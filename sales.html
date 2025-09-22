@@ -211,58 +211,47 @@
             border-left: 4px solid var(--sales-blue);
         }
 
-        .input-form {
+        .upload-section {
             display: grid;
-            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
             margin-top: 1rem;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .upload-option {
+            padding: 1.5rem;
+            border: 2px dashed var(--border-gray);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .upload-option:hover {
+            border-color: var(--sales-blue);
+            background: rgba(59, 130, 246, 0.05);
         }
 
-        .form-group label {
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--sales-blue);
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
             font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
             color: var(--text-dark);
+        }
+
+        .upload-description {
             font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
         }
 
-        .form-input {
-            padding: 0.75rem;
-            border: 2px solid var(--border-gray);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--sales-blue);
-        }
-
-        .form-select {
-            padding: 0.75rem;
-            border: 2px solid var(--border-gray);
-            border-radius: 6px;
-            font-size: 1rem;
-            background: white;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--sales-blue);
-        }
-
-        .submit-btn {
+        .upload-btn {
             background: var(--sales-blue);
             color: white;
             border: none;
@@ -271,11 +260,27 @@
             cursor: pointer;
             font-weight: 600;
             transition: background 0.3s ease;
-            margin-top: 0.5rem;
+            margin: 0.5rem;
         }
 
-        .submit-btn:hover {
+        .upload-btn:hover {
             background: var(--sales-light-blue);
+        }
+
+        .sync-btn {
+            background: var(--evonik-purple);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .sync-btn:hover {
+            background: var(--evonik-light-purple);
         }
 
         .sap-sync-indicator {
@@ -397,6 +402,18 @@
             font-weight: 600;
         }
 
+        .automation-highlight {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.1));
+            border: 2px solid var(--sales-blue);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -411,7 +428,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .form-row {
+            .upload-section {
                 grid-template-columns: 1fr;
             }
 
@@ -428,7 +445,7 @@
                 <div class="logo">📈 Evonik</div>
                 <div>
                     <div style="font-size: 1.2rem; font-weight: 600;">Sales Team Dashboard</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Customer Management & Demand Forecasting</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Automated Order Management & IBP Integration</div>
                 </div>
             </div>
             <div class="user-info">
@@ -449,10 +466,33 @@
     </div>
 
     <main class="main-content">
-        <h2>📈 Sales Operations & Customer Management</h2>
+        <h2>📈 Automated Sales Operations & IBP Integration</h2>
         
         <!-- Key Metrics -->
         <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">IBP-SAP Integration Status</div>
+                    <div class="card-status status-operational" id="ibpStatus">Fully Automated</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last IBP Sync</div>
+                    <div class="metric-value" id="lastIbpSync">🟢 3 minutes ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Manual Entry Elimination</div>
+                    <div class="metric-value" style="color: var(--success-green);">98% Automated</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Sync Time Improvement</div>
+                    <div class="metric-value">From 4+ hours → 2.3 seconds</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Accuracy</div>
+                    <div class="metric-value">99.8%</div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Monthly Sales Performance</div>
@@ -493,7 +533,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Production Coordination</div>
+                    <div class="card-title">Real-Time Coordination</div>
                     <div class="card-status status-operational" id="productionCoordination">Synchronized</div>
                 </div>
                 <div class="metric">
@@ -501,98 +541,45 @@
                     <div class="metric-value">Real-Time</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Lead Time Accuracy</div>
-                    <div class="metric-value">96.2%</div>
+                    <div class="metric-label">Decision Time</div>
+                    <div class="metric-value" id="responseTime">< 5 minutes</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Emergency Response Time</div>
-                    <div class="metric-value" id="responseTime">< 30 minutes</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Customer Impact Prevention</div>
-                    <div class="card-status status-operational">Protected</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Disruptions Prevented (2025)</div>
-                    <div class="metric-value" style="color: var(--success-green);">47 incidents</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Customer Retention</div>
-                    <div class="metric-value">99.1%</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Lost Sales Prevention</div>
-                    <div class="metric-value">$1.2M+</div>
+                    <div class="metric-label">Cross-System Updates</div>
+                    <div class="metric-value">Instant</div>
                 </div>
             </div>
         </div>
 
-        <!-- New Order Input -->
+        <!-- Automated Order Management -->
         <div class="input-panel">
-            <h3>📝 New Customer Order Entry</h3>
-            <p>Direct SAP integration for instant production planning coordination:</p>
-            <div class="input-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="customerName">Customer Name</label>
-                        <select id="customerName" class="form-select">
-                            <option value="">Select Customer</option>
-                            <option value="cp-foods">CP Foods (Thailand)</option>
-                            <option value="charoen-pokphand">Charoen Pokphand Group</option>
-                            <option value="new-hope">New Hope Group (China)</option>
-                            <option value="japfa">Japfa Ltd (Indonesia)</option>
-                            <option value="betagro">Betagro Group (Thailand)</option>
-                            <option value="genting-plantations">Genting Plantations</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="orderVolume">Order Volume (MT)</label>
-                        <input type="number" id="orderVolume" class="form-input" placeholder="e.g., 750" min="1" max="5000">
-                    </div>
+            <h3>🔄 Automated Order Management</h3>
+            <div class="automation-highlight">
+                <h4>📊 Digital Transformation Impact</h4>
+                <p><strong>Before:</strong> Manual Excel entry, 4+ hours daily, 1-2 week coordination delays, data silos</p>
+                <p><strong>After:</strong> Automated IBP-SAP sync, real-time updates, instant coordination across all stakeholders</p>
+            </div>
+            
+            <p>Choose your preferred method for order processing - both integrate automatically with production planning:</p>
+            <div class="upload-section">
+                <div class="upload-option" onclick="document.getElementById('bulkFileInput').click()">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">Bulk Order Upload</div>
+                    <div class="upload-description">Upload Excel/CSV files with multiple orders for automatic processing</div>
+                    <button class="upload-btn">📁 Upload Orders File</button>
+                    <input type="file" id="bulkFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleBulkUpload(event)">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="deliveryRegion">Delivery Region</label>
-                        <select id="deliveryRegion" class="form-select">
-                            <option value="">Select Region</option>
-                            <option value="thailand">Thailand</option>
-                            <option value="indonesia">Indonesia</option>
-                            <option value="vietnam">Vietnam</option>
-                            <option value="philippines">Philippines</option>
-                            <option value="malaysia">Malaysia</option>
-                            <option value="china">Greater China</option>
-                            <option value="korea">South Korea</option>
-                            <option value="japan">Japan</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="deliveryDate">Required Delivery Date</label>
-                        <input type="date" id="deliveryDate" class="form-input">
-                    </div>
+                <div class="upload-option">
+                    <div class="upload-icon">🔄</div>
+                    <div class="upload-title">IBP System Sync</div>
+                    <div class="upload-description">Sync directly with IBP forecasting system for seamless data integration</div>
+                    <button class="sync-btn" onclick="syncWithIBP()">⚡ Sync with IBP</button>
+                    <button class="sync-btn" onclick="syncWithSAP()">🗄️ Sync with SAP</button>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="priority">Order Priority</label>
-                        <select id="priority" class="form-select">
-                            <option value="">Select Priority</option>
-                            <option value="standard">Standard</option>
-                            <option value="urgent">Urgent</option>
-                            <option value="critical">Critical Customer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="specialRequirements">Special Requirements</label>
-                        <input type="text" id="specialRequirements" class="form-input" placeholder="e.g., Feed grade, Pharma grade">
-                    </div>
-                </div>
-                <button class="submit-btn" onclick="submitNewOrder()">🚀 Submit Order & Coordinate Production</button>
             </div>
             <div class="sap-sync-indicator" id="salesSyncStatus" style="display: none;">
                 <div class="sync-animation"></div>
-                Order synchronized with Production, Supply Chain, and Global Coordination teams
+                Order data synchronized across all systems - Production, Supply Chain, and Global teams automatically notified
             </div>
         </div>
 
@@ -719,11 +706,11 @@
         function showProductionAlert(data) {
             const alertBanner = document.getElementById('alertsBanner');
             const alertMessage = document.getElementById('alertMessage');
-            alertMessage.textContent = `${data.unit} Unit failure detected. Production reduced to ${data.efficiency}%. Customer delivery schedules may be affected.`;
+            alertMessage.textContent = `${data.unit} Unit failure detected. Production reduced to ${data.efficiency}%. Customer delivery schedules automatically updated.`;
             alertBanner.classList.add('show');
 
             // Update delivery status
-            document.getElementById('deliveryStatus').textContent = 'Risk Assessment';
+            document.getElementById('deliveryStatus').textContent = 'Auto-Adjusting';
             document.getElementById('deliveryStatus').className = 'card-status status-warning';
             document.getElementById('ordersAtRisk').textContent = '12 orders';
             document.getElementById('productionCoordination').textContent = 'Emergency Mode';
@@ -746,7 +733,7 @@
             document.getElementById('deliveryStatus').className = 'card-status status-operational';
             document.getElementById('productionCoordination').textContent = 'Coordinated';
             document.getElementById('productionCoordination').className = 'card-status status-operational';
-            document.getElementById('responseTime').textContent = '< 30 minutes';
+            document.getElementById('responseTime').textContent = '< 5 minutes';
             
             setTimeout(() => {
                 document.getElementById('alertsBanner').classList.remove('show');
@@ -761,90 +748,177 @@
             document.getElementById('ordersAtRisk').textContent = '2 orders';
             document.getElementById('productionCoordination').textContent = 'Synchronized';
             document.getElementById('productionCoordination').className = 'card-status status-operational';
-            document.getElementById('responseTime').textContent = '< 30 minutes';
+            document.getElementById('responseTime').textContent = '< 5 minutes';
+            document.getElementById('ibpStatus').textContent = 'Fully Automated';
+            document.getElementById('ibpStatus').className = 'card-status status-operational';
+            document.getElementById('lastIbpSync').textContent = '🟢 3 minutes ago';
         }
 
-        // Submit new order
-        function submitNewOrder() {
-            const customerName = document.getElementById('customerName').value;
-            const orderVolume = document.getElementById('orderVolume').value;
-            const deliveryRegion = document.getElementById('deliveryRegion').value;
-            const deliveryDate = document.getElementById('deliveryDate').value;
-            const priority = document.getElementById('priority').value;
-
-            if (!customerName || !orderVolume || !deliveryRegion || !deliveryDate || !priority) {
-                alert('Please fill in all required fields');
-                return;
-            }
+        // Handle bulk file upload
+        function handleBulkUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
             // Show sync indicator
             const syncStatus = document.getElementById('salesSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Processing bulk upload: ${file.name} - Extracting order data and syncing with SAP...
+            `;
             syncStatus.style.display = 'flex';
 
-            // Update metrics
+            // Simulate processing
             setTimeout(() => {
+                // Generate realistic order data
+                const orderCount = Math.floor(Math.random() * 30) + 20; // 20-50 orders
+                const totalVolume = (orderCount * (Math.random() * 100 + 50)).toFixed(0); // Random volume
+
+                // Update metrics
                 const currentOrders = parseInt(document.getElementById('activeOrders').textContent);
                 const currentVolume = parseInt(document.getElementById('totalVolume').textContent.replace(',', ''));
                 
-                document.getElementById('activeOrders').textContent = `${currentOrders + 1} orders`;
-                document.getElementById('totalVolume').textContent = `${(currentVolume + parseInt(orderVolume)).toLocaleString()} MT`;
+                document.getElementById('activeOrders').textContent = `${currentOrders + orderCount} orders`;
+                document.getElementById('totalVolume').textContent = `${(currentVolume + parseInt(totalVolume)).toLocaleString()} MT`;
 
-                // Add to orders table
-                addOrderToTable(customerName, orderVolume, deliveryRegion, deliveryDate, priority);
+                // Update sync status
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    IBP sync complete: ${orderCount} demand forecasts synchronized with production planning in real-time
+                `;
+
+                // Update last sync time
+                document.getElementById('lastIbpSync').textContent = '🟢 Just now';
+
+                // Add IBP orders to table
+                addIBPOrdersToTable(orderCount, totalVolume);
 
                 // Broadcast to coordination hub
-                broadcastToHub('new_order', {
-                    customer: customerName,
-                    volume: orderVolume,
-                    region: deliveryRegion,
-                    date: deliveryDate,
-                    priority: priority
+                broadcastToHub('bulk_order_upload', {
+                    orders_count: orderCount,
+                    total_volume: totalVolume + ' MT',
+                    file_name: 'IBP_Forecast_Sync.json',
+                    sync_time: '1.8 seconds'
                 });
 
-                // Clear form
-                document.getElementById('customerName').value = '';
-                document.getElementById('orderVolume').value = '';
-                document.getElementById('deliveryRegion').value = '';
-                document.getElementById('deliveryDate').value = '';
-                document.getElementById('priority').value = '';
-                document.getElementById('specialRequirements').value = '';
-
-                // Hide sync indicator after 3 seconds
+                // Hide sync indicator after 5 seconds
                 setTimeout(() => {
                     syncStatus.style.display = 'none';
-                }, 3000);
-            }, 1500);
+                }, 5000);
+            }, 2000);
         }
 
-        // Add order to table
-        function addOrderToTable(customer, volume, region, date, priority) {
+        // Sync with SAP system
+        function syncWithSAP() {
+            const syncStatus = document.getElementById('salesSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Connecting to SAP system - Retrieving order status updates and production schedules...
+            `;
+            syncStatus.style.display = 'flex';
+
+            setTimeout(() => {
+                // Update sync status
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    SAP sync complete: Order statuses updated, production schedules aligned, inventory levels confirmed
+                `;
+
+                // Update last sync time
+                document.getElementById('lastIbpSync').textContent = '🟢 Just now';
+
+                // Update order statuses in table
+                updateOrderStatuses();
+
+                // Broadcast to coordination hub
+                broadcastToHub('sap_sync_complete', {
+                    orders_updated: 'All active orders',
+                    sync_time: '1.5 seconds',
+                    status: 'Production schedules aligned'
+                });
+
+                // Hide sync indicator after 5 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 5000);
+            }, 1800);
+        }
+
+        // Add bulk orders to table
+        function addBulkOrdersToTable(orderCount, totalVolume, fileName) {
             const tableBody = document.getElementById('ordersTableBody');
-            const row = document.createElement('tr');
-            const statusClass = priority === 'critical' ? 'status-pending' : 'status-confirmed';
-            const statusText = priority === 'critical' ? 'Priority' : 'Confirmed';
             
+            // Sample customers and regions
+            const customers = ['CP Foods Thailand', 'Betagro Group', 'Charoen Pokphand', 'New Hope Group', 'Japfa Ltd'];
+            const regions = ['Thailand', 'Indonesia', 'Vietnam', 'China', 'Philippines'];
+            
+            // Add a representative sample of the bulk upload
+            for (let i = 0; i < Math.min(3, orderCount); i++) {
+                const row = document.createElement('tr');
+                const customer = customers[Math.floor(Math.random() * customers.length)];
+                const region = regions[Math.floor(Math.random() * regions.length)];
+                const volume = Math.floor(Math.random() * 800) + 200;
+                const deliveryDate = new Date();
+                deliveryDate.setDate(deliveryDate.getDate() + Math.floor(Math.random() * 30) + 15);
+                
+                row.innerHTML = `
+                    <td>${customer}</td>
+                    <td>${volume}</td>
+                    <td>${region}</td>
+                    <td>${deliveryDate.toLocaleDateString()}</td>
+                    <td><span class="order-status status-confirmed">Auto-Processed</span></td>
+                    <td>Coordination Check</td>
+                `;
+                tableBody.insertBefore(row, tableBody.firstChild);
+            }
+        }
+
+        // Add IBP orders to table
+        function addIBPOrdersToTable(orderCount, totalVolume) {
+            const tableBody = document.getElementById('ordersTableBody');
+            
+            // Add IBP forecast entry
+            const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${customer}</td>
-                <td>${volume}</td>
-                <td>${region}</td>
-                <td>${new Date(date).toLocaleDateString()}</td>
-                <td><span class="order-status ${statusClass}">${statusText}</span></td>
-                <td>Coordination Check</td>
+                <td>IBP Forecast Batch</td>
+                <td>${totalVolume}</td>
+                <td>APAC Multi-Region</td>
+                <td>Q1 2026</td>
+                <td><span class="order-status status-confirmed">IBP Synced</span></td>
+                <td>Planning Integration</td>
             `;
             tableBody.insertBefore(row, tableBody.firstChild);
+        }
+
+        // Update order statuses after SAP sync
+        function updateOrderStatuses() {
+            const tableBody = document.getElementById('ordersTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < Math.min(3, rows.length); i++) {
+                const statusCell = rows[i].querySelector('.order-status');
+                const productionCell = rows[i].cells[5];
+                
+                if (statusCell && statusCell.textContent.includes('Pending')) {
+                    statusCell.textContent = 'SAP Updated';
+                    statusCell.className = 'order-status status-confirmed';
+                    productionCell.textContent = 'Production Scheduled';
+                }
+            }
         }
 
         // Add notification to table
         function addNotificationToTable() {
             const tableBody = document.getElementById('ordersTableBody');
-            // Update first few rows to show "Customer Notified" status
             const rows = tableBody.getElementsByTagName('tr');
             
             for (let i = 0; i < Math.min(2, rows.length); i++) {
                 const statusCell = rows[i].querySelector('.order-status');
+                const productionCell = rows[i].cells[5];
+                
                 if (statusCell) {
                     statusCell.textContent = 'Customer Notified';
                     statusCell.className = 'order-status status-confirmed';
+                    productionCell.textContent = 'Schedule Adjusted';
                 }
             }
         }
@@ -858,7 +932,24 @@
                 source: 'sales_team'
             };
             localStorage.setItem('evonik_coordination_event', JSON.stringify(event));
+            
+            // Clear after short delay
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
         }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sales Team Dashboard initialized');
+            console.log('IBP-SAP integration active');
+            
+            // Simulate periodic sync updates
+            setInterval(() => {
+                const minutes = Math.floor(Math.random() * 5) + 3;
+                document.getElementById('lastIbpSync').textContent = `🟢 ${minutes} minutes ago`;
+            }, 180000); // Update every 3 minutes
+        });
     </script>
 </body>
-</html>
+ </html>

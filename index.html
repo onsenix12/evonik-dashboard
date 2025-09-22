@@ -334,7 +334,7 @@
 
         .notification-card {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
-            border: 2px solid var(--sales-blue);
+            border: 2px solid var(--evonik-purple);
             border-radius: 8px;
             padding: 1rem;
             margin: 0.5rem 0;
@@ -343,14 +343,14 @@
 
         .notification-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
         }
 
         .notification-title {
             font-weight: 600;
-            color: var(--sales-blue);
+            color: var(--evonik-purple);
         }
 
         .notification-time {
@@ -432,37 +432,39 @@
     <main class="main-content">
         <!-- Demo Controls -->
         <div class="demo-controls">
-            <h3>🎮 Live Demo Controls</h3>
-            <p>Simulate real scenarios to demonstrate coordination improvements:</p>
-            <button class="demo-btn" onclick="simulateEquipmentFailure()">💥 Simulate Equipment Failure</button>
-            <button class="demo-btn" onclick="simulateCoordination()">🤝 Show Coordination Response</button>
+            <h3>🎮 Live Demo Controls - Automated Coordination Scenarios</h3>
+            <p>Experience real-time cross-system coordination that eliminates manual processes and information silos:</p>
+            <button class="demo-btn" onclick="simulateEquipmentFailure()">⚙️ Equipment Failure Auto-Response</button>
+            <button class="demo-btn" onclick="simulateBulkOrderSync()">📊 Bulk Order SAP Sync</button>
+            <button class="demo-btn" onclick="simulateSupplyChainSync()">🔄 Supply Chain Auto-Adjustment</button>
+            <button class="demo-btn" onclick="simulateGlobalCapacitySync()">🌏 Global Capacity Rebalancing</button>
             <button class="demo-btn" onclick="resetDemo()">🔄 Reset Demo</button>
             <button class="demo-btn" onclick="openAllStakeholders()">👥 Open All Stakeholder Views</button>
         </div>
 
         <!-- Real-Time Overview -->
-        <h2>🎯 Real-Time Production Coordination</h2>
+        <h2>🎯 Real-Time Cross-System Coordination Platform</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Production Units Status</div>
-                    <div class="card-status status-operational" id="productionStatus">All Operational</div>
+                    <div class="card-title">System Integration Status</div>
+                    <div class="card-status status-operational" id="integrationStatus">Fully Automated</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">MMP Unit (Methionine Production)</div>
-                    <div class="metric-value" id="mmpStatus">🟢 98.5% Efficiency</div>
+                    <div class="metric-label">SAP-Excel Auto-Sync</div>
+                    <div class="metric-value" id="sapSyncStatus">🟢 Active (2 min ago)</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">CNS Unit (Hydrocyanic Acid)</div>
-                    <div class="metric-value" id="cnsStatus">🟢 96.2% Efficiency</div>
+                    <div class="metric-label">IBP Integration</div>
+                    <div class="metric-value" id="ibpStatus">🟢 Connected</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">ME Unit (Methionine Extraction)</div>
-                    <div class="metric-value" id="meStatus">🟢 94.8% Efficiency</div>
+                    <div class="metric-label">Manual Processes Eliminated</div>
+                    <div class="metric-value">95% Automated</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">UTO Unit (Thermal Oxidizer)</div>
-                    <div class="metric-value" id="utoStatus">🟢 99.1% Efficiency</div>
+                    <div class="metric-label">Cross-System Data Flow</div>
+                    <div class="metric-value" id="dataFlowStatus">🟢 Real-Time</div>
                 </div>
             </div>
 
@@ -486,39 +488,47 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Cross-Stakeholder Coordination</div>
+                    <div class="card-title">Coordination Efficiency</div>
                     <div class="card-status status-operational" id="responseStatus">Optimized</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Average Decision Time</div>
+                    <div class="metric-label">Decision Cycle Time</div>
                     <div class="metric-value" id="decisionTime">2.3 hours</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Previous (Manual Process)</div>
-                    <div class="metric-value" style="color: var(--alert-red);">8.5 days</div>
+                    <div class="metric-value" style="color: var(--alert-red);">1-2 weeks</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Improvement</div>
-                    <div class="metric-value" style="color: var(--success-green);">97.2% Faster</div>
+                    <div class="metric-label">Time Savings</div>
+                    <div class="metric-value" style="color: var(--success-green);">98.6% Faster</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Manual Hours Eliminated</div>
+                    <div class="metric-value">15-20 hrs/week</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Financial Impact Prevention</div>
-                    <div class="card-status status-operational">Protected</div>
+                    <div class="card-title">Financial Impact</div>
+                    <div class="card-status status-operational">ROI Achieved</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Losses Prevented (2025)</div>
-                    <div class="metric-value" style="color: var(--success-green);">$750K+</div>
+                    <div class="metric-label">Coordination Failures Prevented</div>
+                    <div class="metric-value" style="color: var(--success-green);">$750K+ (2025)</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Similar to 2023 Incident</div>
+                    <div class="metric-label">Reference: 2023 Incident</div>
                     <div class="metric-value" style="color: var(--alert-red);">$300K Loss</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">ROI from Integration</div>
-                    <div class="metric-value">285%</div>
+                    <div class="metric-label">Annual Process Savings</div>
+                    <div class="metric-value">$39K+</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Implementation ROI</div>
+                    <div class="metric-value">3.3 months</div>
                 </div>
             </div>
         </div>
@@ -730,88 +740,155 @@
             // Show critical alert banner
             const alertBanner = document.getElementById('alertsBanner');
             const alertMessage = document.getElementById('alertMessage');
-            alertMessage.textContent = 'MMP Unit experiencing pump failure. Production capacity reduced to 65%. All stakeholders notified simultaneously.';
+            alertMessage.textContent = 'MMP Unit pump failure detected by automated monitoring. All systems auto-coordinating response within minutes, not weeks.';
             alertBanner.classList.add('show');
 
-            // Update production status
-            document.getElementById('productionStatus').textContent = 'Critical Issue';
-            document.getElementById('productionStatus').className = 'card-status status-critical';
-            document.getElementById('mmpStatus').innerHTML = '🔴 65% Efficiency (Pump Failure)';
-            document.getElementById('productionRate').textContent = '550 MT/day';
-
-            // Update response time
-            document.getElementById('responseStatus').textContent = 'Response Active';
+            // Update integration status to show automated response
+            document.getElementById('integrationStatus').textContent = 'Auto-Response Active';
+            document.getElementById('integrationStatus').className = 'card-status status-warning';
+            document.getElementById('responseStatus').textContent = 'Auto-Coordinating';
             document.getElementById('responseStatus').className = 'card-status status-warning';
             document.getElementById('decisionTime').textContent = 'In Progress...';
+            document.getElementById('dataFlowStatus').textContent = '🟡 Emergency Mode';
 
-            // Add timeline event
-            addTimelineEvent('🚨 15:32', 'CRITICAL: MMP Unit pump failure detected - All stakeholders alerted automatically');
-            addTimelineEvent('📱 15:33', 'Automatic notifications sent to Sales, Supply Chain, and Production teams');
-            addTimelineEvent('⚡ 15:35', 'Emergency coordination session initiated across all systems');
+            // Add timeline event for automated detection
+            addTimelineEvent('🚨 ' + new Date().toLocaleTimeString().slice(0,5), 'AUTOMATED DETECTION: MMP Unit pump failure - All stakeholder systems instantly alerted');
+            
+            // Start automated coordination sequence
+            setTimeout(() => {
+                addTimelineEvent('⚡ ' + new Date().toLocaleTimeString().slice(0,5), 'Auto-coordination initiated: Global sites, supply chain, and sales systems responding');
+                
+                // Automated response sequence
+                setTimeout(() => {
+                    addTimelineEvent('🌏 ' + new Date().toLocaleTimeString().slice(0,5), 'Global Supply Chain: Antwerp +29% capacity auto-allocated');
+                }, 1500);
+                
+                setTimeout(() => {
+                    addTimelineEvent('📦 ' + new Date().toLocaleTimeString().slice(0,5), 'Supply Chain: Emergency materials auto-ordered, maintenance mobilized');
+                }, 2500);
+                
+                setTimeout(() => {
+                    addTimelineEvent('📞 ' + new Date().toLocaleTimeString().slice(0,5), 'Sales: Priority customers auto-notified, deliveries rescheduled');
+                }, 3500);
+                
+                setTimeout(() => {
+                    addTimelineEvent('✅ ' + new Date().toLocaleTimeString().slice(0,5), 'AUTO-COORDINATION COMPLETE: 18 minutes total response time (vs weeks previously)');
+                    
+                    // Update final status
+                    document.getElementById('integrationStatus').textContent = 'Fully Automated';
+                    document.getElementById('integrationStatus').className = 'card-status status-operational';
+                    document.getElementById('responseStatus').textContent = 'Coordinated';
+                    document.getElementById('responseStatus').className = 'card-status status-operational';
+                    document.getElementById('decisionTime').textContent = '18 minutes';
+                    document.getElementById('dataFlowStatus').textContent = '🟢 Real-Time';
+                }, 4500);
+                
+            }, 1000);
 
             // Broadcast to other windows if they exist
             broadcastToStakeholders('equipment_failure', {
                 unit: 'MMP',
                 status: 'critical',
                 efficiency: 65,
-                message: 'Pump failure detected'
+                message: 'Automated pump failure detection - Cross-system response initiated'
             });
 
-            console.log('Equipment failure simulation activated');
+            console.log('Automated equipment failure response activated');
         }
 
-        // Simulate coordination response
-        function simulateCoordination() {
-            if (!isEquipmentFailureActive) {
-                alert('Please simulate equipment failure first to see coordination response.');
-                return;
-            }
-
-            if (coordinationStarted) return;
-            coordinationStarted = true;
-
-            // Update status to show coordination in progress
-            document.getElementById('responseStatus').textContent = 'Coordinating';
-            document.getElementById('responseStatus').className = 'card-status status-warning';
-
-            // Simulate coordination timeline
-            setTimeout(() => {
-                addTimelineEvent('🤝 15:38', 'Global Supply Chain: Antwerp production increased by 150 MT/day');
-                broadcastToStakeholders('coordination_update', { action: 'global_capacity_increase', value: 150 });
-            }, 1000);
+        // Simulate bulk order SAP sync
+        function simulateBulkOrderSync() {
+            // Show sync process
+            const notification = createNotificationCard(
+                '📊 SAP-IBP Bulk Sync Initiated',
+                'Sales team triggered automatic bulk order sync from IBP to SAP. Processing 47 new orders totaling 3,200 MT...',
+                'IBP → SAP → All Systems'
+            );
+            addNotification(notification);
+            
+            // Add to timeline
+            addTimelineEvent(
+                '📊 ' + new Date().toLocaleTimeString().slice(0,5), 
+                'Automated SAP-IBP sync initiated - Processing 47 orders (3,200 MT total volume)'
+            );
 
             setTimeout(() => {
-                addTimelineEvent('📞 15:42', 'Sales Team: Major customers notified, delivery schedules adjusted');
-                broadcastToStakeholders('coordination_update', { action: 'customer_notification', status: 'completed' });
+                addTimelineEvent(
+                    '⚡ ' + new Date().toLocaleTimeString().slice(0,5), 
+                    'Auto-sync complete: Production schedules updated, supply chain notified, capacity allocated'
+                );
+                
+                // Broadcast to stakeholders
+                broadcastToStakeholders('bulk_order_upload', {
+                    orders_count: 47,
+                    total_volume: '3,200 MT',
+                    file_name: 'Q4_Orders_Batch.xlsx',
+                    sync_time: '2.3 seconds'
+                });
+                
+                // Update metrics
+                document.getElementById('sapSyncStatus').textContent = '🟢 Active (Just now)';
+                document.getElementById('decisionTime').textContent = '< 5 minutes';
             }, 2000);
+        }
+
+        // Simulate supply chain auto-adjustment
+        function simulateSupplyChainSync() {
+            const notification = createNotificationCard(
+                '🔄 Supply Chain Auto-Adjustment',
+                'Local supply chain detected low hydrogen inventory. Triggering automated procurement from preferred suppliers...',
+                'SAP Inventory → Procurement → Suppliers'
+            );
+            addNotification(notification);
+            
+            addTimelineEvent(
+                '🔄 ' + new Date().toLocaleTimeString().slice(0,5), 
+                'Automated inventory trigger: Hydrogen levels below threshold, procurement initiated'
+            );
 
             setTimeout(() => {
-                addTimelineEvent('🔧 15:45', 'Local Supply Chain: Maintenance team mobilized, spare parts allocated');
-                broadcastToStakeholders('coordination_update', { action: 'maintenance_mobilized', status: 'active' });
+                addTimelineEvent(
+                    '📦 ' + new Date().toLocaleTimeString().slice(0,5), 
+                    'Auto-procurement complete: 850 MT hydrogen ordered from Petronas, delivery scheduled'
+                );
+                
+                broadcastToStakeholders('procurement_order', {
+                    material: 'Hydrogen (H₂)',
+                    supplier: 'Petronas Chemicals',
+                    quantity: '850 MT',
+                    trigger: 'automated_inventory_threshold',
+                    decision_time: '3.7 minutes'
+                });
             }, 3000);
+        }
+
+        // Simulate global capacity sync
+        function simulateGlobalCapacitySync() {
+            const notification = createNotificationCard(
+                '🌏 Global Capacity Rebalancing',
+                'Market demand spike in APAC detected. Auto-coordinating with Antwerp and Mobile facilities for capacity support...',
+                'Market Analytics → Global Supply Chain → All Sites'
+            );
+            addNotification(notification);
+            
+            addTimelineEvent(
+                '🌏 ' + new Date().toLocaleTimeString().slice(0,5), 
+                'Global coordination triggered: APAC demand +18%, initiating cross-site capacity optimization'
+            );
 
             setTimeout(() => {
-                addTimelineEvent('📋 15:50', 'Production: Alternative production routing activated, efficiency restored to 85%');
+                addTimelineEvent(
+                    '⚖️ ' + new Date().toLocaleTimeString().slice(0,5), 
+                    'Multi-site coordination complete: Antwerp +12%, Mobile +8% capacity allocation for APAC'
+                );
                 
-                // Update production metrics
-                document.getElementById('mmpStatus').innerHTML = '🟡 85% Efficiency (Backup Systems)';
-                document.getElementById('productionRate').textContent = '720 MT/day';
-                
-                // Final coordination completion
-                document.getElementById('responseStatus').textContent = 'Coordinated';
-                document.getElementById('responseStatus').className = 'card-status status-operational';
-                document.getElementById('decisionTime').textContent = '18 minutes';
-                
-                addTimelineEvent('✅ 15:50', 'COORDINATION COMPLETE: Production stabilized, customer impact minimized');
-                
-                broadcastToStakeholders('coordination_complete', { 
-                    efficiency: 85, 
-                    production_rate: 720,
-                    decision_time: '18 minutes'
+                broadcastToStakeholders('global_capacity_adjustment', {
+                    source: 'multi_site',
+                    adjustment: '+15%',
+                    target: 'APAC',
+                    coordination_time: '12 minutes'
                 });
             }, 4000);
-
-            console.log('Coordination response simulation activated');
         }
 
         // Reset demo to initial state
@@ -822,10 +899,13 @@
             // Hide alert banner
             document.getElementById('alertsBanner').classList.remove('show');
 
+            // Reset integration status
+            document.getElementById('integrationStatus').textContent = 'Fully Automated';
+            document.getElementById('integrationStatus').className = 'card-status status-operational';
+            document.getElementById('sapSyncStatus').textContent = '🟢 Active (2 min ago)';
+            document.getElementById('dataFlowStatus').textContent = '🟢 Real-Time';
+
             // Reset production status
-            document.getElementById('productionStatus').textContent = 'All Operational';
-            document.getElementById('productionStatus').className = 'card-status status-operational';
-            document.getElementById('mmpStatus').innerHTML = '🟢 98.5% Efficiency';
             document.getElementById('productionRate').textContent = '847 MT/day';
 
             // Reset response time
@@ -835,6 +915,9 @@
 
             // Reset timeline
             resetTimeline();
+
+            // Clear notifications
+            document.getElementById('systemNotifications').innerHTML = '';
 
             // Broadcast reset to other windows
             broadcastToStakeholders('demo_reset', {});

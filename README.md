@@ -4,7 +4,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 
 ### Highlights
 - **Single-click demo scenarios**: Trigger realistic coordination flows (equipment failure, bulk order sync, supply chain adjustment, global capacity rebalancing).
-- **Multi-window sync**: Open all stakeholder pages; updates propagate instantly using `localStorage` events.
+- **Multi-window sync**: Open stakeholder pages manually; updates propagate instantly using `localStorage` events.
 - **No build or backend required**: Pure HTML/CSS/JS, run locally by opening `index.html`.
 
 ---
@@ -23,7 +23,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ## Getting Started
 1. Clone or download this repository to your machine.
 2. Open `index.html` in a modern browser (Chrome, Edge, or Firefox recommended).
-3. For the best demo, allow pop-ups when prompted (the hub can open all stakeholder pages).
+3. For the best demo, optionally open the other pages in separate tabs/windows.
 
 > Tip: You can also serve the folder via a simple static server, but it is not required.
 
@@ -37,12 +37,11 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
    - `📊 Bulk Order SAP Sync`
    - `🔄 Supply Chain Auto-Adjustment`
    - `🌏 Global Capacity Rebalancing`
-   - `🔄 Reset Demo`
-   - `👥 Open All Stakeholder Views`
+  - `🔄 Reset Demo`
 3. Watch the status cards, alerts banner, notifications panel, and coordination timeline update in real time.
 
 ### Option B: Multi-window coordination
-1. Click `👥 Open All Stakeholder Views` on `index.html` to open:
+1. Manually open these pages in separate tabs/windows:
    - `sales.html`
    - `global-supply-chain.html`
    - `local-supply-chain.html`
@@ -59,7 +58,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ---
 
 ## Troubleshooting
-- **Pop-ups blocked**: If `👥 Open All Stakeholder Views` does nothing, enable pop-ups for the site.
+ 
 - **No cross-window updates**: The `storage` event only fires across different windows/tabs of the same origin. Ensure all pages are opened from the same folder/location.
 - **Local file security quirks**: Some browsers restrict `localStorage` for `file://` URLs in certain modes. If you see inconsistent behavior, start a simple local server:
 

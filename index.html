@@ -433,13 +433,12 @@
         <!-- Demo Controls -->
         <div class="demo-controls">
             <h3>🎮 Live Demo Controls - Automated Coordination Scenarios</h3>
-            <p>Experience real-time cross-system coordination that eliminates manual processes and information silos:</p>
+            <p>Experience real-time cross-system coordination that eliminates manual processes and information silos. For a multi-window demo, open the stakeholder pages below in separate tabs/windows.</p>
             <button class="demo-btn" onclick="simulateEquipmentFailure()">⚙️ Equipment Failure Auto-Response</button>
             <button class="demo-btn" onclick="simulateBulkOrderSync()">📊 Bulk Order SAP Sync</button>
             <button class="demo-btn" onclick="simulateSupplyChainSync()">🔄 Supply Chain Auto-Adjustment</button>
             <button class="demo-btn" onclick="simulateGlobalCapacitySync()">🌏 Global Capacity Rebalancing</button>
             <button class="demo-btn" onclick="resetDemo()">🔄 Reset Demo</button>
-            <button class="demo-btn" onclick="openAllStakeholders()">👥 Open All Stakeholder Views</button>
         </div>
 
         <!-- Real-Time Overview -->
@@ -558,7 +557,7 @@
         <!-- Stakeholder Access Links -->
         <div class="stakeholder-links">
             <h3>👥 Stakeholder System Access</h3>
-            <p>Direct links to each department's specialized interface:</p>
+            <p>Direct links to each department's specialized interface. Open these links manually in new tabs/windows to see updates synchronize across pages.</p>
             <div class="links-grid">
                 <a href="sales.html" class="stakeholder-link">
                     <div class="stakeholder-icon">📈</div>
@@ -925,22 +924,7 @@
             console.log('Demo reset to initial state');
         }
 
-        // Open all stakeholder views in separate windows/tabs
-        function openAllStakeholders() {
-            const stakeholders = [
-                { url: 'sales.html', name: 'Sales Team' },
-                { url: 'global-supply-chain.html', name: 'Global Supply Chain' },
-                { url: 'local-supply-chain.html', name: 'Local Supply Chain' },
-                { url: 'production.html', name: 'Plant Production' }
-            ];
 
-            stakeholders.forEach(stakeholder => {
-                window.open(stakeholder.url, stakeholder.name.replace(' ', '_'), 
-                    'width=1200,height=800,scrollbars=yes,resizable=yes');
-            });
-
-            alert('All stakeholder interfaces opened in separate windows. You can now demonstrate cross-system coordination!');
-        }
 
         // Broadcast events to other stakeholder windows
         function broadcastToStakeholders(eventType, data) {

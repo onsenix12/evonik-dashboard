@@ -807,6 +807,61 @@
             }, 2000);
         }
 
+        // Sync with IBP system
+        function syncWithIBP() {
+            const syncStatus = document.getElementById('salesSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Connecting to IBP forecasting system - Retrieving latest demand signals...
+            `;
+            syncStatus.style.display = 'flex';
+
+            const ibpStatusEl = document.getElementById('ibpStatus');
+            if (ibpStatusEl) {
+                ibpStatusEl.textContent = 'Syncing...';
+                ibpStatusEl.className = 'card-status status-warning';
+            }
+
+            setTimeout(() => {
+                const orderCount = Math.floor(Math.random() * 20) + 10; // 10-30
+                const totalVolume = (orderCount * (Math.random() * 80 + 40)).toFixed(0);
+
+                // Reflect on metrics
+                const currentOrders = parseInt(document.getElementById('activeOrders').textContent);
+                const currentVolume = parseInt(document.getElementById('totalVolume').textContent.replace(/,/g, ''));
+                document.getElementById('activeOrders').textContent = `${currentOrders + orderCount} orders`;
+                document.getElementById('totalVolume').textContent = `${(currentVolume + parseInt(totalVolume)).toLocaleString()} MT`;
+
+                // Table entry
+                addIBPOrdersToTable(orderCount, totalVolume);
+
+                // Update status pill and last sync
+                document.getElementById('lastIbpSync').textContent = '🟢 Just now';
+                if (ibpStatusEl) {
+                    ibpStatusEl.textContent = 'Fully Automated';
+                    ibpStatusEl.className = 'card-status status-operational';
+                }
+
+                // Completion message
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    IBP sync complete: ${orderCount} forecasts synchronized with production planning
+                `;
+
+                // Broadcast event
+                broadcastToHub('ibp_sync_complete', {
+                    orders_count: orderCount,
+                    total_volume: totalVolume + ' MT',
+                    sync_time: '2.0 seconds',
+                    status: 'IBP planning integrated'
+                });
+
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 5000);
+            }, 1800);
+        }
+
         // Sync with SAP system
         function syncWithSAP() {
             const syncStatus = document.getElementById('salesSyncStatus');

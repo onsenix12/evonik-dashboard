@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Supply Chain Dashboard - Evonik Digital Platform</title>
+    <style>
+        :root {
+            --evonik-purple: #8B2E8B;
+            --evonik-light-purple: #A855A8;
+            --evonik-dark-purple: #6B1F6B;
+            --alert-red: #DC2626;
+            --warning-orange: #EA580C;
+            --success-green: #16A34A;
+            --background-gray: #F8FAFC;
+            --border-gray: #E2E8F0;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --global-teal: #14B8A6;
+            --global-light-teal: #5EEAD4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--global-teal), var(--global-light-teal));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+
+        .back-nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--evonik-purple);
+            background: white;
+            color: var(--evonik-purple);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--evonik-purple);
+            color: white;
+        }
+
+        .breadcrumb {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .alerts-banner {
+            background: var(--alert-red);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .alerts-banner.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-gray);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-operational {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-warning {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .metric {
+            margin: 0.75rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .global-map {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-bottom: 2rem;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .production-site {
+            padding: 1.5rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .production-site:hover {
+            border-color: var(--global-teal);
+            background: rgba(20, 184, 166, 0.05);
+        }
+
+        .site-flag {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .site-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .site-capacity {
+            color: var(--global-teal);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .site-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .coordination-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 1rem;
+            border-left: 4px solid var(--global-teal);
+        }
+
+        .input-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--global-teal);
+        }
+
+        .form-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--global-teal);
+        }
+
+        .submit-btn {
+            background: var(--global-teal);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--global-light-teal);
+        }
+
+        .sap-sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .sync-animation {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--success-green);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logistics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .logistics-table th,
+        .logistics-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .logistics-table th {
+            background-color: var(--background-gray);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-gray);
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--global-teal);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .emergency-allocation {
+            background: rgba(220, 38, 38, 0.05);
+            border: 2px solid var(--alert-red);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .emergency-allocation.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .map-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🌏 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Global Supply Chain Dashboard</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Multi-Site Coordination & Capacity Management</div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div>👤 Global Supply Chain Director</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="back-nav">
+        <div class="nav-content">
+            <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
+            <div class="breadcrumb">Global Supply Chain Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>🚨 GLOBAL COORDINATION ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <h2>🌏 Global Production Network Coordination</h2>
+        
+        <!-- Key Metrics -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Global Network Status</div>
+                    <div class="card-status status-operational" id="networkStatus">All Sites Online</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Daily Capacity</div>
+                    <div class="metric-value" id="totalCapacity">1,747 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Network Utilization</div>
+                    <div class="metric-value">96.8%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Production Sites</div>
+                    <div class="metric-value">3 complexes</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Regional Balance</div>
+                    <div class="card-status status-operational" id="balanceStatus">Optimized</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">APAC Coverage</div>
+                    <div class="metric-value" id="apacCoverage">78%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Europe Coverage</div>
+                    <div class="metric-value">68%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Americas Coverage</div>
+                    <div class="metric-value">45%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Coordination Efficiency</div>
+                    <div class="card-status status-operational" id="coordinationEfficiency">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Response Time (Cross-Site)</div>
+                    <div class="metric-value" id="responseTime">< 45 minutes</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Rebalancing Success Rate</div>
+                    <div class="metric-value">98.5%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Cost Optimization</div>
+                    <div class="metric-value">$2.1M saved</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Crisis Management</div>
+                    <div class="card-status status-operational" id="crisisStatus">Standby</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Backup Capacity Available</div>
+                    <div class="metric-value" id="backupCapacity">380 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Emergency Protocols</div>
+                    <div class="metric-value">Ready</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Risk Assessment</div>
+                    <div class="metric-value" style="color: var(--success-green);" id="riskLevel">Low</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Production Map -->
+        <div class="global-map">
+            <h3>🗺️ Global Methionine Production Network</h3>
+            <div class="map-container">
+                <div class="production-site">
+                    <div class="site-flag">🇸🇬</div>
+                    <div class="site-name">Singapore Complex</div>
+                    <div class="site-capacity" id="singaporeCapacity">847 MT/day</div>
+                    <div class="site-status status-operational" id="singaporeStatus">Operational</div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        Jurong Island • World's Largest
+                    </div>
+                </div>
+                <div class="production-site">
+                    <div class="site-flag">🇧🇪</div>
+                    <div class="site-name">Antwerp Complex</div>
+                    <div class="site-capacity" id="antwerpCapacity">520 MT/day</div>
+                    <div class="site-status status-operational" id="antwerpStatus">Operational</div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        Belgium • Europe Hub
+                    </div>
+                </div>
+                <div class="production-site">
+                    <div class="site-flag">🇺🇸</div>
+                    <div class="site-name">Mobile Complex</div>
+                    <div class="site-capacity" id="mobileCapacity">380 MT/day</div>
+                    <div class="site-status status-operational" id="mobileStatus">Operational</div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        Alabama, USA • Americas Hub
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Allocation Panel -->
+        <div class="emergency-allocation" id="emergencyAllocation">
+            <h4>🚨 Emergency Capacity Reallocation Protocol</h4>
+            <p>Singapore production compromised. Initiating automatic capacity rebalancing across network.</p>
+            <div style="margin-top: 1rem;">
+                <div><strong>Antwerp:</strong> Increasing to 670 MT/day (+29%)</div>
+                <div><strong>Mobile:</strong> Increasing to 480 MT/day (+26%)</div>
+                <div><strong>Total Compensation:</strong> 1,150 MT/day (vs 847 MT/day lost)</div>
+            </div>
+        </div>
+
+        <!-- Capacity Coordination Panel -->
+        <div class="coordination-panel">
+            <h3>⚖️ Global Capacity Coordination</h3>
+            <p>Real-time production allocation and cross-site optimization:</p>
+            <div class="input-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="sourceComplex">Source Complex</label>
+                        <select id="sourceComplex" class="form-select">
+                            <option value="">Select Complex</option>
+                            <option value="singapore">Singapore (Jurong Island)</option>
+                            <option value="antwerp">Antwerp (Belgium)</option>
+                            <option value="mobile">Mobile (Alabama, USA)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="capacityAdjustment">Capacity Adjustment (%)</label>
+                        <input type="number" id="capacityAdjustment" class="form-input" placeholder="e.g., +25 or -15" min="-50" max="50" step="5">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="targetRegion">Target Market Region</label>
+                        <select id="targetRegion" class="form-select">
+                            <option value="">Select Target Region</option>
+                            <option value="apac">Asia Pacific</option>
+                            <option value="europe">Europe & Middle East</option>
+                            <option value="americas">North & South America</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustmentReason">Reason for Adjustment</label>
+                        <select id="adjustmentReason" class="form-select">
+                            <option value="">Select Reason</option>
+                            <option value="demand-surge">Regional Demand Surge</option>
+                            <option value="planned-maintenance">Planned Maintenance</option>
+                            <option value="equipment-issue">Equipment Issue</option>
+                            <option value="supply-optimization">Cost Optimization</option>
+                            <option value="emergency-support">Emergency Support</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="duration">Duration (Days)</label>
+                        <input type="number" id="duration" class="form-input" placeholder="e.g., 14" min="1" max="90">
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority Level</label>
+                        <select id="priority" class="form-select">
+                            <option value="">Select Priority</option>
+                            <option value="routine">Routine Optimization</option>
+                            <option value="urgent">Urgent Rebalancing</option>
+                            <option value="emergency">Emergency Response</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="submitCapacityAdjustment()">🔄 Execute Global Capacity Adjustment</button>
+            </div>
+            <div class="sap-sync-indicator" id="globalSyncStatus" style="display: none;">
+                <div class="sync-animation"></div>
+                Global allocation updated across all production sites and regional teams
+            </div>
+        </div>
+
+        <!-- Logistics Coordination -->
+        <div class="coordination-panel">
+            <h3>🚢 Cross-Regional Logistics Overview</h3>
+            <table class="logistics-table">
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Monthly Volume (MT)</th>
+                        <th>Transit Time</th>
+                        <th>Cost per MT</th>
+                        <th>Efficiency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Singapore → APAC Markets</td>
+                        <td>15,200</td>
+                        <td>5-12 days</td>
+                        <td>$85</td>
+                        <td>97.2%</td>
+                    </tr>
+                    <tr>
+                        <td>Antwerp → Europe/MENA</td>
+                        <td>11,800</td>
+                        <td>8-15 days</td>
+                        <td>$92</td>
+                        <td>95.8%</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile → Americas</td>
+                        <td>8,400</td>
+                        <td>3-8 days</td>
+                        <td>$78</td>
+                        <td>96.5%</td>
+                    </tr>
+                    <tr id="emergencyRoute" style="display: none;">
+                        <td>Antwerp → APAC (Emergency)</td>
+                        <td>2,800</td>
+                        <td>18-22 days</td>
+                        <td>$145</td>
+                        <td>Emergency Mode</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Listen for coordination events from the hub
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                handleCoordinationEvent(eventData);
+            }
+        });
+
+        // Handle coordination events from other systems
+        function handleCoordinationEvent(eventData) {
+            console.log('Global Supply Chain received coordination event:', eventData);
+            
+            switch(eventData.type) {
+                case 'equipment_failure':
+                    showGlobalAlert(eventData.data);
+                    activateEmergencyProtocols();
+                    break;
+                case 'coordination_update':
+                    updateGlobalCoordination(eventData.data);
+                    break;
+                case 'coordination_complete':
+                    resetToNormalStatus();
+                    break;
+                case 'demo_reset':
+                    resetDashboard();
+                    break;
+            }
+        }
+
+        // Show global alert
+        function showGlobalAlert(data) {
+            const alertBanner = document.getElementById('alertsBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = `Singapore ${data.unit} Unit failure detected. Global capacity reallocation protocols activated. Antwerp and Mobile increasing production.`;
+            alertBanner.classList.add('show');
+
+            // Update status indicators
+            document.getElementById('networkStatus').textContent = 'Crisis Mode';
+            document.getElementById('networkStatus').className = 'card-status status-critical';
+            document.getElementById('balanceStatus').textContent = 'Rebalancing';
+            document.getElementById('balanceStatus').className = 'card-status status-warning';
+            document.getElementById('coordinationEfficiency').textContent = 'Excellent';
+            document.getElementById('coordinationEfficiency').className = 'card-status status-operational';
+            document.getElementById('crisisStatus').textContent = 'Standby';
+            document.getElementById('crisisStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 45 minutes';
+            document.getElementById('riskLevel').textContent = 'Low';
+            document.getElementById('riskLevel').style.color = 'var(--success-green)';
+            
+            // Reset site capacities
+            document.getElementById('singaporeCapacity').textContent = '847 MT/day';
+            document.getElementById('singaporeStatus').textContent = 'Operational';
+            document.getElementById('singaporeStatus').className = 'site-status status-operational';
+            document.getElementById('antwerpCapacity').textContent = '520 MT/day';
+            document.getElementById('antwerpStatus').textContent = 'Operational';
+            document.getElementById('antwerpStatus').className = 'site-status status-operational';
+            document.getElementById('mobileCapacity').textContent = '380 MT/day';
+            document.getElementById('mobileStatus').textContent = 'Operational';
+            document.getElementById('mobileStatus').className = 'site-status status-operational';
+            
+            // Reset totals
+            document.getElementById('totalCapacity').textContent = '1,747 MT/day';
+            document.getElementById('backupCapacity').textContent = '380 MT/day';
+            document.getElementById('apacCoverage').textContent = '78%';
+        }
+
+        // Submit capacity adjustment
+        function submitCapacityAdjustment() {
+            const sourceComplex = document.getElementById('sourceComplex').value;
+            const capacityAdjustment = document.getElementById('capacityAdjustment').value;
+            const targetRegion = document.getElementById('targetRegion').value;
+            const adjustmentReason = document.getElementById('adjustmentReason').value;
+            const duration = document.getElementById('duration').value;
+            const priority = document.getElementById('priority').value;
+
+            if (!sourceComplex || !capacityAdjustment || !targetRegion || !adjustmentReason || !duration || !priority) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Show sync indicator
+            const syncStatus = document.getElementById('globalSyncStatus');
+            syncStatus.style.display = 'flex';
+
+            // Update metrics based on adjustment
+            setTimeout(() => {
+                const adjustment = parseInt(capacityAdjustment);
+                
+                if (sourceComplex === 'singapore') {
+                    const currentCapacity = parseInt(document.getElementById('singaporeCapacity').textContent);
+                    const newCapacity = Math.round(currentCapacity * (1 + adjustment / 100));
+                    document.getElementById('singaporeCapacity').textContent = `${newCapacity} MT/day`;
+                    
+                    if (adjustment > 0) {
+                        document.getElementById('singaporeStatus').textContent = 'Increased';
+                        document.getElementById('singaporeStatus').className = 'site-status status-warning';
+                    }
+                } else if (sourceComplex === 'antwerp') {
+                    const currentCapacity = parseInt(document.getElementById('antwerpCapacity').textContent);
+                    const newCapacity = Math.round(currentCapacity * (1 + adjustment / 100));
+                    document.getElementById('antwerpCapacity').textContent = `${newCapacity} MT/day`;
+                    
+                    if (adjustment > 0) {
+                        document.getElementById('antwerpStatus').textContent = 'Increased';
+                        document.getElementById('antwerpStatus').className = 'site-status status-warning';
+                    }
+                } else if (sourceComplex === 'mobile') {
+                    const currentCapacity = parseInt(document.getElementById('mobileCapacity').textContent);
+                    const newCapacity = Math.round(currentCapacity * (1 + adjustment / 100));
+                    document.getElementById('mobileCapacity').textContent = `${newCapacity} MT/day`;
+                    
+                    if (adjustment > 0) {
+                        document.getElementById('mobileStatus').textContent = 'Increased';
+                        document.getElementById('mobileStatus').className = 'site-status status-warning';
+                    }
+                }
+
+                // Update regional coverage based on target
+                if (targetRegion === 'apac' && adjustment > 0) {
+                    const currentCoverage = parseInt(document.getElementById('apacCoverage').textContent.replace('%', ''));
+                    const newCoverage = Math.min(100, currentCoverage + Math.abs(adjustment / 2));
+                    document.getElementById('apacCoverage').textContent = `${newCoverage}%`;
+                }
+
+                // Update coordination status
+                document.getElementById('balanceStatus').textContent = 'Adjusting';
+                document.getElementById('balanceStatus').className = 'card-status status-warning';
+
+                // Broadcast to coordination hub
+                broadcastToHub('global_capacity_adjustment', {
+                    source: sourceComplex,
+                    adjustment: capacityAdjustment,
+                    target: targetRegion,
+                    reason: adjustmentReason,
+                    priority: priority
+                });
+
+                // Clear form
+                document.getElementById('sourceComplex').value = '';
+                document.getElementById('capacityAdjustment').value = '';
+                document.getElementById('targetRegion').value = '';
+                document.getElementById('adjustmentReason').value = '';
+                document.getElementById('duration').value = '';
+                document.getElementById('priority').value = '';
+
+                // Reset status after delay
+                setTimeout(() => {
+                    document.getElementById('balanceStatus').textContent = 'Optimized';
+                    document.getElementById('balanceStatus').className = 'card-status status-operational';
+                }, 5000);
+
+                // Hide sync indicator after 3 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 3000);
+            }, 1500);
+        }
+
+        // Broadcast events to coordination hub
+        function broadcastToHub(eventType, data) {
+            const broadcastData = {
+                type: eventType,
+                timestamp: new Date().toISOString(),
+                source: 'global_supply_chain',
+                data: data
+            };
+
+            // Use localStorage to communicate with coordination hub
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+            
+            // Clear after short delay
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Global Supply Chain Dashboard initialized');
+            console.log('Multi-site coordination system active');
+            
+            // Set default duration to 30 days
+            document.getElementById('duration').value = '30';
+        });
+
+        // Activate emergency protocols
+        function activateEmergencyProtocols() {
+            // Show emergency allocation panel
+            document.getElementById('emergencyAllocation').classList.add('show');
+            
+            // Show emergency logistics route
+            document.getElementById('emergencyRoute').style.display = 'table-row';
+            
+            setTimeout(() => {
+                // Update Antwerp capacity
+                document.getElementById('antwerpCapacity').textContent = '670 MT/day';
+                document.getElementById('antwerpStatus').textContent = 'Increased';
+                document.getElementById('antwerpStatus').className = 'site-status status-warning';
+                
+                // Update Mobile capacity
+                document.getElementById('mobileCapacity').textContent = '480 MT/day';
+                document.getElementById('mobileStatus').textContent = 'Increased';
+                document.getElementById('mobileStatus').className = 'site-status status-warning';
+                
+                // Update total capacity
+                document.getElementById('totalCapacity').textContent = '1,700 MT/day';
+                document.getElementById('backupCapacity').textContent = '0 MT/day (Deployed)';
+                
+                // Update coverage
+                document.getElementById('apacCoverage').textContent = '85%';
+            }, 2000);
+        }
+
+        // Update global coordination
+        function updateGlobalCoordination(data) {
+            if (data.action === 'global_capacity_increase') {
+                document.getElementById('responseTime').textContent = '22 minutes';
+            }
+        }
+
+        // Reset to normal status
+        function resetToNormalStatus() {
+            document.getElementById('networkStatus').textContent = 'Coordinated';
+            document.getElementById('networkStatus').className = 'card-status status-operational';
+            document.getElementById('balanceStatus').textContent = 'Optimized';
+            document.getElementById('balanceStatus').className = 'card-status status-operational';
+            document.getElementById('coordinationEfficiency').textContent = 'Excellent';
+            document.getElementById('coordinationEfficiency').className = 'card-status status-operational';
+            document.getElementById('crisisStatus').textContent = 'Resolved';
+            document.getElementById('crisisStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 45 minutes';
+            
+            setTimeout(() => {
+                document.getElementById('alertsBanner').classList.remove('show');
+                document.getElementById('emergencyAllocation').classList.remove('show');
+            }, 2000);
+        }
+
+        // Reset dashboard
+        function resetDashboard() {
+            document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('emergencyAllocation').classList.remove('show');
+            document.getElementById('emergencyRoute').style.display = 'none';
+            
+            // Reset all status indicators
+            document.getElementById('networkStatus').textContent = 'All Sites Online';
+            document.getElementById('networkStatus').className = 'card-status status-operational';
+            document.getElementById('balanceStatus').textContent = 'Optimized';
+            document.getElementById('balanceStatus').className = 'card-status status-operational';
+            document.getElementById('coordinationEfficiency').textContent = 'Excellent';
+            document.getElementById('coordinationEfficiency').className = 'card-status status-operational';
+            document.getElementById('crisisStatus').textContent = 'Standby';
+            document.getElementById('crisisStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 45 minutes';
+            document.getElementById('riskLevel').textContent = 'Low';
+            document.getElementById('riskLevel').style.color = 'var(--success-green)';
+            
+            // Reset site capacities
+            document.getElementById('singaporeCapacity').textContent = '847 MT/day';
+            document.getElementById('singaporeStatus').textContent = 'Operational';
+            document.getElementById('singaporeStatus').className = 'site-status status-operational';
+            document.getElementById('antwerpCapacity').textContent = '520 MT/day';
+            document.getElementById('antwerpStatus').textContent = 'Operational';
+            document.getElementById('antwerpStatus').className = 'site-status status-operational';
+            document.getElementById('mobileCapacity').textContent = '380 MT/day';
+            document.getElementById('mobileStatus').textContent = 'Operational';
+            document.getElementById('mobileStatus').className = 'site-status status-operational';
+            
+            // Reset totals
+            document.getElementById('totalCapacity').textContent = '1,747 MT/day';
+            document.getElementById('backupCapacity').textContent = '380 MT/day';
+            document.getElementById('apacCoverage').textContent = '78%';
+        }
+    </script>
+</body>
+</html>

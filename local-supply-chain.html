@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Supply Chain Dashboard - Evonik Digital Platform</title>
+    <style>
+        :root {
+            --evonik-purple: #8B2E8B;
+            --evonik-light-purple: #A855A8;
+            --evonik-dark-purple: #6B1F6B;
+            --alert-red: #DC2626;
+            --warning-orange: #EA580C;
+            --success-green: #16A34A;
+            --background-gray: #F8FAFC;
+            --border-gray: #E2E8F0;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --supply-orange: #F59E0B;
+            --supply-light-orange: #FCD34D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--supply-orange), var(--supply-light-orange));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+
+        .back-nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--evonik-purple);
+            background: white;
+            color: var(--evonik-purple);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--evonik-purple);
+            color: white;
+        }
+
+        .breadcrumb {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .alerts-banner {
+            background: var(--alert-red);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .alerts-banner.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-gray);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-operational {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-warning {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .metric {
+            margin: 0.75rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .sap-excel-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 1rem;
+            border-left: 4px solid var(--supply-orange);
+        }
+
+        .excel-mockup {
+            background: #f8f9fa;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .excel-header {
+            background: var(--supply-orange);
+            color: white;
+            padding: 0.5rem;
+            margin: -1rem -1rem 1rem -1rem;
+            border-radius: 6px 6px 0 0;
+            font-weight: bold;
+        }
+
+        .excel-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .excel-row:last-child {
+            border-bottom: none;
+        }
+
+        .excel-cell {
+            padding: 0.25rem;
+        }
+
+        .input-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--supply-orange);
+        }
+
+        .form-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--supply-orange);
+        }
+
+        .submit-btn {
+            background: var(--supply-orange);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--supply-light-orange);
+        }
+
+        .sap-sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .sync-animation {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--success-green);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .automation-highlight {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(252, 211, 77, 0.1));
+            border: 2px solid var(--supply-orange);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .inventory-table th,
+        .inventory-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .inventory-table th {
+            background-color: var(--background-gray);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .stock-level {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .stock-adequate {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .stock-low {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .stock-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-gray);
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--supply-orange);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .excel-row {
+                grid-template-columns: 1fr;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">📊 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Local Supply Chain Dashboard</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Procurement & Inventory Management - Singapore</div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div>👤 Local Supply Chain Manager</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="back-nav">
+        <div class="nav-content">
+            <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
+            <div class="breadcrumb">Local Supply Chain Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>🚨 SUPPLY CHAIN ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <h2>📊 Local Supply Chain Operations</h2>
+        
+        <!-- Key Metrics -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">SAP-Excel Integration</div>
+                    <div class="card-status status-operational">Automated</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last SAP Data Sync</div>
+                    <div class="metric-value" id="lastSync">3 minutes ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Manual Entry Elimination</div>
+                    <div class="metric-value" style="color: var(--success-green);">95% Automated</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Daily Time Saved</div>
+                    <div class="metric-value">4.2 hours</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Procurement Status</div>
+                    <div class="card-status status-operational" id="procurementStatus">All Secured</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Purchase Orders</div>
+                    <div class="metric-value" id="activePOs">12 orders</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Pending Deliveries</div>
+                    <div class="metric-value" id="pendingDeliveries">8 shipments</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Supply Risk Assessment</div>
+                    <div class="metric-value" style="color: var(--success-green);" id="riskLevel">Low Risk</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Inventory Management</div>
+                    <div class="card-status status-operational">Optimized</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Raw Material Value</div>
+                    <div class="metric-value">$18.7M</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Turnover Rate</div>
+                    <div class="metric-value">24.3 days</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Stock Accuracy</div>
+                    <div class="metric-value">99.2%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Coordination</div>
+                    <div class="card-status status-operational" id="coordinationStatus">Synchronized</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Production Visibility</div>
+                    <div class="metric-value">Real-Time</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Planning Accuracy</div>
+                    <div class="metric-value">96.8%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Emergency Response</div>
+                    <div class="metric-value" id="emergencyResponse">< 15 minutes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAP-Excel Integration Panel -->
+        <div class="sap-excel-panel">
+            <h3>🔄 Automated SAP-Excel Integration</h3>
+            <div class="automation-highlight">
+                <h4>📈 Transformation Impact</h4>
+                <p><strong>Before:</strong> Manual Excel entry, 4+ hours daily, 1-2 week coordination delays</p>
+                <p><strong>After:</strong> Automated sync, real-time updates, instant coordination</p>
+            </div>
+            
+            <div class="excel-mockup">
+                <div class="excel-header">📋 Live Production Planning Sheet (Auto-Updated from SAP)</div>
+                <div class="excel-row" style="font-weight: bold;">
+                    <div>Raw Material</div>
+                    <div>Current Stock (MT)</div>
+                    <div>Weekly Usage</div>
+                    <div>Days Remaining</div>
+                    <div>Status</div>
+                </div>
+                <div class="excel-row">
+                    <div>Methanol (CH₃OH)</div>
+                    <div id="methanolStock">2,450</div>
+                    <div>175</div>
+                    <div>14</div>
+                    <div style="color: var(--success-green);">✓ Adequate</div>
+                </div>
+                <div class="excel-row">
+                    <div>Ammonia (NH₃)</div>
+                    <div>1,890</div>
+                    <div>105</div>
+                    <div>18</div>
+                    <div style="color: var(--success-green);">✓ Adequate</div>
+                </div>
+                <div class="excel-row">
+                    <div>Propylene</div>
+                    <div>3,200</div>
+                    <div>150</div>
+                    <div>21</div>
+                    <div style="color: var(--success-green);">✓ Adequate</div>
+                </div>
+                <div class="excel-row">
+                    <div>Hydrogen (H₂)</div>
+                    <div id="hydrogenStock">850</div>
+                    <div>120</div>
+                    <div id="hydrogenDays">7</div>
+                    <div style="color: var(--warning-orange);" id="hydrogenStatus">⚠ Monitor</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procurement Input -->
+        <div class="sap-excel-panel">
+            <h3>📦 Procurement Planning & Order Management</h3>
+            <p>Automated SAP integration with instant production coordination:</p>
+            <div class="input-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rawMaterial">Raw Material</label>
+                        <select id="rawMaterial" class="form-select">
+                            <option value="">Select Material</option>
+                            <option value="methanol">Methanol (CH₃OH)</option>
+                            <option value="ammonia">Ammonia (NH₃)</option>
+                            <option value="propylene">Propylene</option>
+                            <option value="hydrogen">Hydrogen (H₂)</option>
+                            <option value="sulfur">Sulfur (S)</option>
+                            <option value="natural-gas">Natural Gas (CH₄)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier">Preferred Supplier</label>
+                        <select id="supplier" class="form-select">
+                            <option value="">Select Supplier</option>
+                            <option value="petronas">Petronas Chemicals</option>
+                            <option value="shell">Shell Singapore</option>
+                            <option value="exxon">ExxonMobil Singapore</option>
+                            <option value="mitsubishi">Mitsubishi Chemical</option>
+                            <option value="sumitomo">Sumitomo Chemical</option>
+                            <option value="basf">BASF Singapore</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderQuantity">Order Quantity (MT)</label>
+                        <input type="number" id="orderQuantity" class="form-input" placeholder="e.g., 1500" min="100" max="10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="expectedDelivery">Expected Delivery Date</label>
+                        <input type="date" id="expectedDelivery" class="form-input">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="urgency">Urgency Level</label>
+                        <select id="urgency" class="form-select">
+                            <option value="">Select Urgency</option>
+                            <option value="standard">Standard</option>
+                            <option value="expedited">Expedited</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Special Requirements</label>
+                        <input type="text" id="notes" class="form-input" placeholder="e.g., Extra purity, Special handling">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="submitProcurementOrder()">🚀 Submit Order & Update Production Plan</button>
+            </div>
+            <div class="sap-sync-indicator" id="procurementSyncStatus" style="display: none;">
+                <div class="sync-animation"></div>
+                SAP updated, Excel synchronized, Production and Global teams automatically notified
+            </div>
+        </div>
+
+        <!-- Inventory Overview -->
+        <div class="sap-excel-panel">
+            <h3>📊 Current Inventory Status</h3>
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Raw Material</th>
+                        <th>Current Stock (MT)</th>
+                        <th>Weekly Consumption</th>
+                        <th>Days Remaining</th>
+                        <th>Next Delivery</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Methanol (CH₃OH)</td>
+                        <td>2,450</td>
+                        <td>175</td>
+                        <td>14 days</td>
+                        <td>Dec 28, 2025</td>
+                        <td><span class="stock-level stock-adequate">Adequate</span></td>
+                    </tr>
+                    <tr>
+                        <td>Ammonia (NH₃)</td>
+                        <td>1,890</td>
+                        <td>105</td>
+                        <td>18 days</td>
+                        <td>Jan 02, 2026</td>
+                        <td><span class="stock-level stock-adequate">Adequate</span></td>
+                    </tr>
+                    <tr>
+                        <td>Propylene</td>
+                        <td>3,200</td>
+                        <td>150</td>
+                        <td>21 days</td>
+                        <td>Dec 30, 2025</td>
+                        <td><span class="stock-level stock-adequate">Adequate</span></td>
+                    </tr>
+                    <tr id="hydrogenRow">
+                        <td>Hydrogen (H₂)</td>
+                        <td>850</td>
+                        <td>120</td>
+                        <td>7 days</td>
+                        <td>Dec 24, 2025</td>
+                        <td><span class="stock-level stock-low">Monitor</span></td>
+                    </tr>
+                    <tr>
+                        <td>Sulfur (S)</td>
+                        <td>680</td>
+                        <td>45</td>
+                        <td>15 days</td>
+                        <td>Jan 05, 2026</td>
+                        <td><span class="stock-level stock-adequate">Adequate</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Listen for coordination events from the hub
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                handleCoordinationEvent(eventData);
+            }
+        });
+
+        // Handle coordination events from other systems
+        function handleCoordinationEvent(eventData) {
+            console.log('Local Supply Chain received coordination event:', eventData);
+            
+            switch(eventData.type) {
+                case 'equipment_failure':
+                    showSupplyChainAlert(eventData.data);
+                    updateSupplyMetrics('critical');
+                    break;
+                case 'coordination_update':
+                    updateCoordinationStatus(eventData.data);
+                    break;
+                case 'coordination_complete':
+                    resetToNormalStatus();
+                    break;
+                case 'demo_reset':
+                    resetDashboard();
+                    break;
+                case 'new_order':
+                    handleNewSalesOrder(eventData.data);
+                    break;
+            }
+        }
+
+        // Show supply chain alert
+        function showSupplyChainAlert(data) {
+            const alertBanner = document.getElementById('alertsBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = `${data.unit} Unit failure detected. Increased raw material consumption expected. Emergency procurement protocols activated.`;
+            alertBanner.classList.add('show');
+
+            // Update status indicators
+            document.getElementById('procurementStatus').textContent = 'Emergency Mode';
+            document.getElementById('procurementStatus').className = 'card-status status-critical';
+            document.getElementById('riskLevel').textContent = 'High Risk';
+            document.getElementById('riskLevel').style.color = 'var(--alert-red)';
+            document.getElementById('coordinationStatus').textContent = 'Crisis Response';
+            document.getElementById('coordinationStatus').className = 'card-status status-critical';
+            document.getElementById('emergencyResponse').textContent = 'Active...';
+
+            // Update hydrogen status to critical (equipment failure affects consumption)
+            document.getElementById('hydrogenStock').textContent = '850';
+            document.getElementById('hydrogenDays').textContent = '5';
+            document.getElementById('hydrogenStatus').textContent = '🔴 Critical';
+            document.getElementById('hydrogenStatus').style.color = 'var(--alert-red)';
+            
+            // Update table row
+            const hydrogenRow = document.getElementById('hydrogenRow');
+            hydrogenRow.cells[2].textContent = '170'; // Increased consumption
+            hydrogenRow.cells[3].textContent = '5 days';
+            hydrogenRow.querySelector('.stock-level').textContent = 'Critical';
+            hydrogenRow.querySelector('.stock-level').className = 'stock-level stock-critical';
+        }
+
+        // Update coordination status
+        function updateCoordinationStatus(data) {
+            if (data.action === 'maintenance_mobilized') {
+                document.getElementById('emergencyResponse').textContent = '12 minutes';
+                document.getElementById('activePOs').textContent = '15 orders'; // Emergency orders placed
+            }
+        }
+
+        // Reset to normal status
+        function resetToNormalStatus() {
+            document.getElementById('procurementStatus').textContent = 'Coordinated';
+            document.getElementById('procurementStatus').className = 'card-status status-operational';
+            document.getElementById('coordinationStatus').textContent = 'Synchronized';
+            document.getElementById('coordinationStatus').className = 'card-status status-operational';
+            document.getElementById('emergencyResponse').textContent = '< 15 minutes';
+            
+            setTimeout(() => {
+                document.getElementById('alertsBanner').classList.remove('show');
+            }, 2000);
+        }
+
+        // Reset dashboard
+        function resetDashboard() {
+            document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('procurementStatus').textContent = 'All Secured';
+            document.getElementById('procurementStatus').className = 'card-status status-operational';
+            document.getElementById('riskLevel').textContent = 'Low Risk';
+            document.getElementById('riskLevel').style.color = 'var(--success-green)';
+            document.getElementById('coordinationStatus').textContent = 'Synchronized';
+            document.getElementById('coordinationStatus').className = 'card-status status-operational';
+            document.getElementById('emergencyResponse').textContent = '< 15 minutes';
+            document.getElementById('activePOs').textContent = '12 orders';
+            
+            // Reset hydrogen status
+            document.getElementById('hydrogenStock').textContent = '850';
+            document.getElementById('hydrogenDays').textContent = '7';
+            document.getElementById('hydrogenStatus').textContent = '⚠ Monitor';
+            document.getElementById('hydrogenStatus').style.color = 'var(--warning-orange)';
+            
+            // Reset table
+            const hydrogenRow = document.getElementById('hydrogenRow');
+            hydrogenRow.cells[2].textContent = '120';
+            hydrogenRow.cells[3].textContent = '7 days';
+            hydrogenRow.querySelector('.stock-level').textContent = 'Monitor';
+            hydrogenRow.querySelector('.stock-level').className = 'stock-level stock-low';
+        }
+
+        // Handle new sales order
+        function handleNewSalesOrder(data) {
+            // Update metrics to show increased demand
+            document.getElementById('pendingDeliveries').textContent = '9 shipments';
+            updateSyncTime();
+        }
+
+        // Submit procurement order
+        function submitProcurementOrder() {
+            const rawMaterial = document.getElementById('rawMaterial').value;
+            const supplier = document.getElementById('supplier').value;
+            const orderQuantity = document.getElementById('orderQuantity').value;
+            const expectedDelivery = document.getElementById('expectedDelivery').value;
+            const urgency = document.getElementById('urgency').value;
+
+            if (!rawMaterial || !supplier || !orderQuantity || !expectedDelivery || !urgency) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Show sync indicator
+            const syncStatus = document.getElementById('procurementSyncStatus');
+            syncStatus.style.display = 'flex';
+
+            // Update metrics
+            setTimeout(() => {
+                const currentPOs = parseInt(document.getElementById('activePOs').textContent.split(' ')[0]);
+                const currentDeliveries = parseInt(document.getElementById('pendingDeliveries').textContent.split(' ')[0]);
+                
+                document.getElementById('activePOs').textContent = `${currentPOs + 1} orders`;
+                document.getElementById('pendingDeliveries').textContent = `${currentDeliveries + 1} shipments`;
+
+                // Update sync time
+                updateSyncTime();
+
+                // If hydrogen order, update status
+                if (rawMaterial === 'hydrogen') {
+                    const hydrogenRow = document.getElementById('hydrogenRow');
+                    hydrogenRow.cells[4].textContent = new Date(expectedDelivery).toLocaleDateString();
+                    hydrogenRow.querySelector('.stock-level').textContent = 'Order Placed';
+                    hydrogenRow.querySelector('.stock-level').className = 'stock-level stock-adequate';
+                }
+
+                // Broadcast to coordination hub
+                broadcastToHub('procurement_order', {
+                    material: rawMaterial,
+                    supplier: supplier,
+                    quantity: orderQuantity,
+                    delivery: expectedDelivery,
+                    urgency: urgency
+                });
+
+                // Clear form
+                document.getElementById('rawMaterial').value = '';
+                document.getElementById('supplier').value = '';
+                document.getElementById('orderQuantity').value = '';
+                document.getElementById('expectedDelivery').value = '';
+                document.getElementById('urgency').value = '';
+                document.getElementById('notes').value = '';
+
+                // Hide sync indicator after 3 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 3000);
+            }, 1500);
+        }
+
+        // Update sync time
+        function updateSyncTime() {
+            document.getElementById('lastSync').textContent = 'Just now';
+            setTimeout(() => {
+                document.getElementById('lastSync').textContent = '3 minutes ago';
+            }, 180000); // Reset after 3 minutes
+        }
+
+        // Broadcast events to coordination hub
+        function broadcastToHub(eventType, data) {
+            const broadcastData = {
+                type: eventType,
+                timestamp: new Date().toISOString(),
+                source: 'local_supply_chain',
+                data: data
+            };
+
+            // Use localStorage to communicate with coordination hub
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+            
+            // Clear after short delay
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Local Supply Chain Dashboard initialized');
+            console.log('SAP-Excel integration active');
+            
+            // Set default delivery date to 14 days from now
+            const deliveryInput = document.getElementById('expectedDelivery');
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 14);
+            deliveryInput.min = new Date().toISOString().split('T')[0];
+            deliveryInput.value = defaultDate.toISOString().split('T')[0];
+
+            // Update sync time every 3 minutes
+            setInterval(updateSyncTime, 180000);
+        });
+    </script>
+</body>
+</html>

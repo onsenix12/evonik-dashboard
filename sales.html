@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Team Dashboard - Evonik Digital Platform</title>
+    <style>
+        :root {
+            --evonik-purple: #8B2E8B;
+            --evonik-light-purple: #A855A8;
+            --evonik-dark-purple: #6B1F6B;
+            --alert-red: #DC2626;
+            --warning-orange: #EA580C;
+            --success-green: #16A34A;
+            --background-gray: #F8FAFC;
+            --border-gray: #E2E8F0;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --sales-blue: #3B82F6;
+            --sales-light-blue: #60A5FA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--sales-blue), var(--sales-light-blue));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+
+        .back-nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--evonik-purple);
+            background: white;
+            color: var(--evonik-purple);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--evonik-purple);
+            color: white;
+        }
+
+        .breadcrumb {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .alerts-banner {
+            background: var(--alert-red);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .alerts-banner.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-gray);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-operational {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-warning {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .metric {
+            margin: 0.75rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .input-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 1rem;
+            border-left: 4px solid var(--sales-blue);
+        }
+
+        .input-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--sales-blue);
+        }
+
+        .form-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--sales-blue);
+        }
+
+        .submit-btn {
+            background: var(--sales-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--sales-light-blue);
+        }
+
+        .sap-sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .sync-animation {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--success-green);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .recent-orders {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 2rem;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .orders-table th {
+            background-color: var(--background-gray);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .order-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-confirmed {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-pending {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .status-delayed {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .regional-map {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 2rem;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .region-card {
+            padding: 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .region-card:hover {
+            border-color: var(--sales-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .region-flag {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .region-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .region-demand {
+            color: var(--sales-blue);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .orders-table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">📈 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Sales Team Dashboard</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Customer Management & Demand Forecasting</div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div>👤 Sarah Chen, Regional Sales Manager</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="back-nav">
+        <div class="nav-content">
+            <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
+            <div class="breadcrumb">Sales Team Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>🚨 PRODUCTION ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <h2>📈 Sales Operations & Customer Management</h2>
+        
+        <!-- Key Metrics -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Monthly Sales Performance</div>
+                    <div class="card-status status-operational">On Target</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Orders (This Month)</div>
+                    <div class="metric-value" id="activeOrders">284 orders</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Volume Committed</div>
+                    <div class="metric-value" id="totalVolume">18,450 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Revenue Pipeline</div>
+                    <div class="metric-value">$52.3M</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Delivery Performance</div>
+                    <div class="card-status status-operational" id="deliveryStatus">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On-Time Delivery Rate</div>
+                    <div class="metric-value" id="deliveryRate">98.7%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Customer Satisfaction</div>
+                    <div class="metric-value">4.8/5.0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Orders at Risk</div>
+                    <div class="metric-value" id="ordersAtRisk">2 orders</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Coordination</div>
+                    <div class="card-status status-operational" id="productionCoordination">Synchronized</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Production Visibility</div>
+                    <div class="metric-value">Real-Time</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Lead Time Accuracy</div>
+                    <div class="metric-value">96.2%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Emergency Response Time</div>
+                    <div class="metric-value" id="responseTime">< 30 minutes</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Customer Impact Prevention</div>
+                    <div class="card-status status-operational">Protected</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Disruptions Prevented (2025)</div>
+                    <div class="metric-value" style="color: var(--success-green);">47 incidents</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Customer Retention</div>
+                    <div class="metric-value">99.1%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Lost Sales Prevention</div>
+                    <div class="metric-value">$1.2M+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Order Input -->
+        <div class="input-panel">
+            <h3>📝 New Customer Order Entry</h3>
+            <p>Direct SAP integration for instant production planning coordination:</p>
+            <div class="input-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName">Customer Name</label>
+                        <select id="customerName" class="form-select">
+                            <option value="">Select Customer</option>
+                            <option value="cp-foods">CP Foods (Thailand)</option>
+                            <option value="charoen-pokphand">Charoen Pokphand Group</option>
+                            <option value="new-hope">New Hope Group (China)</option>
+                            <option value="japfa">Japfa Ltd (Indonesia)</option>
+                            <option value="betagro">Betagro Group (Thailand)</option>
+                            <option value="genting-plantations">Genting Plantations</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="orderVolume">Order Volume (MT)</label>
+                        <input type="number" id="orderVolume" class="form-input" placeholder="e.g., 750" min="1" max="5000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="deliveryRegion">Delivery Region</label>
+                        <select id="deliveryRegion" class="form-select">
+                            <option value="">Select Region</option>
+                            <option value="thailand">Thailand</option>
+                            <option value="indonesia">Indonesia</option>
+                            <option value="vietnam">Vietnam</option>
+                            <option value="philippines">Philippines</option>
+                            <option value="malaysia">Malaysia</option>
+                            <option value="china">Greater China</option>
+                            <option value="korea">South Korea</option>
+                            <option value="japan">Japan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryDate">Required Delivery Date</label>
+                        <input type="date" id="deliveryDate" class="form-input">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="priority">Order Priority</label>
+                        <select id="priority" class="form-select">
+                            <option value="">Select Priority</option>
+                            <option value="standard">Standard</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="critical">Critical Customer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialRequirements">Special Requirements</label>
+                        <input type="text" id="specialRequirements" class="form-input" placeholder="e.g., Feed grade, Pharma grade">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="submitNewOrder()">🚀 Submit Order & Coordinate Production</button>
+            </div>
+            <div class="sap-sync-indicator" id="salesSyncStatus" style="display: none;">
+                <div class="sync-animation"></div>
+                Order synchronized with Production, Supply Chain, and Global Coordination teams
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="recent-orders">
+            <h3>📋 Recent Customer Orders</h3>
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Volume (MT)</th>
+                        <th>Region</th>
+                        <th>Delivery Date</th>
+                        <th>Status</th>
+                        <th>Production Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr>
+                        <td>CP Foods Thailand</td>
+                        <td>1,200</td>
+                        <td>Thailand</td>
+                        <td>Dec 15, 2025</td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>In Production</td>
+                    </tr>
+                    <tr>
+                        <td>Charoen Pokphand</td>
+                        <td>850</td>
+                        <td>Indonesia</td>
+                        <td>Dec 20, 2025</td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>Scheduled</td>
+                    </tr>
+                    <tr>
+                        <td>New Hope Group</td>
+                        <td>2,100</td>
+                        <td>China</td>
+                        <td>Dec 25, 2025</td>
+                        <td><span class="order-status status-pending">Pending</span></td>
+                        <td>Capacity Check</td>
+                    </tr>
+                    <tr>
+                        <td>Japfa Ltd</td>
+                        <td>950</td>
+                        <td>Indonesia</td>
+                        <td>Jan 05, 2026</td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>Planned</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Regional Demand Overview -->
+        <div class="regional-map">
+            <h3>🌏 Regional Demand Overview</h3>
+            <div class="map-container">
+                <div class="region-card">
+                    <div class="region-flag">🇹🇭</div>
+                    <div class="region-name">Thailand</div>
+                    <div class="region-demand" id="thailandDemand">3,200 MT/month</div>
+                </div>
+                <div class="region-card">
+                    <div class="region-flag">🇮🇩</div>
+                    <div class="region-name">Indonesia</div>
+                    <div class="region-demand">2,800 MT/month</div>
+                </div>
+                <div class="region-card">
+                    <div class="region-flag">🇻🇳</div>
+                    <div class="region-name">Vietnam</div>
+                    <div class="region-demand">2,200 MT/month</div>
+                </div>
+                <div class="region-card">
+                    <div class="region-flag">🇨🇳</div>
+                    <div class="region-name">Greater China</div>
+                    <div class="region-demand">8,900 MT/month</div>
+                </div>
+                <div class="region-card">
+                    <div class="region-flag">🇵🇭</div>
+                    <div class="region-name">Philippines</div>
+                    <div class="region-demand">1,850 MT/month</div>
+                </div>
+                <div class="region-card">
+                    <div class="region-flag">🇰🇷</div>
+                    <div class="region-name">South Korea</div>
+                    <div class="region-demand">1,400 MT/month</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Listen for coordination events from the hub
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                handleCoordinationEvent(eventData);
+            }
+        });
+
+        // Handle coordination events from other systems
+        function handleCoordinationEvent(eventData) {
+            console.log('Sales Team received coordination event:', eventData);
+            
+            switch(eventData.type) {
+                case 'equipment_failure':
+                    showProductionAlert(eventData.data);
+                    updateDeliveryMetrics('critical');
+                    break;
+                case 'coordination_update':
+                    updateCoordinationStatus(eventData.data);
+                    break;
+                case 'coordination_complete':
+                    resetToNormalStatus();
+                    break;
+                case 'demo_reset':
+                    resetDashboard();
+                    break;
+            }
+        }
+
+        // Show production alert
+        function showProductionAlert(data) {
+            const alertBanner = document.getElementById('alertsBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = `${data.unit} Unit failure detected. Production reduced to ${data.efficiency}%. Customer delivery schedules may be affected.`;
+            alertBanner.classList.add('show');
+
+            // Update delivery status
+            document.getElementById('deliveryStatus').textContent = 'Risk Assessment';
+            document.getElementById('deliveryStatus').className = 'card-status status-warning';
+            document.getElementById('ordersAtRisk').textContent = '12 orders';
+            document.getElementById('productionCoordination').textContent = 'Emergency Mode';
+            document.getElementById('productionCoordination').className = 'card-status status-critical';
+            document.getElementById('responseTime').textContent = 'Coordinating...';
+        }
+
+        // Update coordination status
+        function updateCoordinationStatus(data) {
+            if (data.action === 'customer_notification') {
+                document.getElementById('responseTime').textContent = '8 minutes';
+                // Add to orders table showing customer notifications
+                addNotificationToTable();
+            }
+        }
+
+        // Reset to normal status
+        function resetToNormalStatus() {
+            document.getElementById('deliveryStatus').textContent = 'Stabilized';
+            document.getElementById('deliveryStatus').className = 'card-status status-operational';
+            document.getElementById('productionCoordination').textContent = 'Coordinated';
+            document.getElementById('productionCoordination').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 30 minutes';
+            
+            setTimeout(() => {
+                document.getElementById('alertsBanner').classList.remove('show');
+            }, 2000);
+        }
+
+        // Reset dashboard
+        function resetDashboard() {
+            document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('deliveryStatus').textContent = 'Excellent';
+            document.getElementById('deliveryStatus').className = 'card-status status-operational';
+            document.getElementById('ordersAtRisk').textContent = '2 orders';
+            document.getElementById('productionCoordination').textContent = 'Synchronized';
+            document.getElementById('productionCoordination').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 30 minutes';
+        }
+
+        // Submit new order
+        function submitNewOrder() {
+            const customerName = document.getElementById('customerName').value;
+            const orderVolume = document.getElementById('orderVolume').value;
+            const deliveryRegion = document.getElementById('deliveryRegion').value;
+            const deliveryDate = document.getElementById('deliveryDate').value;
+            const priority = document.getElementById('priority').value;
+
+            if (!customerName || !orderVolume || !deliveryRegion || !deliveryDate || !priority) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Show sync indicator
+            const syncStatus = document.getElementById('salesSyncStatus');
+            syncStatus.style.display = 'flex';
+
+            // Update metrics
+            setTimeout(() => {
+                const currentOrders = parseInt(document.getElementById('activeOrders').textContent);
+                const currentVolume = parseInt(document.getElementById('totalVolume').textContent.replace(',', ''));
+                
+                document.getElementById('activeOrders').textContent = `${currentOrders + 1} orders`;
+                document.getElementById('totalVolume').textContent = `${(currentVolume + parseInt(orderVolume)).toLocaleString()} MT`;
+
+                // Add to orders table
+                addOrderToTable(customerName, orderVolume, deliveryRegion, deliveryDate, priority);
+
+                // Broadcast to coordination hub
+                broadcastToHub('new_order', {
+                    customer: customerName,
+                    volume: orderVolume,
+                    region: deliveryRegion,
+                    date: deliveryDate,
+                    priority: priority
+                });
+
+                // Clear form
+                document.getElementById('customerName').value = '';
+                document.getElementById('orderVolume').value = '';
+                document.getElementById('deliveryRegion').value = '';
+                document.getElementById('deliveryDate').value = '';
+                document.getElementById('priority').value = '';
+                document.getElementById('specialRequirements').value = '';
+
+                // Hide sync indicator after 3 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 3000);
+            }, 1500);
+        }
+
+        // Add order to table
+        function addOrderToTable(customer, volume, region, date, priority) {
+            const tableBody = document.getElementById('ordersTableBody');
+            const row = document.createElement('tr');
+            const statusClass = priority === 'critical' ? 'status-pending' : 'status-confirmed';
+            const statusText = priority === 'critical' ? 'Priority' : 'Confirmed';
+            
+            row.innerHTML = `
+                <td>${customer}</td>
+                <td>${volume}</td>
+                <td>${region}</td>
+                <td>${new Date(date).toLocaleDateString()}</td>
+                <td><span class="order-status ${statusClass}">${statusText}</span></td>
+                <td>Coordination Check</td>
+            `;
+            tableBody.insertBefore(row, tableBody.firstChild);
+        }
+
+        // Add notification to table
+        function addNotificationToTable() {
+            const tableBody = document.getElementById('ordersTableBody');
+            // Update first few rows to show "Customer Notified" status
+            const rows = tableBody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < Math.min(2, rows.length); i++) {
+                const statusCell = rows[i].querySelector('.order-status');
+                if (statusCell) {
+                    statusCell.textContent = 'Customer Notified';
+                    statusCell.className = 'order-status status-confirmed';
+                }
+            }
+        }
+
+        // Broadcast to coordination hub
+        function broadcastToHub(eventType, data) {
+            const event = {
+                type: eventType,
+                data: data,
+                timestamp: new Date().toISOString(),
+                source: 'sales_team'
+            };
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(event));
+        }
+    </script>
+</body>
+</html>

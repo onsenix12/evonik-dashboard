@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Dashboard - Evonik Digital Platform</title>
+    <style>
+        :root {
+            --evonik-purple: #8B2E8B;
+            --evonik-light-purple: #A855A8;
+            --evonik-dark-purple: #6B1F6B;
+            --alert-red: #DC2626;
+            --warning-orange: #EA580C;
+            --success-green: #16A34A;
+            --background-gray: #F8FAFC;
+            --border-gray: #E2E8F0;
+            --text-dark: #1E293B;
+            --text-light: #64748B;
+            --production-indigo: #6366F1;
+            --production-light-indigo: #A5B4FC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--production-indigo), var(--production-light-indigo));
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+
+        .back-nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--evonik-purple);
+            background: white;
+            color: var(--evonik-purple);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--evonik-purple);
+            color: white;
+        }
+
+        .breadcrumb {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .alerts-banner {
+            background: var(--alert-red);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .alerts-banner.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid var(--border-gray);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-operational {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-warning {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .metric {
+            margin: 0.75rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .units-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-bottom: 2rem;
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .unit-card {
+            padding: 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .unit-card:hover {
+            border-color: var(--production-indigo);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .unit-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .unit-efficiency {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .unit-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .equipment-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 1rem;
+            border-left: 4px solid var(--production-indigo);
+        }
+
+        .input-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--production-indigo);
+        }
+
+        .form-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--production-indigo);
+        }
+
+        .submit-btn {
+            background: var(--production-indigo);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--production-light-indigo);
+        }
+
+        .sap-sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .sync-animation {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--success-green);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .maintenance-schedule {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 2rem;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .schedule-table th {
+            background-color: var(--background-gray);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .maintenance-type {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .type-routine {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .type-preventive {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .type-emergency {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .process-flow {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 2rem;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            border-color: var(--production-indigo);
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--production-indigo);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-gray);
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--production-indigo);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-diagram {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🏭 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Production Operations Dashboard</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Methionine Complex - Jurong Island, Singapore</div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div>👤 Production Manager</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="back-nav">
+        <div class="nav-content">
+            <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
+            <div class="breadcrumb">Production Operations Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>🚨 EQUIPMENT ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <h2>🏭 Production Operations & Equipment Monitoring</h2>
+        
+        <!-- Key Metrics -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Overall Equipment Effectiveness</div>
+                    <div class="card-status status-operational" id="oeeStatus">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current OEE</div>
+                    <div class="metric-value" id="oeeValue">94.7%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Availability</div>
+                    <div class="metric-value">98.2%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Performance</div>
+                    <div class="metric-value">96.8%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Performance</div>
+                    <div class="card-status status-operational">On Target</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Rate</div>
+                    <div class="metric-value" id="productionRate">847 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Daily Target</div>
+                    <div class="metric-value">850 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Monthly Achievement</div>
+                    <div class="metric-value">102.3%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Maintenance Status</div>
+                    <div class="card-status status-operational" id="maintenanceStatus">Scheduled</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Alerts</div>
+                    <div class="metric-value" id="activeAlerts">0 critical</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Next Maintenance Window</div>
+                    <div class="metric-value" id="nextMaintenance">12 days</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Preventive Actions</div>
+                    <div class="metric-value">3 scheduled</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Supply Chain Coordination</div>
+                    <div class="card-status status-operational" id="coordinationStatus">Synchronized</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Raw Material Status</div>
+                    <div class="metric-value">Adequate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Response Time</div>
+                    <div class="metric-value" id="responseTime">< 10 minutes</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Planning Accuracy</div>
+                    <div class="metric-value">97.4%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Units Overview -->
+        <div class="units-overview">
+            <h3>⚙️ Production Units Status</h3>
+            <div class="units-grid">
+                <div class="unit-card" id="mmpUnit">
+                    <div class="unit-name">MMP Unit</div>
+                    <div class="unit-efficiency" id="mmpEfficiency">🟢 98.5%</div>
+                    <div class="unit-description">Methionine Production - Primary synthesis reactor and catalyst system</div>
+                </div>
+                <div class="unit-card" id="cnsUnit">
+                    <div class="unit-name">CNS Unit</div>
+                    <div class="unit-efficiency" id="cnsEfficiency">🟢 96.2%</div>
+                    <div class="unit-description">Hydrocyanic Acid Generation - Key intermediate production</div>
+                </div>
+                <div class="unit-card" id="meUnit">
+                    <div class="unit-name">ME Unit</div>
+                    <div class="unit-efficiency" id="meEfficiency">🟢 94.8%</div>
+                    <div class="unit-description">Methionine Extraction - Purification and crystallization</div>
+                </div>
+                <div class="unit-card" id="utoUnit">
+                    <div class="unit-name">UTO Unit</div>
+                    <div class="unit-efficiency" id="utoEfficiency">🟢 99.1%</div>
+                    <div class="unit-description">Thermal Oxidizer - Waste gas treatment and environmental control</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment Status Update Panel -->
+        <div class="equipment-panel">
+            <h3>📊 Equipment Status & Maintenance Input</h3>
+            <p>Real-time SAP integration for equipment monitoring and maintenance coordination:</p>
+            <div class="input-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productionUnit">Production Unit</label>
+                        <select id="productionUnit" class="form-select">
+                            <option value="">Select Unit</option>
+                            <option value="mmp">MMP Unit (Methionine Production)</option>
+                            <option value="cns">CNS Unit (Hydrocyanic Acid)</option>
+                            <option value="me">ME Unit (Methionine Extraction)</option>
+                            <option value="uto">UTO Unit (Thermal Oxidizer)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="operatingEfficiency">Operating Efficiency (%)</label>
+                        <input type="number" id="operatingEfficiency" class="form-input" placeholder="e.g., 98.5" min="0" max="100" step="0.1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="equipmentStatus">Equipment Status</label>
+                        <select id="equipmentStatus" class="form-select">
+                            <option value="">Select Status</option>
+                            <option value="operational">Fully Operational</option>
+                            <option value="maintenance">Scheduled Maintenance</option>
+                            <option value="warning">Performance Warning</option>
+                            <option value="critical">Critical Issue</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="maintenanceDate">Next Maintenance Date</label>
+                        <input type="date" id="maintenanceDate" class="form-input">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="equipmentComponent">Equipment Component</label>
+                        <select id="equipmentComponent" class="form-select">
+                            <option value="">Select Component</option>
+                            <option value="pump">Centrifugal Pump</option>
+                            <option value="compressor">Compressor Unit</option>
+                            <option value="heat-exchanger">Heat Exchanger</option>
+                            <option value="reactor">Reactor Vessel</option>
+                            <option value="distillation">Distillation Column</option>
+                            <option value="valve">Control Valve</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueDescription">Issue Description</label>
+                        <input type="text" id="issueDescription" class="form-input" placeholder="e.g., Vibration levels elevated, temperature variance">
+                    </div>
+                </div>
+                <button class="submit-btn" onclick="submitEquipmentUpdate()">⚡ Update Equipment Status & Notify Teams</button>
+            </div>
+            <div class="sap-sync-indicator" id="productionSyncStatus" style="display: none;">
+                <div class="sync-animation"></div>
+                Equipment data updated in SAP, Supply Chain and Global teams automatically notified
+            </div>
+        </div>
+
+        <!-- Process Flow -->
+        <div class="process-flow">
+            <h3>🔄 Methionine Production Process Flow</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <div style="font-weight: 600;">Raw Materials</div>
+                    <div style="font-size: 0.9rem;">Methanol, Ammonia, Propylene</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div style="font-weight: 600;">CNS Unit</div>
+                    <div style="font-size: 0.9rem;">HCN Generation</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div style="font-weight: 600;">MMP Unit</div>
+                    <div style="font-size: 0.9rem;">Methionine Synthesis</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div style="font-weight: 600;">ME Unit</div>
+                    <div style="font-size: 0.9rem;">Purification</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div style="font-weight: 600;">Final Product</div>
+                    <div style="font-size: 0.9rem;">DL-Methionine</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div class="flow-step">
+                    <div style="font-weight: 600;">UTO Unit</div>
+                    <div style="font-size: 0.9rem;">Waste Gas Treatment</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintenance Schedule -->
+        <div class="maintenance-schedule">
+            <h3>🔧 Maintenance Schedule & Planning</h3>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Unit</th>
+                        <th>Component</th>
+                        <th>Maintenance Type</th>
+                        <th>Scheduled Date</th>
+                        <th>Duration</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>MMP Unit</td>
+                        <td>Reactor Catalyst</td>
+                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td>Jan 15, 2026</td>
+                        <td>8 hours</td>
+                        <td>Minimal</td>
+                    </tr>
+                    <tr>
+                        <td>CNS Unit</td>
+                        <td>Compressor 2A</td>
+                        <td><span class="maintenance-type type-preventive">Preventive</span></td>
+                        <td>Dec 28, 2025</td>
+                        <td>12 hours</td>
+                        <td>Reduced Rate</td>
+                    </tr>
+                    <tr>
+                        <td>ME Unit</td>
+                        <td>Heat Exchanger</td>
+                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td>Jan 08, 2026</td>
+                        <td>6 hours</td>
+                        <td>Minimal</td>
+                    </tr>
+                    <tr>
+                        <td>UTO Unit</td>
+                        <td>Oxidizer Burner</td>
+                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td>Dec 30, 2025</td>
+                        <td>4 hours</td>
+                        <td>None</td>
+                    </tr>
+                    <tr id="emergencyMaintenance" style="display: none;">
+                        <td>MMP Unit</td>
+                        <td>Pump 2B</td>
+                        <td><span class="maintenance-type type-emergency">Emergency</span></td>
+                        <td>Immediate</td>
+                        <td>TBD</td>
+                        <td>Production Impact</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Listen for coordination events from the hub
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                handleCoordinationEvent(eventData);
+            }
+        });
+
+        // Handle coordination events from other systems
+        function handleCoordinationEvent(eventData) {
+            console.log('Production received coordination event:', eventData);
+            
+            switch(eventData.type) {
+                case 'equipment_failure':
+                    // This event originated from production, so we're already aware
+                    break;
+                case 'coordination_update':
+                    updateProductionCoordination(eventData.data);
+                    break;
+                case 'coordination_complete':
+                    resetToNormalStatus();
+                    break;
+                case 'demo_reset':
+                    resetDashboard();
+                    break;
+                case 'procurement_order':
+                    handleProcurementUpdate(eventData.data);
+                    break;
+            }
+        }
+
+        // Update production coordination
+        function updateProductionCoordination(data) {
+            if (data.action === 'maintenance_mobilized') {
+                document.getElementById('maintenanceStatus').textContent = 'Emergency';
+                document.getElementById('maintenanceStatus').className = 'card-status status-critical';
+                document.getElementById('responseTime').textContent = '8 minutes';
+                
+                // Show emergency maintenance
+                document.getElementById('emergencyMaintenance').style.display = 'table-row';
+            }
+        }
+
+        // Reset dashboard
+        function resetDashboard() {
+            document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('emergencyMaintenance').style.display = 'none';
+            
+            // Reset all status indicators
+            document.getElementById('oeeStatus').textContent = 'Excellent';
+            document.getElementById('oeeStatus').className = 'card-status status-operational';
+            document.getElementById('oeeValue').textContent = '94.7%';
+            document.getElementById('productionRate').textContent = '847 MT/day';
+            document.getElementById('maintenanceStatus').textContent = 'Scheduled';
+            document.getElementById('maintenanceStatus').className = 'card-status status-operational';
+            document.getElementById('activeAlerts').textContent = '0 critical';
+            document.getElementById('coordinationStatus').textContent = 'Synchronized';
+            document.getElementById('coordinationStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 10 minutes';
+            
+            // Reset unit efficiencies
+            document.getElementById('mmpEfficiency').textContent = '🟢 98.5%';
+            document.getElementById('cnsEfficiency').textContent = '🟢 96.2%';
+            document.getElementById('meEfficiency').textContent = '🟢 94.8%';
+            document.getElementById('utoEfficiency').textContent = '🟢 99.1%';
+        }
+
+        // Submit equipment update
+        function submitEquipmentUpdate() {
+            const productionUnit = document.getElementById('productionUnit').value;
+            const operatingEfficiency = document.getElementById('operatingEfficiency').value;
+            const equipmentStatus = document.getElementById('equipmentStatus').value;
+            const maintenanceDate = document.getElementById('maintenanceDate').value;
+            const equipmentComponent = document.getElementById('equipmentComponent').value;
+            const issueDescription = document.getElementById('issueDescription').value;
+
+            if (!productionUnit || !operatingEfficiency || !equipmentStatus) {
+                alert('Please fill in required fields (Unit, Efficiency, Status)');
+                return;
+            }
+
+            // Show sync indicator
+            const syncStatus = document.getElementById('productionSyncStatus');
+            syncStatus.style.display = 'flex';
+
+            // Update metrics based on input
+            setTimeout(() => {
+                // Update OEE if efficiency changed significantly
+                const newEfficiency = parseFloat(operatingEfficiency);
+                if (Math.abs(newEfficiency - 94.7) > 2) {
+                    document.getElementById('oeeValue').textContent = `${newEfficiency}%`;
+                    
+                    if (newEfficiency < 90) {
+                        document.getElementById('oeeStatus').textContent = 'Below Target';
+                        document.getElementById('oeeStatus').className = 'card-status status-warning';
+                    } else if (newEfficiency < 85) {
+                        document.getElementById('oeeStatus').textContent = 'Critical';
+                        document.getElementById('oeeStatus').className = 'card-status status-critical';
+                    }
+                }
+
+                // Update specific unit efficiency
+                const unitMap = {
+                    'mmp': 'mmpEfficiency',
+                    'cns': 'cnsEfficiency', 
+                    'me': 'meEfficiency',
+                    'uto': 'utoEfficiency'
+                };
+
+                if (unitMap[productionUnit]) {
+                    const statusEmoji = equipmentStatus === 'operational' ? '🟢' : 
+                                      equipmentStatus === 'warning' ? '🟡' : 
+                                      equipmentStatus === 'critical' ? '🔴' : '🟡';
+                    document.getElementById(unitMap[productionUnit]).textContent = `${statusEmoji} ${operatingEfficiency}%`;
+                }
+
+                // Update maintenance date if provided
+                if (maintenanceDate) {
+                    const today = new Date();
+                    const maintDate = new Date(maintenanceDate);
+                    const daysDiff = Math.ceil((maintDate - today) / (1000 * 60 * 60 * 24));
+                    document.getElementById('nextMaintenance').textContent = `${daysDiff} days`;
+                }
+
+                // If critical status, simulate equipment failure
+                if (equipmentStatus === 'critical' && productionUnit === 'mmp') {
+                    simulateEquipmentFailure();
+                }
+
+                // Broadcast to coordination hub
+                broadcastToHub('equipment_update', {
+                    unit: productionUnit,
+                    efficiency: operatingEfficiency,
+                    status: equipmentStatus,
+                    component: equipmentComponent,
+                    issue: issueDescription
+                });
+
+                // Clear form
+                document.getElementById('productionUnit').value = '';
+                document.getElementById('operatingEfficiency').value = '';
+                document.getElementById('equipmentStatus').value = '';
+                document.getElementById('maintenanceDate').value = '';
+                document.getElementById('equipmentComponent').value = '';
+                document.getElementById('issueDescription').value = '';
+
+                // Hide sync indicator after 3 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 3000);
+            }, 1500);
+        }
+
+        // Simulate equipment failure (when critical status is reported)
+        function simulateEquipmentFailure() {
+            const alertBanner = document.getElementById('alertsBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = 'MMP Unit pump failure detected. Production capacity reduced. Maintenance team mobilized, supply chain notified.';
+            alertBanner.classList.add('show');
+
+            // Update production metrics
+            document.getElementById('productionRate').textContent = '550 MT/day';
+            document.getElementById('oeeValue').textContent = '67.2%';
+            document.getElementById('oeeStatus').textContent = 'Critical';
+            document.getElementById('oeeStatus').className = 'card-status status-critical';
+            document.getElementById('activeAlerts').textContent = '1 critical';
+            document.getElementById('maintenanceStatus').textContent = 'Emergency';
+            document.getElementById('maintenanceStatus').className = 'card-status status-critical';
+            document.getElementById('coordinationStatus').textContent = 'Crisis Mode';
+            document.getElementById('coordinationStatus').className = 'card-status status-critical';
+
+            // Show emergency maintenance
+            document.getElementById('emergencyMaintenance').style.display = 'table-row';
+
+            // Broadcast equipment failure to all systems
+            broadcastToHub('equipment_failure', {
+                unit: 'MMP',
+                status: 'critical',
+                efficiency: 65,
+                message: 'Pump failure detected'
+            });
+        }
+
+        // Broadcast events to coordination hub
+        function broadcastToHub(eventType, data) {
+            const broadcastData = {
+                type: eventType,
+                timestamp: new Date().toISOString(),
+                source: 'production',
+                data: data
+            };
+
+            // Use localStorage to communicate with coordination hub
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+            
+            // Clear after short delay
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Production Operations Dashboard initialized');
+            console.log('Equipment monitoring and SAP integration active');
+            
+            // Set default maintenance date to 30 days from now
+            const maintenanceInput = document.getElementById('maintenanceDate');
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() + 30);
+            maintenanceInput.min = new Date().toISOString().split('T')[0];
+            maintenanceInput.value = defaultDate.toISOString().split('T')[0];
+        });
+
+        // Handle procurement updates
+        function handleProcurementUpdate(data) {
+            if (data.urgency === 'emergency') {
+                document.getElementById('coordinationStatus').textContent = 'Emergency Supply';
+                document.getElementById('coordinationStatus').className = 'card-status status-warning';
+            }
+        }
+
+        // Reset to normal status
+        function resetToNormalStatus() {
+            document.getElementById('maintenanceStatus').textContent = 'Coordinated';
+            document.getElementById('maintenanceStatus').className = 'card-status status-operational';
+            document.getElementById('coordinationStatus').textContent = 'Synchronized';
+            document.getElementById('coordinationStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 10 minutes';
+            
+            // Update MMP efficiency back to normal
+            document.getElementById('mmpEfficiency').textContent = '🟡 85%';
+            document.getElementById('productionRate').textContent = '720 MT/day';
+            document.getElementById('oeeValue').textContent = '89.2%';
+            
+            setTimeout(() => {
+                document.getElementById('alertsBanner').classList.remove('show');
+                document.getElementById('emergencyMaintenance').style.display = 'none';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

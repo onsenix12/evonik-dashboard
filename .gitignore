@@ -1,0 +1,36 @@
+# OS/Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.swp
+*.swo
+*.orig
+*.log
+*.tmp
+*.bak
+*.cache
+$RECYCLE.BIN/
+System Volume Information/
+
+# Node/Build (just in case)
+node_modules/
+dist/
+build/
+.parcel-cache/
+.cache/
+.next/
+out/
+coverage/
+.turbo/
+
+# Env/Secrets
+*.env
+*.env.*
+!*.example
+
+# Misc
+.vscode/
+.idea/
+.history
+*.iml

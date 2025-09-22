@@ -255,58 +255,47 @@
             border-left: 4px solid var(--production-indigo);
         }
 
-        .input-form {
+        .automation-section {
             display: grid;
-            gap: 1rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
             margin-top: 1rem;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .automation-option {
+            padding: 1.5rem;
+            border: 2px dashed var(--border-gray);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+        .automation-option:hover {
+            border-color: var(--production-indigo);
+            background: rgba(99, 102, 241, 0.05);
         }
 
-        .form-group label {
+        .automation-icon {
+            font-size: 3rem;
+            color: var(--production-indigo);
+            margin-bottom: 1rem;
+        }
+
+        .automation-title {
             font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
             color: var(--text-dark);
+        }
+
+        .automation-description {
             font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
         }
 
-        .form-input {
-            padding: 0.75rem;
-            border: 2px solid var(--border-gray);
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--production-indigo);
-        }
-
-        .form-select {
-            padding: 0.75rem;
-            border: 2px solid var(--border-gray);
-            border-radius: 6px;
-            font-size: 1rem;
-            background: white;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--production-indigo);
-        }
-
-        .submit-btn {
+        .automation-btn {
             background: var(--production-indigo);
             color: white;
             border: none;
@@ -315,11 +304,27 @@
             cursor: pointer;
             font-weight: 600;
             transition: background 0.3s ease;
-            margin-top: 0.5rem;
+            margin: 0.5rem;
         }
 
-        .submit-btn:hover {
+        .automation-btn:hover {
             background: var(--production-light-indigo);
+        }
+
+        .sync-btn {
+            background: var(--evonik-purple);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .sync-btn:hover {
+            background: var(--evonik-light-purple);
         }
 
         .sap-sync-indicator {
@@ -448,6 +453,18 @@
             transition: width 0.3s ease;
         }
 
+        .automation-highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(165, 180, 252, 0.1));
+            border: 2px solid var(--production-indigo);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -462,7 +479,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .form-row {
+            .automation-section {
                 grid-template-columns: 1fr;
             }
 
@@ -482,12 +499,12 @@
             <div class="logo-section">
                 <div class="logo">🏭 Evonik</div>
                 <div>
-                    <div style="font-size: 1.2rem; font-weight: 600;">Production Operations Dashboard</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Methionine Complex - Jurong Island, Singapore</div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Smart Production Operations</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Automated Monitoring & Real-Time Coordination - Jurong Island</div>
                 </div>
             </div>
             <div class="user-info">
-                <div>👤 Production Manager</div>
+                <div>👤 Alex Rodriguez, Production Manager</div>
             </div>
         </div>
     </header>
@@ -504,10 +521,33 @@
     </div>
 
     <main class="main-content">
-        <h2>🏭 Production Operations & Equipment Monitoring</h2>
+        <h2>🏭 Automated Production Operations & Real-Time Coordination</h2>
         
         <!-- Key Metrics -->
         <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Automation Status</div>
+                    <div class="card-status status-operational" id="automationStatus">Fully Automated</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Equipment Monitoring</div>
+                    <div class="metric-value" id="monitoringStatus">🟢 Real-Time</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Cross-System Integration</div>
+                    <div class="metric-value">100% Connected</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Decision Speed</div>
+                    <div class="metric-value">From weeks → minutes</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Coordination Efficiency</div>
+                    <div class="metric-value">98.7% Automated</div>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Overall Equipment Effectiveness</div>
@@ -548,173 +588,124 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Maintenance Status</div>
-                    <div class="card-status status-operational" id="maintenanceStatus">Scheduled</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Active Alerts</div>
-                    <div class="metric-value" id="activeAlerts">0 critical</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Next Maintenance Window</div>
-                    <div class="metric-value" id="nextMaintenance">12 days</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Preventive Actions</div>
-                    <div class="metric-value">3 scheduled</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Supply Chain Coordination</div>
+                    <div class="card-title">Smart Coordination</div>
                     <div class="card-status status-operational" id="coordinationStatus">Synchronized</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Raw Material Status</div>
-                    <div class="metric-value">Adequate</div>
+                    <div class="metric-label">Auto-Response Time</div>
+                    <div class="metric-value" id="responseTime">< 2 minutes</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Response Time</div>
-                    <div class="metric-value" id="responseTime">< 10 minutes</div>
+                    <div class="metric-label">Cross-System Alerts</div>
+                    <div class="metric-value">Instant</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Planning Accuracy</div>
-                    <div class="metric-value">97.4%</div>
+                    <div class="metric-label">Stakeholder Sync</div>
+                    <div class="metric-value">Real-Time</div>
                 </div>
             </div>
         </div>
 
         <!-- Production Units Overview -->
         <div class="units-overview">
-            <h3>⚙️ Production Units Status</h3>
+            <h3>⚙️ Smart Production Units Status</h3>
             <div class="units-grid">
                 <div class="unit-card" id="mmpUnit">
                     <div class="unit-name">MMP Unit</div>
                     <div class="unit-efficiency" id="mmpEfficiency">🟢 98.5%</div>
-                    <div class="unit-description">Methionine Production - Primary synthesis reactor and catalyst system</div>
+                    <div class="unit-description">Methionine Production - AI-monitored synthesis reactor with predictive maintenance</div>
                 </div>
                 <div class="unit-card" id="cnsUnit">
                     <div class="unit-name">CNS Unit</div>
                     <div class="unit-efficiency" id="cnsEfficiency">🟢 96.2%</div>
-                    <div class="unit-description">Hydrocyanic Acid Generation - Key intermediate production</div>
+                    <div class="unit-description">Hydrocyanic Acid Generation - Smart catalyst system with automated optimization</div>
                 </div>
                 <div class="unit-card" id="meUnit">
                     <div class="unit-name">ME Unit</div>
                     <div class="unit-efficiency" id="meEfficiency">🟢 94.8%</div>
-                    <div class="unit-description">Methionine Extraction - Purification and crystallization</div>
+                    <div class="unit-description">Methionine Extraction - Intelligent purification with real-time quality control</div>
                 </div>
                 <div class="unit-card" id="utoUnit">
                     <div class="unit-name">UTO Unit</div>
                     <div class="unit-efficiency" id="utoEfficiency">🟢 99.1%</div>
-                    <div class="unit-description">Thermal Oxidizer - Waste gas treatment and environmental control</div>
+                    <div class="unit-description">Thermal Oxidizer - Automated waste gas treatment with environmental monitoring</div>
                 </div>
             </div>
         </div>
 
-        <!-- Equipment Status Update Panel -->
+        <!-- Equipment Automation Panel -->
         <div class="equipment-panel">
-            <h3>📊 Equipment Status & Maintenance Input</h3>
-            <p>Real-time SAP integration for equipment monitoring and maintenance coordination:</p>
-            <div class="input-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="productionUnit">Production Unit</label>
-                        <select id="productionUnit" class="form-select">
-                            <option value="">Select Unit</option>
-                            <option value="mmp">MMP Unit (Methionine Production)</option>
-                            <option value="cns">CNS Unit (Hydrocyanic Acid)</option>
-                            <option value="me">ME Unit (Methionine Extraction)</option>
-                            <option value="uto">UTO Unit (Thermal Oxidizer)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="operatingEfficiency">Operating Efficiency (%)</label>
-                        <input type="number" id="operatingEfficiency" class="form-input" placeholder="e.g., 98.5" min="0" max="100" step="0.1">
-                    </div>
+            <h3>📊 Smart Equipment Management & Automated Coordination</h3>
+            <div class="automation-highlight">
+                <h4>🚀 Digital Transformation Impact</h4>
+                <p><strong>Before:</strong> Manual equipment monitoring, reactive maintenance, isolated production decisions</p>
+                <p><strong>After:</strong> Real-time automated monitoring, predictive maintenance, instant cross-system coordination</p>
+                <p><strong>Result:</strong> Equipment failures trigger automatic coordination across all stakeholders in minutes instead of weeks</p>
+            </div>
+            
+            <p>Choose your automation method for equipment updates and maintenance coordination:</p>
+            <div class="automation-section">
+                <div class="automation-option" onclick="document.getElementById('equipmentFileInput').click()">
+                    <div class="automation-icon">📊</div>
+                    <div class="automation-title">Equipment Data Upload</div>
+                    <div class="automation-description">Upload maintenance schedules, equipment logs, or sensor data for automated analysis and cross-system updates</div>
+                    <button class="automation-btn">📁 Upload Equipment Data</button>
+                    <input type="file" id="equipmentFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleEquipmentUpload(event)">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="equipmentStatus">Equipment Status</label>
-                        <select id="equipmentStatus" class="form-select">
-                            <option value="">Select Status</option>
-                            <option value="operational">Fully Operational</option>
-                            <option value="maintenance">Scheduled Maintenance</option>
-                            <option value="warning">Performance Warning</option>
-                            <option value="critical">Critical Issue</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="maintenanceDate">Next Maintenance Date</label>
-                        <input type="date" id="maintenanceDate" class="form-input">
-                    </div>
+                <div class="automation-option">
+                    <div class="automation-icon">🤖</div>
+                    <div class="automation-title">Smart System Sync</div>
+                    <div class="automation-description">Real-time integration with DCS, SCADA, and maintenance systems for instant coordination</div>
+                    <button class="sync-btn" onclick="syncProductionSystems()">⚡ Sync All Systems</button>
+                    <button class="sync-btn" onclick="triggerPredictiveMaintenance()">🔮 Predictive Analysis</button>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="equipmentComponent">Equipment Component</label>
-                        <select id="equipmentComponent" class="form-select">
-                            <option value="">Select Component</option>
-                            <option value="pump">Centrifugal Pump</option>
-                            <option value="compressor">Compressor Unit</option>
-                            <option value="heat-exchanger">Heat Exchanger</option>
-                            <option value="reactor">Reactor Vessel</option>
-                            <option value="distillation">Distillation Column</option>
-                            <option value="valve">Control Valve</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="issueDescription">Issue Description</label>
-                        <input type="text" id="issueDescription" class="form-input" placeholder="e.g., Vibration levels elevated, temperature variance">
-                    </div>
-                </div>
-                <button class="submit-btn" onclick="submitEquipmentUpdate()">⚡ Update Equipment Status & Notify Teams</button>
             </div>
             <div class="sap-sync-indicator" id="productionSyncStatus" style="display: none;">
                 <div class="sync-animation"></div>
-                Equipment data updated in SAP, Supply Chain and Global teams automatically notified
+                Equipment data synchronized across all systems - Supply Chain, Sales, and Global teams automatically updated
             </div>
         </div>
 
         <!-- Process Flow -->
         <div class="process-flow">
-            <h3>🔄 Methionine Production Process Flow</h3>
+            <h3>🔄 Smart Methionine Production Process Flow</h3>
             <div class="flow-diagram">
                 <div class="flow-step">
-                    <div style="font-weight: 600;">Raw Materials</div>
-                    <div style="font-size: 0.9rem;">Methanol, Ammonia, Propylene</div>
+                    <div style="font-weight: 600;">Smart Raw Materials</div>
+                    <div style="font-size: 0.9rem;">Auto-monitored Methanol, Ammonia, Propylene</div>
                 </div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step">
-                    <div style="font-weight: 600;">CNS Unit</div>
-                    <div style="font-size: 0.9rem;">HCN Generation</div>
+                    <div style="font-weight: 600;">AI-CNS Unit</div>
+                    <div style="font-size: 0.9rem;">Intelligent HCN Generation</div>
                 </div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step">
-                    <div style="font-weight: 600;">MMP Unit</div>
-                    <div style="font-size: 0.9rem;">Methionine Synthesis</div>
+                    <div style="font-weight: 600;">Smart MMP Unit</div>
+                    <div style="font-size: 0.9rem;">Automated Methionine Synthesis</div>
                 </div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step">
-                    <div style="font-weight: 600;">ME Unit</div>
-                    <div style="font-size: 0.9rem;">Purification</div>
+                    <div style="font-weight: 600;">AI-ME Unit</div>
+                    <div style="font-size: 0.9rem;">Intelligent Purification</div>
                 </div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-step">
-                    <div style="font-weight: 600;">Final Product</div>
-                    <div style="font-size: 0.9rem;">DL-Methionine</div>
+                    <div style="font-weight: 600;">Smart Product</div>
+                    <div style="font-size: 0.9rem;">Quality-Assured DL-Methionine</div>
                 </div>
             </div>
             <div style="margin-top: 1rem;">
                 <div class="flow-step">
-                    <div style="font-weight: 600;">UTO Unit</div>
-                    <div style="font-size: 0.9rem;">Waste Gas Treatment</div>
+                    <div style="font-weight: 600;">Auto-UTO Unit</div>
+                    <div style="font-size: 0.9rem;">Environmental Smart Treatment</div>
                 </div>
             </div>
         </div>
 
         <!-- Maintenance Schedule -->
         <div class="maintenance-schedule">
-            <h3>🔧 Maintenance Schedule & Planning</h3>
+            <h3>🔧 Smart Maintenance Schedule & Predictive Planning</h3>
             <table class="schedule-table">
                 <thead>
                     <tr>
@@ -723,49 +714,49 @@
                         <th>Maintenance Type</th>
                         <th>Scheduled Date</th>
                         <th>Duration</th>
-                        <th>Impact</th>
+                        <th>Auto-Coordination</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>MMP Unit</td>
                         <td>Reactor Catalyst</td>
-                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td><span class="maintenance-type type-routine">AI-Predicted</span></td>
                         <td>Jan 15, 2026</td>
                         <td>8 hours</td>
-                        <td>Minimal</td>
+                        <td>All Stakeholders Auto-Notified</td>
                     </tr>
                     <tr>
                         <td>CNS Unit</td>
                         <td>Compressor 2A</td>
-                        <td><span class="maintenance-type type-preventive">Preventive</span></td>
+                        <td><span class="maintenance-type type-preventive">Smart-Triggered</span></td>
                         <td>Dec 28, 2025</td>
                         <td>12 hours</td>
-                        <td>Reduced Rate</td>
+                        <td>Supply Chain Auto-Adjusted</td>
                     </tr>
                     <tr>
                         <td>ME Unit</td>
                         <td>Heat Exchanger</td>
-                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td><span class="maintenance-type type-routine">Predictive</span></td>
                         <td>Jan 08, 2026</td>
                         <td>6 hours</td>
-                        <td>Minimal</td>
+                        <td>Production Plan Auto-Updated</td>
                     </tr>
                     <tr>
                         <td>UTO Unit</td>
                         <td>Oxidizer Burner</td>
-                        <td><span class="maintenance-type type-routine">Routine</span></td>
+                        <td><span class="maintenance-type type-routine">Scheduled</span></td>
                         <td>Dec 30, 2025</td>
                         <td>4 hours</td>
-                        <td>None</td>
+                        <td>Environmental Compliance Auto-Check</td>
                     </tr>
                     <tr id="emergencyMaintenance" style="display: none;">
                         <td>MMP Unit</td>
                         <td>Pump 2B</td>
-                        <td><span class="maintenance-type type-emergency">Emergency</span></td>
+                        <td><span class="maintenance-type type-emergency">Auto-Detected</span></td>
                         <td>Immediate</td>
                         <td>TBD</td>
-                        <td>Production Impact</td>
+                        <td>Emergency Coordination Active</td>
                     </tr>
                 </tbody>
             </table>
@@ -798,18 +789,36 @@
                 case 'demo_reset':
                     resetDashboard();
                     break;
+                case 'bulk_order_upload':
+                    handleNewOrderBatch(eventData.data);
+                    break;
                 case 'procurement_order':
                     handleProcurementUpdate(eventData.data);
                     break;
             }
         }
 
+        // Handle new order batch from sales
+        function handleNewOrderBatch(data) {
+            // Show brief coordination update
+            const syncStatus = document.getElementById('productionSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Processing ${data.orders_count} new orders - Production schedules automatically adjusted
+            `;
+            syncStatus.style.display = 'flex';
+            
+            setTimeout(() => {
+                syncStatus.style.display = 'none';
+            }, 3000);
+        }
+
         // Update production coordination
         function updateProductionCoordination(data) {
             if (data.action === 'maintenance_mobilized') {
-                document.getElementById('maintenanceStatus').textContent = 'Emergency';
-                document.getElementById('maintenanceStatus').className = 'card-status status-critical';
-                document.getElementById('responseTime').textContent = '8 minutes';
+                document.getElementById('coordinationStatus').textContent = 'Emergency';
+                document.getElementById('coordinationStatus').className = 'card-status status-critical';
+                document.getElementById('responseTime').textContent = '1.5 minutes';
                 
                 // Show emergency maintenance
                 document.getElementById('emergencyMaintenance').style.display = 'table-row';
@@ -822,16 +831,16 @@
             document.getElementById('emergencyMaintenance').style.display = 'none';
             
             // Reset all status indicators
+            document.getElementById('automationStatus').textContent = 'Fully Automated';
+            document.getElementById('automationStatus').className = 'card-status status-operational';
+            document.getElementById('monitoringStatus').textContent = '🟢 Real-Time';
             document.getElementById('oeeStatus').textContent = 'Excellent';
             document.getElementById('oeeStatus').className = 'card-status status-operational';
             document.getElementById('oeeValue').textContent = '94.7%';
             document.getElementById('productionRate').textContent = '847 MT/day';
-            document.getElementById('maintenanceStatus').textContent = 'Scheduled';
-            document.getElementById('maintenanceStatus').className = 'card-status status-operational';
-            document.getElementById('activeAlerts').textContent = '0 critical';
             document.getElementById('coordinationStatus').textContent = 'Synchronized';
             document.getElementById('coordinationStatus').className = 'card-status status-operational';
-            document.getElementById('responseTime').textContent = '< 10 minutes';
+            document.getElementById('responseTime').textContent = '< 2 minutes';
             
             // Reset unit efficiencies
             document.getElementById('mmpEfficiency').textContent = '🟢 98.5%';
@@ -840,97 +849,171 @@
             document.getElementById('utoEfficiency').textContent = '🟢 99.1%';
         }
 
-        // Submit equipment update
-        function submitEquipmentUpdate() {
-            const productionUnit = document.getElementById('productionUnit').value;
-            const operatingEfficiency = document.getElementById('operatingEfficiency').value;
-            const equipmentStatus = document.getElementById('equipmentStatus').value;
-            const maintenanceDate = document.getElementById('maintenanceDate').value;
-            const equipmentComponent = document.getElementById('equipmentComponent').value;
-            const issueDescription = document.getElementById('issueDescription').value;
-
-            if (!productionUnit || !operatingEfficiency || !equipmentStatus) {
-                alert('Please fill in required fields (Unit, Efficiency, Status)');
-                return;
-            }
+        // Handle equipment data upload
+        function handleEquipmentUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
             // Show sync indicator
             const syncStatus = document.getElementById('productionSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Processing equipment upload: ${file.name} - Analyzing maintenance data and updating all systems...
+            `;
             syncStatus.style.display = 'flex';
 
-            // Update metrics based on input
+            // Simulate processing
             setTimeout(() => {
-                // Update OEE if efficiency changed significantly
-                const newEfficiency = parseFloat(operatingEfficiency);
-                if (Math.abs(newEfficiency - 94.7) > 2) {
-                    document.getElementById('oeeValue').textContent = `${newEfficiency}%`;
-                    
-                    if (newEfficiency < 90) {
-                        document.getElementById('oeeStatus').textContent = 'Below Target';
-                        document.getElementById('oeeStatus').className = 'card-status status-warning';
-                    } else if (newEfficiency < 85) {
-                        document.getElementById('oeeStatus').textContent = 'Critical';
-                        document.getElementById('oeeStatus').className = 'card-status status-critical';
-                    }
-                }
+                // Generate realistic equipment data
+                const equipmentUpdates = Math.floor(Math.random() * 6) + 4; // 4-9 updates
+                const unitsAffected = ['MMP', 'CNS', 'ME', 'UTO'];
+                const selectedUnit = unitsAffected[Math.floor(Math.random() * unitsAffected.length)];
+                
+                // Update sync status
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    Upload complete: ${equipmentUpdates} equipment updates processed, ${selectedUnit} unit status updated, all stakeholders synchronized
+                `;
 
-                // Update specific unit efficiency
+                // Update monitoring status
+                document.getElementById('monitoringStatus').textContent = '🟢 Just Updated';
+
+                // Simulate unit efficiency update
+                const newEfficiency = (Math.random() * 3 + 96).toFixed(1); // 96-99%
                 const unitMap = {
-                    'mmp': 'mmpEfficiency',
-                    'cns': 'cnsEfficiency', 
-                    'me': 'meEfficiency',
-                    'uto': 'utoEfficiency'
+                    'MMP': 'mmpEfficiency',
+                    'CNS': 'cnsEfficiency', 
+                    'ME': 'meEfficiency',
+                    'UTO': 'utoEfficiency'
                 };
-
-                if (unitMap[productionUnit]) {
-                    const statusEmoji = equipmentStatus === 'operational' ? '🟢' : 
-                                      equipmentStatus === 'warning' ? '🟡' : 
-                                      equipmentStatus === 'critical' ? '🔴' : '🟡';
-                    document.getElementById(unitMap[productionUnit]).textContent = `${statusEmoji} ${operatingEfficiency}%`;
-                }
-
-                // Update maintenance date if provided
-                if (maintenanceDate) {
-                    const today = new Date();
-                    const maintDate = new Date(maintenanceDate);
-                    const daysDiff = Math.ceil((maintDate - today) / (1000 * 60 * 60 * 24));
-                    document.getElementById('nextMaintenance').textContent = `${daysDiff} days`;
-                }
-
-                // If critical status, simulate equipment failure
-                if (equipmentStatus === 'critical' && productionUnit === 'mmp') {
-                    simulateEquipmentFailure();
+                
+                if (unitMap[selectedUnit]) {
+                    document.getElementById(unitMap[selectedUnit]).textContent = `🟢 ${newEfficiency}%`;
                 }
 
                 // Broadcast to coordination hub
-                broadcastToHub('equipment_update', {
-                    unit: productionUnit,
-                    efficiency: operatingEfficiency,
-                    status: equipmentStatus,
-                    component: equipmentComponent,
-                    issue: issueDescription
+                broadcastToHub('equipment_batch_upload', {
+                    updates_count: equipmentUpdates,
+                    unit_affected: selectedUnit,
+                    file_name: file.name,
+                    processing_time: '1.4 seconds'
                 });
 
-                // Clear form
-                document.getElementById('productionUnit').value = '';
-                document.getElementById('operatingEfficiency').value = '';
-                document.getElementById('equipmentStatus').value = '';
-                document.getElementById('maintenanceDate').value = '';
-                document.getElementById('equipmentComponent').value = '';
-                document.getElementById('issueDescription').value = '';
+                // Hide sync indicator after 5 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 5000);
+            }, 2200);
 
-                // Hide sync indicator after 3 seconds
+            // Clear file input
+            event.target.value = '';
+        }
+
+        // Sync production systems
+        function syncProductionSystems() {
+            const syncStatus = document.getElementById('productionSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                Syncing with DCS, SCADA, and maintenance systems - Real-time data integration in progress...
+            `;
+            syncStatus.style.display = 'flex';
+
+            setTimeout(() => {
+                // Update sync status
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    System sync complete: All production data updated, stakeholders notified, predictive models refreshed
+                `;
+
+                // Update monitoring status
+                document.getElementById('monitoringStatus').textContent = '🟢 All Systems Synced';
+
+                // Update some metrics to show sync effect
+                const currentOEE = parseFloat(document.getElementById('oeeValue').textContent.replace('%', ''));
+                const newOEE = (currentOEE + (Math.random() * 0.6 - 0.3)).toFixed(1); // Small random change
+                document.getElementById('oeeValue').textContent = `${newOEE}%`;
+
+                // Update production rate slightly
+                const currentRate = parseInt(document.getElementById('productionRate').textContent.split(' ')[0]);
+                const rateChange = Math.floor(Math.random() * 10 - 5); // -5 to +5 MT
+                document.getElementById('productionRate').textContent = `${currentRate + rateChange} MT/day`;
+
+                // Broadcast to coordination hub
+                broadcastToHub('production_system_sync', {
+                    systems_synced: ['DCS', 'SCADA', 'Maintenance'],
+                    oee_updated: `${newOEE}%`,
+                    sync_time: '0.9 seconds'
+                });
+
+                // Hide sync indicator after 4 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 4000);
+            }, 2000);
+        }
+
+        // Trigger predictive maintenance
+        function triggerPredictiveMaintenance() {
+            const syncStatus = document.getElementById('productionSyncStatus');
+            syncStatus.innerHTML = `
+                <div class="sync-animation"></div>
+                AI analyzing equipment performance patterns, vibration data, temperature trends...
+            `;
+            syncStatus.style.display = 'flex';
+
+            setTimeout(() => {
+                // Generate predictive analysis results
+                const riskComponents = ['Pump 3A', 'Compressor 1B', 'Heat Exchanger 2C'];
+                const selectedComponent = riskComponents[Math.floor(Math.random() * riskComponents.length)];
+                const riskLevel = Math.floor(Math.random() * 30) + 15; // 15-45% risk
+                
+                // Update sync status
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    Predictive analysis complete: ${selectedComponent} requires attention in 12-15 days (${riskLevel}% failure risk), maintenance auto-scheduled
+                `;
+
+                // Update automation status
+                document.getElementById('automationStatus').textContent = 'AI-Optimized';
+                document.getElementById('automationStatus').className = 'card-status status-operational';
+                document.getElementById('responseTime').textContent = '< 1 minute';
+
+                // Broadcast to coordination hub
+                broadcastToHub('predictive_maintenance_triggered', {
+                    component: selectedComponent,
+                    risk_level: `${riskLevel}%`,
+                    recommended_date: '12-15 days',
+                    ai_confidence: '94.2%'
+                });
+
+                // Hide sync indicator after 6 seconds
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 6000);
+            }, 3000);
+        }
+
+        // Handle procurement updates
+        function handleProcurementUpdate(data) {
+            if (data.urgency === 'emergency' || data.trigger === 'automated_inventory_threshold') {
+                const syncStatus = document.getElementById('productionSyncStatus');
+                syncStatus.innerHTML = `
+                    <div class="sync-animation"></div>
+                    Supply Chain auto-ordered ${data.material} - Production schedules adjusted for continuous operation
+                `;
+                syncStatus.style.display = 'flex';
+                
                 setTimeout(() => {
                     syncStatus.style.display = 'none';
                 }, 3000);
-            }, 1500);
+            }
         }
 
-        // Simulate equipment failure (when critical status is reported)
-        function simulateEquipmentFailure() {
+        // Simulate equipment failure (triggered by coordination hub)
+        function simulateEquipmentFailure(unit = 'MMP', efficiency = 65) {
             const alertBanner = document.getElementById('alertsBanner');
             const alertMessage = document.getElementById('alertMessage');
-            alertMessage.textContent = 'MMP Unit pump failure detected. Production capacity reduced. Maintenance team mobilized, supply chain notified.';
+            alertMessage.textContent = `${unit} Unit pump failure detected by automated monitoring systems. All stakeholders instantly notified for coordinated response.`;
             alertBanner.classList.add('show');
 
             // Update production metrics
@@ -938,22 +1021,42 @@
             document.getElementById('oeeValue').textContent = '67.2%';
             document.getElementById('oeeStatus').textContent = 'Critical';
             document.getElementById('oeeStatus').className = 'card-status status-critical';
-            document.getElementById('activeAlerts').textContent = '1 critical';
-            document.getElementById('maintenanceStatus').textContent = 'Emergency';
-            document.getElementById('maintenanceStatus').className = 'card-status status-critical';
-            document.getElementById('coordinationStatus').textContent = 'Crisis Mode';
+            document.getElementById('coordinationStatus').textContent = 'Emergency Response';
             document.getElementById('coordinationStatus').className = 'card-status status-critical';
+            document.getElementById('automationStatus').textContent = 'Auto-Response Active';
+            document.getElementById('automationStatus').className = 'card-status status-warning';
+
+            // Update unit efficiency
+            document.getElementById('mmpEfficiency').textContent = '🔴 65% (Pump Failure)';
 
             // Show emergency maintenance
             document.getElementById('emergencyMaintenance').style.display = 'table-row';
 
             // Broadcast equipment failure to all systems
             broadcastToHub('equipment_failure', {
-                unit: 'MMP',
+                unit: unit,
                 status: 'critical',
-                efficiency: 65,
-                message: 'Pump failure detected'
+                efficiency: efficiency,
+                message: 'Automated pump failure detection - Cross-system response initiated'
             });
+        }
+
+        // Reset to normal status after coordination
+        function resetToNormalStatus() {
+            document.getElementById('coordinationStatus').textContent = 'Coordinated';
+            document.getElementById('coordinationStatus').className = 'card-status status-operational';
+            document.getElementById('responseTime').textContent = '< 2 minutes';
+            
+            // Update MMP efficiency to show recovery
+            document.getElementById('mmpEfficiency').textContent = '🟡 85% (Backup Systems)';
+            document.getElementById('productionRate').textContent = '720 MT/day';
+            document.getElementById('oeeValue').textContent = '89.2%';
+            document.getElementById('oeeStatus').textContent = 'Recovering';
+            document.getElementById('oeeStatus').className = 'card-status status-warning';
+            
+            setTimeout(() => {
+                document.getElementById('alertsBanner').classList.remove('show');
+            }, 2000);
         }
 
         // Broadcast events to coordination hub
@@ -975,44 +1078,48 @@
         }
 
         // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Production Operations Dashboard initialized');
-            console.log('Equipment monitoring and SAP integration active');
+        function initializeDashboard() {
+            console.log('Smart Production Operations Dashboard initialized');
+            console.log('Real-time equipment monitoring and cross-system coordination active');
             
-            // Set default maintenance date to 30 days from now
-            const maintenanceInput = document.getElementById('maintenanceDate');
-            const defaultDate = new Date();
-            defaultDate.setDate(defaultDate.getDate() + 30);
-            maintenanceInput.min = new Date().toISOString().split('T')[0];
-            maintenanceInput.value = defaultDate.toISOString().split('T')[0];
-        });
+            // Simulate real-time monitoring updates
+            setInterval(() => {
+                if (Math.random() > 0.8) { // 20% chance of minor update
+                    document.getElementById('monitoringStatus').textContent = '🟢 Real-Time';
+                    
+                    // Occasionally update efficiency values slightly
+                    if (Math.random() > 0.9) {
+                        const units = ['mmpEfficiency', 'cnsEfficiency', 'meEfficiency', 'utoEfficiency'];
+                        const selectedUnit = units[Math.floor(Math.random() * units.length)];
+                        const element = document.getElementById(selectedUnit);
+                        const currentValue = parseFloat(element.textContent.match(/[\d.]+/)[0]);
+                        const newValue = (currentValue + (Math.random() * 0.4 - 0.2)).toFixed(1);
+                        element.textContent = `🟢 ${newValue}%`;
+                    }
+                }
+            }, 180000); // 3 minutes
 
-        // Handle procurement updates
-        function handleProcurementUpdate(data) {
-            if (data.urgency === 'emergency') {
-                document.getElementById('coordinationStatus').textContent = 'Emergency Supply';
-                document.getElementById('coordinationStatus').className = 'card-status status-warning';
-            }
-        }
-
-        // Reset to normal status
-        function resetToNormalStatus() {
-            document.getElementById('maintenanceStatus').textContent = 'Coordinated';
-            document.getElementById('maintenanceStatus').className = 'card-status status-operational';
-            document.getElementById('coordinationStatus').textContent = 'Synchronized';
-            document.getElementById('coordinationStatus').className = 'card-status status-operational';
-            document.getElementById('responseTime').textContent = '< 10 minutes';
-            
-            // Update MMP efficiency back to normal
-            document.getElementById('mmpEfficiency').textContent = '🟡 85%';
-            document.getElementById('productionRate').textContent = '720 MT/day';
-            document.getElementById('oeeValue').textContent = '89.2%';
-            
+            // Show initial automation success after 3 seconds
             setTimeout(() => {
-                document.getElementById('alertsBanner').classList.remove('show');
-                document.getElementById('emergencyMaintenance').style.display = 'none';
-            }, 2000);
+                const syncStatus = document.getElementById('productionSyncStatus');
+                syncStatus.innerHTML = `
+                    <div style="color: var(--success-green);">
+                        ✅ Smart production systems fully integrated - Real-time coordination with all stakeholders active
+                    </div>
+                `;
+                syncStatus.style.display = 'flex';
+                syncStatus.style.background = 'rgba(22, 163, 74, 0.05)';
+                
+                setTimeout(() => {
+                    syncStatus.style.display = 'none';
+                }, 4000);
+            }, 3000);
         }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+        });
     </script>
 </body>
 </html>

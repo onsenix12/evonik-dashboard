@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evonik Coordination Hub - Digital Transformation Dashboard</title>
+    <title>Evonik Production Coordination Hub</title>
     <style>
         :root {
             --evonik-purple: #8B2E8B;
-            --evonik-light-purple: #A855A8;
-            --evonik-dark-purple: #6B1F6B;
-            --alert-red: #DC2626;
-            --warning-orange: #EA580C;
+            --evonik-light-purple: #A855F7;
+            --evonik-dark-purple: #6B1B6B;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --border-gray: #E5E7EB;
+            --bg-gray: #F9FAFB;
             --success-green: #16A34A;
-            --background-gray: #F8FAFC;
-            --border-gray: #E2E8F0;
-            --text-dark: #1E293B;
-            --text-light: #64748B;
+            --warning-orange: #EA580C;
+            --alert-red: #DC2626;
         }
 
         * {
@@ -25,26 +25,24 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-gray);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gray);
             color: var(--text-dark);
-            line-height: 1.6;
         }
 
         .header {
-            background: linear-gradient(135deg, var(--evonik-purple), var(--evonik-light-purple));
+            background: linear-gradient(135deg, var(--evonik-purple) 0%, var(--evonik-dark-purple) 100%);
             color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .logo-section {
@@ -54,7 +52,7 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: bold;
         }
 
@@ -62,35 +60,35 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.2);
-            font-size: 0.9rem;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            width: 12px;
+            height: 12px;
             background: var(--success-green);
+            border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
+            0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
-            100% { opacity: 1; }
         }
 
         .stakeholder-nav {
             background: white;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border-gray);
+            border-bottom: 2px solid var(--border-gray);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .nav-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 2rem;
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
@@ -120,8 +118,20 @@
             border-color: var(--evonik-light-purple);
         }
 
+        .stakeholder-btn.optimizer {
+            background: linear-gradient(135deg, var(--evonik-purple), var(--evonik-light-purple));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(139, 46, 139, 0.3);
+        }
+
+        .stakeholder-btn.optimizer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(139, 46, 139, 0.4);
+        }
+
         .main-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -143,6 +153,42 @@
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .demo-controls {
+            background: var(--evonik-dark-purple);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .demo-controls h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-controls p {
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .demo-btn {
+            background: white;
+            color: var(--evonik-purple);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: var(--evonik-light-purple);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .dashboard-grid {
@@ -222,36 +268,18 @@
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
 
-        .demo-controls {
-            background: var(--evonik-dark-purple);
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 2rem 0;
-        }
-
-        .demo-btn {
-            background: white;
-            color: var(--evonik-purple);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 0.5rem 0.5rem 0.5rem 0;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .demo-btn:hover {
-            background: var(--evonik-light-purple);
-            color: white;
+        .action-panel h3 {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
         }
 
         .coordination-timeline {
             margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .timeline-item {
@@ -262,27 +290,19 @@
             border-left: 4px solid var(--evonik-purple);
             background: rgba(139, 46, 139, 0.05);
             border-radius: 0 8px 8px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .timeline-time {
             font-weight: 600;
             margin-right: 1rem;
             min-width: 80px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--border-gray);
-            border-radius: 4px;
-            margin: 0.5rem 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--evonik-purple);
-            border-radius: 4px;
-            transition: width 0.3s ease;
+            color: var(--evonik-purple);
         }
 
         .stakeholder-links {
@@ -293,19 +313,23 @@
             margin-top: 2rem;
         }
 
+        .stakeholder-links h3 {
+            margin-bottom: 1rem;
+        }
+
         .links-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
 
         .stakeholder-link {
             display: flex;
-            align-items: center;
-            padding: 1rem;
+            gap: 1rem;
+            padding: 1.5rem;
             border: 2px solid var(--border-gray);
-            border-radius: 8px;
+            border-radius: 12px;
             text-decoration: none;
             color: var(--text-dark);
             transition: all 0.3s ease;
@@ -313,77 +337,84 @@
 
         .stakeholder-link:hover {
             border-color: var(--evonik-purple);
-            background: rgba(139, 46, 139, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(139, 46, 139, 0.2);
         }
 
         .stakeholder-icon {
-            font-size: 2rem;
-            margin-right: 1rem;
+            font-size: 2.5rem;
         }
 
         .stakeholder-info h4 {
-            margin: 0;
+            margin-bottom: 0.5rem;
             color: var(--evonik-purple);
         }
 
         .stakeholder-info p {
-            margin: 0.25rem 0 0 0;
             font-size: 0.9rem;
             color: var(--text-light);
         }
 
-        .notification-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+        .ai-optimizer-highlight {
+            background: linear-gradient(135deg, rgba(139, 46, 139, 0.1), rgba(168, 85, 247, 0.1));
             border: 2px solid var(--evonik-purple);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            animation: slideIn 0.5s ease;
-        }
-
-        .notification-header {
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
         }
 
-        .notification-title {
-            font-weight: 600;
+        .ai-optimizer-content h3 {
             color: var(--evonik-purple);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .notification-time {
-            font-size: 0.8rem;
-            color: var(--text-light);
+        .ai-optimizer-button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--evonik-purple), var(--evonik-light-purple));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(139, 46, 139, 0.3);
         }
 
-        .notification-content {
-            font-size: 0.9rem;
-            color: var(--text-dark);
+        .ai-optimizer-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(139, 46, 139, 0.4);
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
             }
 
-            .nav-content {
+            .ai-optimizer-highlight {
                 flex-direction: column;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+                gap: 1rem;
             }
         }
     </style>
@@ -410,6 +441,9 @@
             <div class="stakeholder-btn active">
                 🎯 Coordination Hub
             </div>
+            <a href="optimizer.html" class="stakeholder-btn optimizer">
+                🤖 AI Decision Optimizer
+            </a>
             <a href="sales.html" class="stakeholder-btn">
                 📈 Sales Team
             </a>
@@ -430,114 +464,131 @@
     </div>
 
     <main class="main-content">
+        <!-- AI Optimizer Highlight -->
+        <div class="ai-optimizer-highlight">
+            <div class="ai-optimizer-content">
+                <h3>🤖 NEW: AI Decision Optimizer</h3>
+                <p>Ask questions naturally and get instant scenario analysis with explainable recommendations. Layer 3 intelligence now available for crisis management and optimization.</p>
+            </div>
+            <button class="ai-optimizer-button" onclick="window.location.href='optimizer.html'">
+                Launch AI Optimizer →
+            </button>
+        </div>
+
         <!-- Demo Controls -->
         <div class="demo-controls">
             <h3>🎮 Live Demo Controls - Automated Coordination Scenarios</h3>
-            <p>Experience real-time cross-system coordination that eliminates manual processes and information silos. For a multi-window demo, open the stakeholder pages below in separate tabs/windows.</p>
+            <p>Experience real-time cross-system coordination that eliminates manual processes and information silos:</p>
             <button class="demo-btn" onclick="simulateEquipmentFailure()">⚙️ Equipment Failure Auto-Response</button>
             <button class="demo-btn" onclick="simulateBulkOrderSync()">📊 Bulk Order SAP Sync</button>
             <button class="demo-btn" onclick="simulateSupplyChainSync()">🔄 Supply Chain Auto-Adjustment</button>
             <button class="demo-btn" onclick="simulateGlobalCapacitySync()">🌏 Global Capacity Rebalancing</button>
             <button class="demo-btn" onclick="resetDemo()">🔄 Reset Demo</button>
+            <button class="demo-btn" onclick="openAllStakeholders()">👥 Open All Stakeholder Views</button>
         </div>
 
-        <!-- Real-Time Overview -->
+        <!-- Real-Time Overview with Jason's Data -->
         <h2>🎯 Real-Time Cross-System Coordination Platform</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">System Integration Status</div>
-                    <div class="card-status status-operational" id="integrationStatus">Fully Automated</div>
+                    <div class="card-title">Production Status</div>
+                    <div class="card-status status-operational" id="productionStatus">Operational</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">SAP-Excel Auto-Sync</div>
-                    <div class="metric-value" id="sapSyncStatus">🟢 Active (2 min ago)</div>
+                    <div class="metric-label">Monthly Target</div>
+                    <div class="metric-value">29,000 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">IBP Integration</div>
-                    <div class="metric-value" id="ibpStatus">🟢 Connected</div>
+                    <div class="metric-label">Current Output</div>
+                    <div class="metric-value" id="currentProduction">22,620 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Manual Processes Eliminated</div>
-                    <div class="metric-value">95% Automated</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Cross-System Data Flow</div>
-                    <div class="metric-value" id="dataFlowStatus">🟢 Real-Time</div>
+                    <div class="metric-label">Achievement</div>
+                    <div class="metric-value" style="color: var(--success-green);">78%</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Daily Production Metrics</div>
-                    <div class="card-status status-operational">Target: 850 MT/day</div>
+                    <div class="card-title">Tank Inventory</div>
+                    <div class="card-status status-operational" id="inventoryStatus">Safe Zone</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Current Production Rate</div>
-                    <div class="metric-value" id="productionRate">847 MT/day</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 99.6%"></div>
-                    </div>
+                    <div class="metric-label">Current Stock</div>
+                    <div class="metric-value" id="tankLevel">4,200 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Daily Target Achievement</div>
-                    <div class="metric-value">99.6%</div>
+                    <div class="metric-label">Capacity</div>
+                    <div class="metric-value">6,300 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Utilization</div>
+                    <div class="metric-value">67%</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Coordination Efficiency</div>
-                    <div class="card-status status-operational" id="responseStatus">Optimized</div>
+                    <div class="card-title">SAP-Excel Automation</div>
+                    <div class="card-status status-operational" id="sapStatus">Synced</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Decision Cycle Time</div>
-                    <div class="metric-value" id="decisionTime">2.3 hours</div>
+                    <div class="metric-label">Jason's Time Saved</div>
+                    <div class="metric-value">2.5 hrs/day</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Previous (Manual Process)</div>
-                    <div class="metric-value" style="color: var(--alert-red);">1-2 weeks</div>
+                    <div class="metric-label">Last Sync</div>
+                    <div class="metric-value" id="lastSync">3 min ago</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Time Savings</div>
-                    <div class="metric-value" style="color: var(--success-green);">98.6% Faster</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Manual Hours Eliminated</div>
-                    <div class="metric-value">15-20 hrs/week</div>
+                    <div class="metric-label">Manual Work</div>
+                    <div class="metric-value" style="color: var(--success-green);">Eliminated</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Financial Impact</div>
-                    <div class="card-status status-operational">ROI Achieved</div>
+                    <div class="card-title">Co-mingled Inventory</div>
+                    <div class="card-status status-operational">Active</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Coordination Failures Prevented</div>
-                    <div class="metric-value" style="color: var(--success-green);">$750K+ (2025)</div>
+                    <div class="metric-label">Mitsui Allocation</div>
+                    <div class="metric-value">600 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Reference: 2023 Incident</div>
-                    <div class="metric-value" style="color: var(--alert-red);">$300K Loss</div>
+                    <div class="metric-label">Akema Allocation</div>
+                    <div class="metric-value">0 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Annual Process Savings</div>
-                    <div class="metric-value">$39K+</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Implementation ROI</div>
-                    <div class="metric-value">3.3 months</div>
+                    <div class="metric-label">Working Capacity</div>
+                    <div class="metric-value">6,300 MT</div>
                 </div>
             </div>
         </div>
 
-        <!-- Real-Time System Updates -->
+        <!-- Notifications Panel -->
         <div class="action-panel">
-            <h3>📡 Real-Time System Updates</h3>
-            <div id="systemNotifications" style="margin-bottom: 1rem;">
-                <!-- Notifications will appear here -->
+            <h3>📬 Real-Time Notifications</h3>
+            <div id="notificationsPanel">
+                <div class="timeline-item">
+                    <div class="timeline-time">15:42</div>
+                    <div>✅ ME5 unit operating at 98% efficiency - optimal performance</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:30</div>
+                    <div>📊 SAP automated sync completed - Jason's Excel updated automatically</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">13:15</div>
+                    <div>🚚 Raw material delivery confirmed - Hydrogen tank refilled to 4,800 MT</div>
+                </div>
             </div>
+        </div>
+
+        <!-- Coordination Timeline -->
+        <div class="action-panel">
+            <h3>⏱️ Coordination Timeline - Decision Speed Tracking</h3>
             <div class="coordination-timeline" id="coordinationTimeline">
                 <div class="timeline-item">
                     <div class="timeline-time">08:30</div>
@@ -557,8 +608,15 @@
         <!-- Stakeholder Access Links -->
         <div class="stakeholder-links">
             <h3>👥 Stakeholder System Access</h3>
-            <p>Direct links to each department's specialized interface. Open these links manually in new tabs/windows to see updates synchronize across pages.</p>
+            <p>Direct links to each department's specialized interface:</p>
             <div class="links-grid">
+                <a href="optimizer.html" class="stakeholder-link" style="border-color: var(--evonik-purple); background: linear-gradient(to right, rgba(139, 46, 139, 0.05), white);">
+                    <div class="stakeholder-icon">🤖</div>
+                    <div class="stakeholder-info">
+                        <h4>AI Decision Optimizer (NEW)</h4>
+                        <p>Conversational AI for scenario analysis, crisis management, and explainable recommendations</p>
+                    </div>
+                </a>
                 <a href="sales.html" class="stakeholder-link">
                     <div class="stakeholder-icon">📈</div>
                     <div class="stakeholder-info">
@@ -596,7 +654,7 @@
         let isEquipmentFailureActive = false;
         let coordinationStarted = false;
 
-        // Listen for all coordination events including bulk uploads
+        // Listen for coordination events
         window.addEventListener('storage', function(e) {
             if (e.key === 'evonik_coordination_event') {
                 const eventData = JSON.parse(e.newValue);
@@ -604,347 +662,145 @@
             }
         });
 
-        // Handle all coordination events
-        function handleCoordinationEvent(eventData) {
-            console.log('Coordination Hub received event:', eventData);
+        // Handle coordination events
+        function handleCoordinationEvent(event) {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             
-            switch(eventData.type) {
-                case 'bulk_order_upload':
-                    showBulkUploadNotification(eventData.data);
+            switch(event.type) {
+                case 'equipment_failure':
+                    showAlert('ME6 Unit Shutdown Detected - Automated Response Activated');
+                    addNotification(now, '⚠️ Equipment Failure: ME6 offline - AI Optimizer analyzing scenarios');
+                    addTimelineEvent(now, 'CRISIS: ME6 shutdown - All stakeholders notified automatically');
+                    updateProductionStatus('critical', '22,440 MT', '-180 MT/day impact');
                     break;
-                case 'procurement_order':
-                    showProcurementNotification(eventData.data);
+                case 'bulk_order_sync':
+                    showAlert('Bulk Order Upload Detected - Auto-Syncing Across All Systems');
+                    addNotification(now, '📊 Bulk order processed - IBP, SAP, and plant systems updated');
+                    addTimelineEvent(now, 'Sales order sync: 847 MT new order auto-coordinated');
                     break;
-                case 'global_capacity_adjustment':
-                    showGlobalAdjustmentNotification(eventData.data);
+                case 'supply_chain_adjustment':
+                    showAlert('Raw Material Delay Detected - Automated Inventory Adjustment');
+                    addNotification(now, '🔄 Supply chain adjusted - Production schedule optimized');
+                    addTimelineEvent(now, 'Raw material delay: Alternative sourcing activated automatically');
                     break;
-                case 'equipment_update':
-                    showEquipmentUpdateNotification(eventData.data);
+                case 'global_capacity_rebalancing':
+                    showAlert('Global Capacity Rebalancing - Multi-Site Coordination Active');
+                    addNotification(now, '🌏 Global rebalancing - Malaysia plant capacity redirected');
+                    addTimelineEvent(now, 'Cross-site optimization: Production reallocated to Singapore');
                     break;
-                case 'new_order':
-                    showNewOrderNotification(eventData.data);
+                case 'global_capacity_upload':
+                    addNotification(now, `🌏 Global capacity upload processed: ${event.data.optimizations_count} optimizations, efficiency +${event.data.efficiency_gain}`);
+                    addTimelineEvent(now, 'Global: Capacity data ingested and synchronized');
+                    break;
+                case 'ai_optimization_complete':
+                    addNotification(now, '🧠 Global AI optimization complete - Sites rebalanced');
+                    addTimelineEvent(now, 'Global: AI optimization finished, events updated');
+                    break;
+                case 'global_sync_complete':
+                    addNotification(now, '🔄 Global systems synchronized successfully');
+                    addTimelineEvent(now, 'Global: All production sites synced');
                     break;
             }
         }
 
-        // Show bulk upload notification
-        function showBulkUploadNotification(data) {
-            const notification = createNotificationCard(
-                '📤 Bulk Orders Uploaded',
-                `Sales Team uploaded ${data.orders_count} new orders (${data.total_volume} MT total volume) via ${data.file_name}`,
-                'Sales Team → All Systems'
-            );
-            addNotification(notification);
-            
-            // Add to timeline
-            addTimelineEvent(
-                '📈 ' + new Date().toLocaleTimeString().slice(0,5), 
-                `Sales: ${data.orders_count} orders uploaded (${data.total_volume} MT) - Production planning automatically updated`
-            );
-        }
-
-        // Show procurement notification
-        function showProcurementNotification(data) {
-            const notification = createNotificationCard(
-                '📦 Procurement Order Placed',
-                `Local Supply Chain ordered ${data.quantity} MT of ${data.material} from ${data.supplier}`,
-                'Supply Chain → Production & Global Teams'
-            );
-            addNotification(notification);
-            
-            addTimelineEvent(
-                '📊 ' + new Date().toLocaleTimeString().slice(0,5), 
-                `Supply Chain: ${data.quantity} MT ${data.material} ordered from ${data.supplier}`
-            );
-        }
-
-        // Show global adjustment notification
-        function showGlobalAdjustmentNotification(data) {
-            const notification = createNotificationCard(
-                '🌏 Global Capacity Adjusted',
-                `${data.source} production ${data.adjustment > 0 ? 'increased' : 'decreased'} by ${Math.abs(data.adjustment)}% for ${data.target} market`,
-                'Global Supply Chain → All Regions'
-            );
-            addNotification(notification);
-            
-            addTimelineEvent(
-                '🌏 ' + new Date().toLocaleTimeString().slice(0,5), 
-                `Global SC: ${data.source} capacity adjusted by ${data.adjustment}% for ${data.target}`
-            );
-        }
-
-        // Show equipment update notification
-        function showEquipmentUpdateNotification(data) {
-            const statusText = data.status === 'critical' ? 'CRITICAL ISSUE' : 
-                              data.status === 'warning' ? 'WARNING' : 'UPDATE';
-            const notification = createNotificationCard(
-                `⚙️ Equipment ${statusText}`,
-                `Production reported ${data.unit} Unit at ${data.efficiency}% efficiency - Status: ${data.status}`,
-                'Production → All Teams'
-            );
-            addNotification(notification);
-            
-            addTimelineEvent(
-                '🏭 ' + new Date().toLocaleTimeString().slice(0,5), 
-                `Production: ${data.unit} Unit status updated - ${data.efficiency}% efficiency`
-            );
-        }
-
-        // Show new order notification
-        function showNewOrderNotification(data) {
-            const notification = createNotificationCard(
-                '📝 New Customer Order',
-                `${data.customer} ordered ${data.volume} MT for delivery to ${data.region}`,
-                'Sales → Production Planning'
-            );
-            addNotification(notification);
-        }
-
-        // Create notification card
-        function createNotificationCard(title, content, source) {
-            return `
-                <div class="notification-card">
-                    <div class="notification-header">
-                        <div class="notification-title">${title}</div>
-                        <div class="notification-time">${new Date().toLocaleTimeString()}</div>
-                    </div>
-                    <div class="notification-content">${content}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.5rem;">
-                        ${source}
-                    </div>
-                </div>
-            `;
-        }
-
-        // Add notification to the panel
-        function addNotification(notificationHTML) {
-            const notificationsPanel = document.getElementById('systemNotifications');
-            notificationsPanel.innerHTML = notificationHTML + notificationsPanel.innerHTML;
-            
-            // Keep only the 5 most recent notifications
-            const notifications = notificationsPanel.querySelectorAll('.notification-card');
-            if (notifications.length > 5) {
-                for (let i = 5; i < notifications.length; i++) {
-                    notifications[i].remove();
-                }
-            }
-        }
-
-        // Simulate equipment failure
+        // Demo simulation functions
         function simulateEquipmentFailure() {
-            if (isEquipmentFailureActive) return;
-
             isEquipmentFailureActive = true;
+            showAlert('Simulating ME6 Equipment Failure - Watch Automated Response');
+            broadcastToStakeholders('equipment_failure', { unit: 'ME6', impact: 180 });
             
-            // Show critical alert banner
-            const alertBanner = document.getElementById('alertsBanner');
-            const alertMessage = document.getElementById('alertMessage');
-            alertMessage.textContent = 'MMP Unit pump failure detected by automated monitoring. All systems auto-coordinating response within minutes, not weeks.';
-            alertBanner.classList.add('show');
-
-            // Update integration status to show automated response
-            document.getElementById('integrationStatus').textContent = 'Auto-Response Active';
-            document.getElementById('integrationStatus').className = 'card-status status-warning';
-            document.getElementById('responseStatus').textContent = 'Auto-Coordinating';
-            document.getElementById('responseStatus').className = 'card-status status-warning';
-            document.getElementById('decisionTime').textContent = 'In Progress...';
-            document.getElementById('dataFlowStatus').textContent = '🟡 Emergency Mode';
-
-            // Add timeline event for automated detection
-            addTimelineEvent('🚨 ' + new Date().toLocaleTimeString().slice(0,5), 'AUTOMATED DETECTION: MMP Unit pump failure - All stakeholder systems instantly alerted');
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            addNotification(now, '⚠️ ME6 Shutdown Detected - AI Optimizer activated');
+            addTimelineEvent(now, 'Equipment Failure: ME6 offline - Automated coordination initiated');
             
-            // Start automated coordination sequence
             setTimeout(() => {
-                addTimelineEvent('⚡ ' + new Date().toLocaleTimeString().slice(0,5), 'Auto-coordination initiated: Global sites, supply chain, and sales systems responding');
-                
-                // Automated response sequence
-                setTimeout(() => {
-                    addTimelineEvent('🌏 ' + new Date().toLocaleTimeString().slice(0,5), 'Global Supply Chain: Antwerp +29% capacity auto-allocated');
-                }, 1500);
-                
-                setTimeout(() => {
-                    addTimelineEvent('📦 ' + new Date().toLocaleTimeString().slice(0,5), 'Supply Chain: Emergency materials auto-ordered, maintenance mobilized');
-                }, 2500);
-                
-                setTimeout(() => {
-                    addTimelineEvent('📞 ' + new Date().toLocaleTimeString().slice(0,5), 'Sales: Priority customers auto-notified, deliveries rescheduled');
-                }, 3500);
-                
-                setTimeout(() => {
-                    addTimelineEvent('✅ ' + new Date().toLocaleTimeString().slice(0,5), 'AUTO-COORDINATION COMPLETE: 18 minutes total response time (vs weeks previously)');
-                    
-                    // Update final status
-                    document.getElementById('integrationStatus').textContent = 'Fully Automated';
-                    document.getElementById('integrationStatus').className = 'card-status status-operational';
-                    document.getElementById('responseStatus').textContent = 'Coordinated';
-                    document.getElementById('responseStatus').className = 'card-status status-operational';
-                    document.getElementById('decisionTime').textContent = '18 minutes';
-                    document.getElementById('dataFlowStatus').textContent = '🟢 Real-Time';
-                }, 4500);
-                
-            }, 1000);
-
-            // Broadcast to other windows if they exist
-            broadcastToStakeholders('equipment_failure', {
-                unit: 'MMP',
-                status: 'critical',
-                efficiency: 65,
-                message: 'Automated pump failure detection - Cross-system response initiated'
-            });
-
-            console.log('Automated equipment failure response activated');
-        }
-
-        // Simulate bulk order SAP sync
-        function simulateBulkOrderSync() {
-            // Show sync process
-            const notification = createNotificationCard(
-                '📊 SAP-IBP Bulk Sync Initiated',
-                'Sales team triggered automatic bulk order sync from IBP to SAP. Processing 47 new orders totaling 3,200 MT...',
-                'IBP → SAP → All Systems'
-            );
-            addNotification(notification);
-            
-            // Add to timeline
-            addTimelineEvent(
-                '📊 ' + new Date().toLocaleTimeString().slice(0,5), 
-                'Automated SAP-IBP sync initiated - Processing 47 orders (3,200 MT total volume)'
-            );
-
-            setTimeout(() => {
-                addTimelineEvent(
-                    '⚡ ' + new Date().toLocaleTimeString().slice(0,5), 
-                    'Auto-sync complete: Production schedules updated, supply chain notified, capacity allocated'
-                );
-                
-                // Broadcast to stakeholders
-                broadcastToStakeholders('bulk_order_upload', {
-                    orders_count: 47,
-                    total_volume: '3,200 MT',
-                    file_name: 'Q4_Orders_Batch.xlsx',
-                    sync_time: '2.3 seconds'
-                });
-                
-                // Update metrics
-                document.getElementById('sapSyncStatus').textContent = '🟢 Active (Just now)';
-                document.getElementById('decisionTime').textContent = '< 5 minutes';
-            }, 2000);
-        }
-
-        // Simulate supply chain auto-adjustment
-        function simulateSupplyChainSync() {
-            const notification = createNotificationCard(
-                '🔄 Supply Chain Auto-Adjustment',
-                'Local supply chain detected low hydrogen inventory. Triggering automated procurement from preferred suppliers...',
-                'SAP Inventory → Procurement → Suppliers'
-            );
-            addNotification(notification);
-            
-            addTimelineEvent(
-                '🔄 ' + new Date().toLocaleTimeString().slice(0,5), 
-                'Automated inventory trigger: Hydrogen levels below threshold, procurement initiated'
-            );
-
-            setTimeout(() => {
-                addTimelineEvent(
-                    '📦 ' + new Date().toLocaleTimeString().slice(0,5), 
-                    'Auto-procurement complete: 850 MT hydrogen ordered from Petronas, delivery scheduled'
-                );
-                
-                broadcastToStakeholders('procurement_order', {
-                    material: 'Hydrogen (H₂)',
-                    supplier: 'Petronas Chemicals',
-                    quantity: '850 MT',
-                    trigger: 'automated_inventory_threshold',
-                    decision_time: '3.7 minutes'
-                });
+                addNotification(now, '✅ AI Optimizer: Scenario A recommended (Increase ME5 capacity)');
+                addTimelineEvent(now, 'AI Decision: Increase ME5 by 20% - Net savings $75K');
             }, 3000);
         }
 
-        // Simulate global capacity sync
-        function simulateGlobalCapacitySync() {
-            const notification = createNotificationCard(
-                '🌏 Global Capacity Rebalancing',
-                'Market demand spike in APAC detected. Auto-coordinating with Antwerp and Mobile facilities for capacity support...',
-                'Market Analytics → Global Supply Chain → All Sites'
-            );
-            addNotification(notification);
+        function simulateBulkOrderSync() {
+            showAlert('Simulating Bulk Order Upload - Watch IBP-SAP Auto-Sync');
+            broadcastToStakeholders('bulk_order_sync', { orders: 25, total_mt: 2100 });
             
-            addTimelineEvent(
-                '🌏 ' + new Date().toLocaleTimeString().slice(0,5), 
-                'Global coordination triggered: APAC demand +18%, initiating cross-site capacity optimization'
-            );
-
-            setTimeout(() => {
-                addTimelineEvent(
-                    '⚖️ ' + new Date().toLocaleTimeString().slice(0,5), 
-                    'Multi-site coordination complete: Antwerp +12%, Mobile +8% capacity allocation for APAC'
-                );
-                
-                broadcastToStakeholders('global_capacity_adjustment', {
-                    source: 'multi_site',
-                    adjustment: '+15%',
-                    target: 'APAC',
-                    coordination_time: '12 minutes'
-                });
-            }, 4000);
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            addNotification(now, '📊 Bulk order upload: 25 orders processed automatically');
+            addTimelineEvent(now, 'Sales sync: 2,100 MT orders auto-coordinated across systems');
         }
 
-        // Reset demo to initial state
+        function simulateSupplyChainSync() {
+            showAlert('Simulating Supply Chain Adjustment - Watch Auto-Optimization');
+            broadcastToStakeholders('supply_chain_adjustment', { delay_days: 3, impact_mt: 450 });
+            
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            addNotification(now, '🔄 Raw material delay detected - Automated inventory adjustment');
+            addTimelineEvent(now, 'Supply chain: Alternative sourcing activated within 5 minutes');
+        }
+
+        function simulateGlobalCapacitySync() {
+            showAlert('Simulating Global Capacity Rebalancing - Multi-Site Coordination');
+            broadcastToStakeholders('global_capacity_rebalancing', { from: 'Malaysia', to: 'Singapore', mt: 850 });
+            
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            addNotification(now, '🌏 Global capacity rebalancing: 850 MT redirected to Singapore');
+            addTimelineEvent(now, 'Cross-site: Malaysia capacity reallocated automatically');
+        }
+
         function resetDemo() {
             isEquipmentFailureActive = false;
-            coordinationStarted = false;
-
-            // Hide alert banner
             document.getElementById('alertsBanner').classList.remove('show');
-
-            // Reset integration status
-            document.getElementById('integrationStatus').textContent = 'Fully Automated';
-            document.getElementById('integrationStatus').className = 'card-status status-operational';
-            document.getElementById('sapSyncStatus').textContent = '🟢 Active (2 min ago)';
-            document.getElementById('dataFlowStatus').textContent = '🟢 Real-Time';
-
-            // Reset production status
-            document.getElementById('productionRate').textContent = '847 MT/day';
-
-            // Reset response time
-            document.getElementById('responseStatus').textContent = 'Optimized';
-            document.getElementById('responseStatus').className = 'card-status status-operational';
-            document.getElementById('decisionTime').textContent = '2.3 hours';
-
-            // Reset timeline
+            document.getElementById('notificationsPanel').innerHTML = `
+                <div class="timeline-item">
+                    <div class="timeline-time">15:42</div>
+                    <div>✅ ME5 unit operating at 98% efficiency - optimal performance</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:30</div>
+                    <div>📊 SAP automated sync completed - Jason's Excel updated automatically</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">13:15</div>
+                    <div>🚚 Raw material delivery confirmed - Hydrogen tank refilled to 4,800 MT</div>
+                </div>
+            `;
             resetTimeline();
-
-            // Clear notifications
-            document.getElementById('systemNotifications').innerHTML = '';
-
-            // Broadcast reset to other windows
-            broadcastToStakeholders('demo_reset', {});
-
-            console.log('Demo reset to initial state');
+            updateProductionStatus('operational', '22,620 MT', '78% achievement');
+            broadcastToStakeholders('reset', {});
         }
 
+        function openAllStakeholders() {
+            window.open('sales.html', '_blank');
+            window.open('global-supply-chain.html', '_blank');
+            window.open('local-supply-chain.html', '_blank');
+            window.open('production.html', '_blank');
+            window.open('optimizer.html', '_blank');
+            alert('All stakeholder views opened! You can now demonstrate cross-system coordination!');
+        }
 
+        // Helper functions
+        function showAlert(message) {
+            const banner = document.getElementById('alertsBanner');
+            document.getElementById('alertMessage').textContent = message;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 8000);
+        }
 
-        // Broadcast events to other stakeholder windows
-        function broadcastToStakeholders(eventType, data) {
-            const broadcastData = {
-                type: eventType,
-                timestamp: new Date().toISOString(),
-                source: 'coordination_hub',
-                data: data
-            };
-
-            // Use localStorage to communicate between windows
-            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+        function addNotification(time, message) {
+            const panel = document.getElementById('notificationsPanel');
+            const notification = document.createElement('div');
+            notification.className = 'timeline-item';
+            notification.innerHTML = `
+                <div class="timeline-time">${time}</div>
+                <div>${message}</div>
+            `;
+            panel.insertBefore(notification, panel.firstChild);
             
-            // Clear after short delay to allow other windows to read
-            setTimeout(() => {
-                localStorage.removeItem('evonik_coordination_event');
-            }, 1000);
+            // Keep only last 5 notifications
+            while (panel.children.length > 5) {
+                panel.removeChild(panel.lastChild);
+            }
         }
 
-        // Helper function to add timeline events
         function addTimelineEvent(time, description) {
             const timeline = document.getElementById('coordinationTimeline');
             const timelineItem = document.createElement('div');
@@ -954,12 +810,9 @@
                 <div>${description}</div>
             `;
             timeline.appendChild(timelineItem);
-            
-            // Scroll to show new item
             timelineItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        // Helper function to reset timeline
         function resetTimeline() {
             const timeline = document.getElementById('coordinationTimeline');
             timeline.innerHTML = `
@@ -978,9 +831,49 @@
             `;
         }
 
+        function updateProductionStatus(status, production, note) {
+            const statusElement = document.getElementById('productionStatus');
+            const productionElement = document.getElementById('currentProduction');
+            
+            if (status === 'critical') {
+                statusElement.className = 'card-status status-critical';
+                statusElement.textContent = 'Critical';
+            } else {
+                statusElement.className = 'card-status status-operational';
+                statusElement.textContent = 'Operational';
+            }
+            
+            productionElement.textContent = production;
+        }
+
+        function broadcastToStakeholders(eventType, data) {
+            const broadcastData = {
+                type: eventType,
+                timestamp: new Date().toISOString(),
+                source: 'coordination_hub',
+                data: data
+            };
+
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+            
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
+        }
+
+        // Auto-update last sync time
+        function updateSyncTime() {
+            const now = new Date();
+            const minutes = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('lastSync').textContent = `${minutes} min ago`;
+        }
+
+        setInterval(updateSyncTime, 60000); // Update every minute
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Evonik Production Coordination Hub initialized');
+            console.log('AI Decision Optimizer now available at optimizer.html');
             console.log('Ready for multi-window coordination demonstration');
         });
     </script>

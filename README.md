@@ -15,6 +15,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 - `global-supply-chain.html`: Global view. Simulates cross-site capacity rebalancing.
 - `local-supply-chain.html`: Local SC view. Simulates SAP/Excel-style procurement and inventory triggers.
 - `production.html`: Plant production view. Equipment status, OEE, maintenance, and predictive analytics.
+ - `optimizer.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
 
 > Each page is self-contained and includes styles and scripts inline for portability.
 
@@ -54,6 +55,27 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 - **Event bus via localStorage**: Pages broadcast coordination events by writing a JSON payload to the `localStorage` key `evonik_coordination_event`. Other pages listen for the browser `storage` event and react accordingly.
 - **Stateless demo**: Events are transient (the key is cleared shortly after write). UI reflects the latest state; `Reset Demo` reinitializes visuals and metrics.
 - **Self-contained UI**: All pages include their own styles and scripts; no external dependencies.
+
+### Event Types (cross-page protocol)
+All events are emitted to `localStorage` as `{ type, data, timestamp, source }` under key `evonik_coordination_event`.
+
+- From Hub (index.html):
+  - `equipment_failure` { unit, impact }
+  - `bulk_order_sync` { orders, total_mt }
+  - `supply_chain_adjustment` { delay_days, impact_mt }
+  - `global_capacity_rebalancing` { from, to, mt }
+  - `reset` {}
+
+- From Global (`global-supply-chain.html`):
+  - `global_capacity_upload` { optimizations_count, efficiency_gain, file_name, processing_time }
+  - `ai_optimization_complete` { affected_sites[], events_increment, processing_time }
+  - `global_sync_complete` { status }
+
+- Sales accepts: `equipment_failure`, `bulk_order_sync`, `reset`
+- Local SC accepts: `equipment_failure`, `supply_chain_adjustment`, `reset`
+- Production accepts: `equipment_failure`, `reset`
+
+Tip: Some handlers accept flexible payload keys (e.g., orders or orders_count) for convenience.
 
 ---
 

@@ -704,6 +704,10 @@
                     showGlobalAlert(eventData.data);
                     activateEmergencyProtocols();
                     break;
+                case 'global_capacity_rebalancing':
+                    showGlobalAlert(eventData.data || { unit: 'ME6' });
+                    activateEmergencyProtocols();
+                    break;
                 case 'coordination_update':
                     updateGlobalCoordination(eventData.data);
                     break;
@@ -714,7 +718,11 @@
                     resetDashboard();
                     break;
                 case 'bulk_order_upload':
+                case 'bulk_order_sync':
                     handleNewOrderBatch(eventData.data);
+                    break;
+                case 'reset':
+                    resetDashboard();
                     break;
             }
         }
@@ -745,7 +753,7 @@
             const syncStatus = document.getElementById('globalSyncStatus');
             syncStatus.innerHTML = `
                 <div class="sync-animation"></div>
-                Processing ${data.orders_count} new orders across global network - Capacity allocation automatically optimized
+                Processing ${(data && (data.orders_count || data.orders)) || 0} new orders across global network - Capacity allocation automatically optimized
             `;
             syncStatus.style.display = 'flex';
             

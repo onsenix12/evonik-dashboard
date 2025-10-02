@@ -80,6 +80,21 @@
             background: rgba(22, 163, 74, 0.05);
         }
 
+        .event-item.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .event-item.clickable:hover {
+            background: rgba(22, 163, 74, 0.1);
+            transform: translateX(4px);
+        }
+
+        .event-item.clickable .event-content {
+            color: var(--evonik-purple);
+            font-weight: 500;
+        }
+
         .event-time {
             font-weight: 600;
             min-width: 60px;
@@ -770,6 +785,9 @@
             // Remove crisis highlighting
             document.querySelector('.optimizer-btn').classList.remove('crisis-active');
             
+            // Make any new event log entries clickable
+            makeEventLogClickable();
+            
             broadcastToStakeholders('reset', {});
         }
 
@@ -792,11 +810,24 @@
         function addEventLog(time, content, type = '') {
             const eventLog = document.getElementById('eventLog');
             const eventItem = document.createElement('div');
-            eventItem.className = `event-item ${type}`;
+            
+            // Check if this is an AI analysis entry
+            const isAIAnalysis = content.includes('View AI analysis') || content.includes('Decision Optimizer');
+            const clickableClass = isAIAnalysis ? 'clickable' : '';
+            
+            eventItem.className = `event-item ${type} ${clickableClass}`;
             eventItem.innerHTML = `
                 <div class="event-time">${time}</div>
                 <div class="event-content">${content}</div>
             `;
+            
+            // Add click handler for AI analysis entries
+            if (isAIAnalysis) {
+                eventItem.addEventListener('click', function() {
+                    window.open('optimizer.html', '_blank');
+                });
+            }
+            
             eventLog.insertBefore(eventItem, eventLog.firstChild);
             
             // Keep only last 10 events
@@ -862,10 +893,25 @@
             }
         });
 
+        // Make existing event log entries clickable
+        function makeEventLogClickable() {
+            const eventItems = document.querySelectorAll('.event-item');
+            eventItems.forEach(item => {
+                const content = item.querySelector('.event-content');
+                if (content && (content.textContent.includes('View AI analysis') || content.textContent.includes('Decision Optimizer'))) {
+                    item.classList.add('clickable');
+                    item.addEventListener('click', function() {
+                        window.open('optimizer.html', '_blank');
+                    });
+                }
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Evonik Production Coordination Hub initialized');
             console.log('Real-time cross-system coordination active');
+            makeEventLogClickable();
         });
     </script>
 </body>

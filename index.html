@@ -513,7 +513,7 @@
                 <a href="local-supply-chain.html" class="stakeholder-link">
                     <div class="stakeholder-icon">📊</div>
                     <div class="stakeholder-info">
-                        <h4>Local Supply Chain (Jason)</h4>
+                        <h4>Local Supply Chain</h4>
                         <p>SAP-Excel integration, procurement, inventory management</p>
                     </div>
                 </a>
@@ -533,7 +533,7 @@
         <button class="demo-fab-button" onclick="toggleDemoMenu()">⚙️</button>
         <div class="demo-menu" id="demoMenu">
             <div class="demo-menu-item" onclick="runScenario(1)">1: Equipment Failure</div>
-            <div class="demo-menu-item" onclick="runScenario(3)">3: Supply Delay</div>
+            <div class="demo-menu-item" onclick="runScenario(2)">2: Supply Delay</div>
             <div class="demo-menu-item" onclick="resetDemo()" style="border-top: 1px solid var(--border-gray); margin-top: 0.5rem; padding-top: 0.75rem;">Reset</div>
             <div class="demo-menu-item" onclick="openAllStakeholders()">Open All Views</div>
         </div>
@@ -613,7 +613,7 @@
             addEventLog(now, '⚠️ ALERT: ME6 unit offline - OAS sensor detection', 'alert');
             
             setTimeout(() => {
-                addEventLog(now, '📧 Notifications sent to: Jason Neo, Alex Rodriguez, Sarah Chen, Maria Gonzalez<br>Alert details: Production reduced 345 MT/day, estimated downtime 3-5 days');
+                addEventLog(now, '📧 Notifications sent to: Local SC Manager, Alex Rodriguez, Sarah Chen, Maria Gonzalez<br>Alert details: Production reduced 345 MT/day, estimated downtime 3-5 days');
             }, 1000);
             
             setTimeout(() => {
@@ -652,6 +652,10 @@
                 addPendingAction('Production capacity review for new orders', 'Global SC', 'Assess if current capacity sufficient for 3,200 MT additional volume');
             }, 2000);
             
+            setTimeout(() => {
+                addEventLog(now, '💡 View AI analysis in Decision Optimizer →', 'update');
+            }, 3000);
+            
             broadcastToStakeholders('bulk_order_sync', { orders: 25, volume: 3200 });
         }
 
@@ -680,6 +684,10 @@
             setTimeout(() => {
                 addPendingAction('Approve expedited methanol delivery', 'Procurement', 'Cost: +$12K for 3-day expedited shipping vs production slowdown');
             }, 3000);
+            
+            setTimeout(() => {
+                addEventLog(now, '💡 View AI analysis in Decision Optimizer →', 'update');
+            }, 4000);
             
             broadcastToStakeholders('supply_chain_adjustment', { material: 'methanol', delay_days: 3 });
         }
@@ -824,7 +832,7 @@
             // Add click handler for AI analysis entries
             if (isAIAnalysis) {
                 eventItem.addEventListener('click', function() {
-                    window.open('optimizer.html', '_blank');
+                    window.open('optimizer.html?crisis=true', '_blank');
                 });
             }
             
@@ -901,7 +909,7 @@
                 if (content && (content.textContent.includes('View AI analysis') || content.textContent.includes('Decision Optimizer'))) {
                     item.classList.add('clickable');
                     item.addEventListener('click', function() {
-                        window.open('optimizer.html', '_blank');
+                        window.open('optimizer.html?crisis=true', '_blank');
                     });
                 }
             });

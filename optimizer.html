@@ -479,7 +479,7 @@
             <div class="role-selector">
                 <label>View as:</label>
                 <select id="roleSelector" onchange="switchRole()">
-                    <option value="local_sc">Jason Neo (Local Supply Chain)</option>
+                    <option value="local_sc">Local Supply Chain Manager</option>
                     <option value="plant">Plant Manager</option>
                     <option value="sales">Sales Team</option>
                     <option value="global_sc">Global Supply Chain</option>
@@ -548,9 +548,9 @@
         // Role-specific contexts
         const roleContexts = {
             local_sc: {
-                name: 'Jason Neo',
+                name: 'Local SC Manager',
                 focus: 'inventory management, raw materials, SAP-Excel automation',
-                greeting: 'Hello Jason! I can help you with production planning, inventory optimization, and raw material coordination.'
+                greeting: 'Hello! I can help you with production planning, inventory optimization, and raw material coordination.'
             },
             plant: {
                 name: 'Plant Manager',
@@ -955,6 +955,9 @@
             // Hide quick actions during crisis
             document.getElementById('quickActions').style.display = 'none';
             
+            // Clear any existing messages
+            document.getElementById('chatMessages').innerHTML = '';
+            
             addSystemMessage('⚠️ ALERT: ME6 unit offline - OAS sensor detection. Analyzing production impact...', true);
             
             setTimeout(() => {
@@ -1332,6 +1335,23 @@
             document.getElementById('vizTimestamp').textContent = `Updated: ${now.toLocaleTimeString()}`;
         }
 
+        // Check for crisis parameter in URL
+        function checkForCrisisParameter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('crisis') === 'true') {
+                // Clear the URL parameter to prevent re-triggering on refresh
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                
+                // Trigger crisis immediately
+                setTimeout(() => {
+                    triggerCrisis();
+                }, 1000);
+                return true;
+            }
+            return false;
+        }
+
         // Demo trigger detection
         function checkForDemoTrigger() {
             const eventData = localStorage.getItem('evonik_coordination_event');
@@ -1354,7 +1374,10 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initChat();
+            // Check for crisis parameter first
+            if (!checkForCrisisParameter()) {
+                initChat();
+            }
             checkForDemoTrigger();
         });
     </script>

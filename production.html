@@ -4,276 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plant Production Dashboard - Evonik</title>
+    <link rel="stylesheet" href="shared-styles.css">
     <style>
-        :root {
-            --evonik-purple: #8B2E8B;
-            --production-indigo: #6366F1;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --border-gray: #E5E7EB;
-            --bg-gray: #F9FAFB;
-            --success-green: #16A34A;
-            --warning-orange: #EA580C;
-            --alert-red: #DC2626;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-gray);
-            color: var(--text-dark);
-        }
-
+        /* Page-specific styles for production.html */
         .header {
             background: linear-gradient(135deg, var(--production-indigo) 0%, #4F46E5 100%);
-            color: white;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .back-nav {
-            background: white;
-            border-bottom: 2px solid var(--border-gray);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-btn {
-            color: var(--evonik-purple);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
         }
 
         .back-btn:hover {
             color: var(--production-indigo);
         }
 
-        .breadcrumb {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .optimizer-btn {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--evonik-purple), #A855F7);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(139, 46, 139, 0.3);
-        }
-
-        .optimizer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(139, 46, 139, 0.4);
-        }
-
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .alerts-banner {
-            background: var(--alert-red);
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        .alerts-banner.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            border: 1px solid var(--border-gray);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .card-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-operational {
-            background: rgba(22, 163, 74, 0.1);
-            color: var(--success-green);
-        }
-
-        .status-warning {
-            background: rgba(234, 88, 12, 0.1);
-            color: var(--warning-orange);
-        }
-
-        .status-critical {
-            background: rgba(220, 38, 38, 0.1);
-            color: var(--alert-red);
-        }
-
-        .metric {
-            margin: 0.75rem 0;
-        }
-
-        .metric-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 0.25rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .ai-scenarios-panel {
-            background: linear-gradient(135deg, rgba(139, 46, 139, 0.1), rgba(99, 102, 241, 0.1));
-            border: 2px solid var(--evonik-purple);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .ai-scenarios-panel h3 {
-            color: var(--evonik-purple);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .scenario-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .scenario-btn {
-            background: white;
-            border: 2px solid var(--border-gray);
-            padding: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-        }
-
-        .scenario-btn:hover {
-            border-color: var(--evonik-purple);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(139, 46, 139, 0.2);
-        }
-
-        .scenario-btn strong {
-            display: block;
-            color: var(--production-indigo);
-            margin-bottom: 0.5rem;
-        }
-
-        .scenario-btn p {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-
-        .units-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-bottom: 2rem;
-        }
-
         .units-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
-            margin-top: 1rem;
         }
 
         .unit-card {
@@ -281,16 +26,11 @@
             padding: 1.5rem;
             border-radius: 12px;
             border: 2px solid var(--border-gray);
-            transition: all 0.3s;
-        }
-
-        .unit-card:hover {
-            border-color: var(--production-indigo);
         }
 
         .unit-card.offline {
             border-color: var(--alert-red);
-            background: linear-gradient(to right, rgba(220, 38, 38, 0.05), var(--bg-gray));
+            background: rgba(220, 38, 38, 0.05);
         }
 
         .unit-header {
@@ -298,6 +38,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-gray);
         }
 
         .unit-name {
@@ -325,7 +67,7 @@
 
         .unit-metrics {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
@@ -348,30 +90,89 @@
             font-weight: 700;
         }
 
-        .ask-ai-btn {
-            background: var(--evonik-purple);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
             margin-top: 1rem;
-            width: 100%;
-            transition: all 0.3s;
         }
 
-        .ask-ai-btn:hover {
-            background: #A855F7;
-            transform: translateY(-1px);
+        .sensor-card {
+            background: var(--bg-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--success-green);
         }
 
-        .maintenance-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-bottom: 2rem;
+        .sensor-card.warning {
+            border-left-color: var(--warning-orange);
+        }
+
+        .sensor-card.critical {
+            border-left-color: var(--alert-red);
+        }
+
+        .sensor-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .sensor-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .sensor-status {
+            font-size: 0.75rem;
+            color: var(--success-green);
+        }
+
+        .sensor-status.warning {
+            color: var(--warning-orange);
+        }
+
+        .sensor-status.critical {
+            color: var(--alert-red);
+        }
+
+        .shift-performance {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .shift-hour {
+            background: var(--bg-gray);
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .shift-hour.current {
+            border: 2px solid var(--production-indigo);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .shift-hour.above-target {
+            background: rgba(22, 163, 74, 0.1);
+        }
+
+        .shift-hour.below-target {
+            background: rgba(234, 88, 12, 0.1);
+        }
+
+        .hour-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .hour-value {
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .maintenance-timeline {
@@ -389,9 +190,13 @@
             border-left: 4px solid var(--production-indigo);
         }
 
-        .maintenance-item.critical {
+        .maintenance-item.urgent {
             border-left-color: var(--alert-red);
             background: rgba(220, 38, 38, 0.05);
+        }
+
+        .maintenance-item.upcoming {
+            border-left-color: var(--warning-orange);
         }
 
         .maintenance-info {
@@ -412,42 +217,30 @@
         .maintenance-date {
             font-weight: 500;
             color: var(--production-indigo);
-        }
-
-        .automation-highlight {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 4px solid var(--success-green);
-        }
-
-        .automation-highlight h4 {
-            color: var(--success-green);
-            margin-bottom: 0.5rem;
+            text-align: right;
         }
 
         @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .scenario-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
             .units-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .sensor-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .shift-performance {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
+            .sensor-grid {
                 grid-template-columns: 1fr;
             }
 
-            .scenario-buttons {
-                grid-template-columns: 1fr;
+            .shift-performance {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -458,12 +251,12 @@
             <div class="logo-section">
                 <div class="logo">🏭 Evonik</div>
                 <div>
-                    <div style="font-size: 1.2rem; font-weight: 600;">Smart Production Operations</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Automated Monitoring & Real-Time Coordination - Jurong Island</div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Plant Production Operations</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Real-Time Monitoring - Jurong Island</div>
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">👤 Alex Rodriguez</div>
+                <div style="font-size: 1.1rem; font-weight: 600;">Alex Rodriguez</div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Production Manager</div>
             </div>
         </div>
@@ -473,44 +266,23 @@
         <div class="nav-content">
             <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
             <a href="optimizer.html" class="optimizer-btn">
-                🤖 Ask AI Optimizer
+                AI Decision Support
             </a>
-            <div class="breadcrumb">Production Operations Dashboard</div>
+            <div class="breadcrumb">Plant Production</div>
         </div>
     </nav>
 
     <div class="alerts-banner" id="alertsBanner">
-        <strong>🚨 EQUIPMENT ALERT:</strong> <span id="alertMessage"></span>
+        <strong>EQUIPMENT ALERT:</strong> <span id="alertMessage"></span>
     </div>
 
     <main class="main-content">
-        <!-- AI Production Scenarios -->
-        <div class="ai-scenarios-panel">
-            <h3>🤖 AI-Powered Production Scenarios</h3>
-            <p>Get instant analysis and recommendations for equipment issues, capacity planning, and maintenance optimization</p>
-            <div class="scenario-buttons">
-                <div class="scenario-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>⚙️ ME6 Shutdown Impact</strong>
-                    <p>Analyze production alternatives if ME6 goes offline</p>
-                </div>
-                <div class="scenario-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>📈 Increase ME5 Capacity</strong>
-                    <p>What's the cost-benefit of running ME5 at 105%?</p>
-                </div>
-                <div class="scenario-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>🔧 Maintenance Planning</strong>
-                    <p>Optimize next month's maintenance schedule</p>
-                </div>
-            </div>
-        </div>
-
-        <h2>🏭 Real-Time Production Monitoring</h2>
-        
-        <!-- Key Metrics -->
+        <!-- Production Overview -->
+        <h2 class="section-title">Production Overview</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Overall Capacity</div>
+                    <div class="card-title">Overall Status</div>
                     <div class="card-status status-operational" id="overallStatus">Operational</div>
                 </div>
                 <div class="metric">
@@ -522,195 +294,358 @@
                     <div class="metric-value">965 MT/day</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Utilization</div>
-                    <div class="metric-value" style="color: var(--success-green);">100%</div>
+                    <div class="metric-label">Capacity Utilization</div>
+                    <div class="metric-value">100%</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Production Efficiency</div>
-                    <div class="card-status status-operational">Optimal</div>
+                    <div class="card-title">Overall Equipment Effectiveness</div>
+                    <div class="card-status status-operational">Excellent</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Overall OEE</div>
+                    <div class="metric-label">OEE</div>
                     <div class="metric-value">94.2%</div>
+                    <div class="metric-subtext">Above industry standard (85%)</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Availability</div>
                     <div class="metric-value">97.8%</div>
                 </div>
                 <div class="metric">
+                    <div class="metric-label">Performance</div>
+                    <div class="metric-value">98.1%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Quality Metrics</div>
+                    <div class="card-status status-operational">On Target</div>
+                </div>
+                <div class="metric">
                     <div class="metric-label">Quality Rate</div>
-                    <div class="metric-value" style="color: var(--success-green);">98.5%</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">OAS Integration</div>
-                    <div class="card-status status-operational" id="oasStatus">Connected</div>
+                    <div class="metric-value">98.5%</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Data Refresh</div>
-                    <div class="metric-value" style="font-size: 1rem;">1 minute</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Sensors Active</div>
-                    <div class="metric-value" style="font-size: 1rem;">247/247</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Real-Time Sync</div>
-                    <div class="metric-value" style="color: var(--success-green); font-size: 1rem;">Live</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Monthly Progress</div>
-                    <div class="card-status status-operational">On Track</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Target</div>
-                    <div class="metric-value">29,000 MT</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Achieved</div>
-                    <div class="metric-value">22,620 MT</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Completion</div>
-                    <div class="metric-value" style="color: var(--success-green);">78%</div>
+                    <div class="metric-label">Defects</div>
+                    <div class="metric-value">0.8%</div>
+                    <div class="metric-subtext">Within acceptable range (<2%)</div>
                 </div>
             </div>
         </div>
 
-        <!-- Production Units Status -->
-        <div class="units-section">
-            <h3>⚙️ Production Units Real-Time Status</h3>
+        <!-- Equipment Status -->
+        <div class="section-panel">
+            <h3 class="section-title">Equipment Status - Real-Time Monitoring</h3>
             <div class="units-grid">
                 <div class="unit-card" id="me5Card">
                     <div class="unit-header">
-                        <div class="unit-name">ME5 Unit</div>
-                        <div class="unit-status-badge badge-online" id="me5Status">🟢 Online</div>
-                    </div>
-                    <div class="automation-highlight" style="margin: 1rem 0;">
-                        <p><strong>Capacity:</strong> 620 MT/day baseline | 775 MT/day max (125% capacity)</p>
-                        <p><strong>Current:</strong> Running at 85% utilization</p>
+                        <div class="unit-name">ME5 Production Unit</div>
+                        <div class="unit-status-badge badge-online" id="me5Status">Online</div>
                     </div>
                     <div class="unit-metrics">
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Daily Output</div>
-                            <div class="unit-metric-value" id="me5Output">620 MT</div>
+                            <div class="unit-metric-label">Current Output</div>
+                            <div class="unit-metric-value" id="me5Output">620 MT/day</div>
+                        </div>
+                        <div class="unit-metric">
+                            <div class="unit-metric-label">Capacity</div>
+                            <div class="unit-metric-value">620 MT/day</div>
+                        </div>
+                        <div class="unit-metric">
+                            <div class="unit-metric-label">Utilization</div>
+                            <div class="unit-metric-value">100%</div>
                         </div>
                         <div class="unit-metric">
                             <div class="unit-metric-label">Efficiency</div>
-                            <div class="unit-metric-value" style="color: var(--success-green);">98%</div>
+                            <div class="unit-metric-value" style="color: var(--success-green);">98.2%</div>
                         </div>
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Temperature</div>
-                            <div class="unit-metric-value">142°C</div>
+                            <div class="unit-metric-label">Runtime Today</div>
+                            <div class="unit-metric-value">14.2 hrs</div>
                         </div>
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Pressure</div>
-                            <div class="unit-metric-value">2.3 bar</div>
+                            <div class="unit-metric-label">Max Capacity</div>
+                            <div class="unit-metric-value">775 MT/day</div>
                         </div>
                     </div>
-                    <button class="ask-ai-btn" onclick="window.location.href='optimizer.html'">
-                        Ask AI: Can ME5 compensate if ME6 fails?
-                    </button>
                 </div>
 
                 <div class="unit-card" id="me6Card">
                     <div class="unit-header">
-                        <div class="unit-name">ME6 Unit</div>
-                        <div class="unit-status-badge badge-online" id="me6Status">🟢 Online</div>
-                    </div>
-                    <div class="automation-highlight" style="margin: 1rem 0;">
-                        <p><strong>Capacity:</strong> 345 MT/day baseline | 430 MT/day max (125% capacity)</p>
-                        <p><strong>Current:</strong> Running at 100% utilization</p>
+                        <div class="unit-name">ME6 Production Unit</div>
+                        <div class="unit-status-badge badge-online" id="me6Status">Online</div>
                     </div>
                     <div class="unit-metrics">
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Daily Output</div>
-                            <div class="unit-metric-value" id="me6Output">345 MT</div>
+                            <div class="unit-metric-label">Current Output</div>
+                            <div class="unit-metric-value" id="me6Output">345 MT/day</div>
+                        </div>
+                        <div class="unit-metric">
+                            <div class="unit-metric-label">Capacity</div>
+                            <div class="unit-metric-value">345 MT/day</div>
+                        </div>
+                        <div class="unit-metric">
+                            <div class="unit-metric-label">Utilization</div>
+                            <div class="unit-metric-value" id="me6Utilization">100%</div>
                         </div>
                         <div class="unit-metric">
                             <div class="unit-metric-label">Efficiency</div>
-                            <div class="unit-metric-value" style="color: var(--success-green);">96%</div>
+                            <div class="unit-metric-value" style="color: var(--success-green);">96.8%</div>
                         </div>
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Temperature</div>
-                            <div class="unit-metric-value">138°C</div>
+                            <div class="unit-metric-label">Runtime Today</div>
+                            <div class="unit-metric-value" id="me6Runtime">14.2 hrs</div>
                         </div>
                         <div class="unit-metric">
-                            <div class="unit-metric-label">Pressure</div>
-                            <div class="unit-metric-value">2.1 bar</div>
+                            <div class="unit-metric-label">Max Capacity</div>
+                            <div class="unit-metric-value">430 MT/day</div>
                         </div>
                     </div>
-                    <button class="ask-ai-btn" onclick="window.location.href='optimizer.html'">
-                        Ask AI: Maintenance impact on ME6
-                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment Health Monitoring -->
+        <div class="section-panel">
+            <h3 class="section-title">Equipment Health - Sensor Data (OAS)</h3>
+            <div class="sensor-grid">
+                <div class="sensor-card">
+                    <div class="sensor-label">ME5 Temperature</div>
+                    <div class="sensor-value" id="me5Temp">142°C</div>
+                    <div class="sensor-status">Normal (140-145°C)</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-label">ME5 Pressure</div>
+                    <div class="sensor-value">2.3 bar</div>
+                    <div class="sensor-status">Normal (2.0-2.5 bar)</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-label">ME5 Flow Rate</div>
+                    <div class="sensor-value">85 m³/h</div>
+                    <div class="sensor-status">Normal</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-label">ME5 Vibration</div>
+                    <div class="sensor-value">2.1 mm/s</div>
+                    <div class="sensor-status">Normal (<3.0 mm/s)</div>
+                </div>
+                <div class="sensor-card" id="me6TempCard">
+                    <div class="sensor-label">ME6 Temperature</div>
+                    <div class="sensor-value" id="me6Temp">138°C</div>
+                    <div class="sensor-status" id="me6TempStatus">Normal (135-142°C)</div>
+                </div>
+                <div class="sensor-card" id="me6PressureCard">
+                    <div class="sensor-label">ME6 Pressure</div>
+                    <div class="sensor-value" id="me6Pressure">2.1 bar</div>
+                    <div class="sensor-status" id="me6PressureStatus">Normal (1.8-2.3 bar)</div>
+                </div>
+                <div class="sensor-card" id="me6FlowCard">
+                    <div class="sensor-label">ME6 Flow Rate</div>
+                    <div class="sensor-value" id="me6Flow">42 m³/h</div>
+                    <div class="sensor-status" id="me6FlowStatus">Normal</div>
+                </div>
+                <div class="sensor-card" id="me6VibrationCard">
+                    <div class="sensor-label">ME6 Vibration</div>
+                    <div class="sensor-value" id="me6Vibration">1.8 mm/s</div>
+                    <div class="sensor-status" id="me6VibrationStatus">Normal (<3.0 mm/s)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shift Performance -->
+        <div class="section-panel">
+            <h3 class="section-title">Current Shift Performance</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Shift A (06:00 - 14:00)</div>
+                        <div class="card-status status-operational">Active</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Target</div>
+                        <div class="metric-value">320 MT</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Actual (6 hrs)</div>
+                        <div class="metric-value" id="shiftActual">245 MT</div>
+                        <div class="metric-subtext" style="color: var(--success-green);">On pace (40 MT/hr)</div>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <div class="card-title">Hourly Production Rate</div>
+                    </div>
+                    <div class="shift-performance">
+                        <div class="shift-hour above-target">
+                            <div class="hour-label">06:00</div>
+                            <div class="hour-value">42 MT</div>
+                        </div>
+                        <div class="shift-hour above-target">
+                            <div class="hour-label">07:00</div>
+                            <div class="hour-value">41 MT</div>
+                        </div>
+                        <div class="shift-hour above-target">
+                            <div class="hour-label">08:00</div>
+                            <div class="hour-value">40 MT</div>
+                        </div>
+                        <div class="shift-hour below-target">
+                            <div class="hour-label">09:00</div>
+                            <div class="hour-value">38 MT</div>
+                        </div>
+                        <div class="shift-hour above-target">
+                            <div class="hour-label">10:00</div>
+                            <div class="hour-value">42 MT</div>
+                        </div>
+                        <div class="shift-hour current">
+                            <div class="hour-label">11:00</div>
+                            <div class="hour-value">42 MT</div>
+                        </div>
+                        <div class="shift-hour">
+                            <div class="hour-label">12:00</div>
+                            <div class="hour-value">--</div>
+                        </div>
+                        <div class="shift-hour">
+                            <div class="hour-label">13:00</div>
+                            <div class="hour-value">--</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);">
+                        Target: 40 MT/hr | Current average: 40.8 MT/hr
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Metrics -->
+        <h2 class="section-title">Safety Performance</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Days Since Last Incident</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" style="color: var(--success-green);">287 days</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Near-Miss Reports</div>
+                    <div class="card-status status-operational">Low</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">This Month</div>
+                    <div class="metric-value">3</div>
+                    <div class="metric-subtext">All investigated & resolved</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Safety Compliance</div>
+                    <div class="card-status status-operational">100%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Inspections Completed</div>
+                    <div class="metric-value">18/18</div>
+                    <div class="metric-subtext">October 2025</div>
                 </div>
             </div>
         </div>
 
         <!-- Maintenance Schedule -->
-        <div class="maintenance-section">
-            <h3>🔧 Maintenance Schedule (From Calculation Basis)</h3>
+        <div class="section-panel">
+            <h3 class="section-title">Maintenance Schedule</h3>
             <div class="maintenance-timeline">
-                <div class="maintenance-item">
+                <div class="maintenance-item urgent">
+                    <div class="maintenance-info">
+                        <div class="maintenance-unit">ME6 - Routine Inspection</div>
+                        <div class="maintenance-desc">40-hour cycle maintenance required (6 times annually, 13 days total)</div>
+                    </div>
+                    <div class="maintenance-date">Due: Oct 25</div>
+                </div>
+                <div class="maintenance-item upcoming">
                     <div class="maintenance-info">
                         <div class="maintenance-unit">ME5 - H2S Catalyst Change</div>
-                        <div class="maintenance-desc">Every 3 years (40 days + 12.5 days loadup loss) | Last: 2023</div>
+                        <div class="maintenance-desc">Major maintenance: 40 days + 12.5 days loadup loss (every 3 years)</div>
                     </div>
-                    <div class="maintenance-date">Next: Q2 2026</div>
+                    <div class="maintenance-date">Scheduled: Q2 2026</div>
                 </div>
-                <div class="maintenance-item">
+                <div class="maintenance-item upcoming">
                     <div class="maintenance-info">
                         <div class="maintenance-unit">ME6 - H2S Catalyst Change</div>
-                        <div class="maintenance-desc">Every 6 years (42 days + 5 days loadup loss) | Last: 2020</div>
+                        <div class="maintenance-desc">Major maintenance: 42 days + 5 days loadup loss (every 6 years)</div>
                     </div>
-                    <div class="maintenance-date">Next: 2026</div>
-                </div>
-                <div class="maintenance-item critical">
-                    <div class="maintenance-info">
-                        <div class="maintenance-unit">ME5 - 9 times (24 hrs each) + 12hrs startup</div>
-                        <div class="maintenance-desc">Total: 13.5 days annually</div>
-                    </div>
-                    <div class="maintenance-date">2026 Constraint</div>
-                </div>
-                <div class="maintenance-item critical">
-                    <div class="maintenance-info">
-                        <div class="maintenance-unit">ME6 - 6 times (40 hrs each) + 12hrs startup</div>
-                        <div class="maintenance-desc">Total: 13 days annually | ⚠️ Jan needs 5 days for MAMP/UTO maintenance</div>
-                    </div>
-                    <div class="maintenance-date">2026 Constraint</div>
+                    <div class="maintenance-date">Scheduled: 2026</div>
                 </div>
                 <div class="maintenance-item">
                     <div class="maintenance-info">
-                        <div class="maintenance-unit">Blackout Test (Alternate Year)</div>
-                        <div class="maintenance-desc">Affecting ME6: 3 days downtime</div>
+                        <div class="maintenance-unit">Blackout Test</div>
+                        <div class="maintenance-desc">Alternate year test affecting ME6 (3 days downtime)</div>
                     </div>
-                    <div class="maintenance-date">Scheduled 2026</div>
+                    <div class="maintenance-date">Scheduled: 2026</div>
+                </div>
+                <div class="maintenance-item">
+                    <div class="maintenance-info">
+                        <div class="maintenance-unit">MAMP/UTO Maintenance</div>
+                        <div class="maintenance-desc">January requirement: 5 days downtime for maintenance</div>
+                    </div>
+                    <div class="maintenance-date">Constraint: Jan 2026</div>
                 </div>
             </div>
-            <button class="ask-ai-btn" onclick="window.location.href='optimizer.html'" style="margin-top: 1rem;">
-                Ask AI: Optimize Sep/Oct 2025 maintenance plan (extended run from Aug/Sep)
-            </button>
         </div>
 
-        <!-- Equipment Automation Info -->
-        <div class="card" style="grid-column: span 4;">
-            <div class="card-header">
-                <div class="card-title">🔗 Automated Equipment Monitoring & Alerts</div>
-                <div class="card-status status-operational">Active</div>
+        <!-- OAS Integration Status -->
+        <h2 class="section-title">OAS Integration Status</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sensor Connectivity</div>
+                    <div class="card-status status-operational" id="oasStatus">Connected</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Sensors</div>
+                    <div class="metric-value">247/247</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Refresh Rate</div>
+                    <div class="metric-value" style="font-size: 1rem;">1 minute</div>
+                </div>
             </div>
-            <div class="automation-highlight">
-                <h4>📊 Digital Transformation: Real-Time Equipment Intelligence</h4>
-                <p><strong>Before:</strong> Manual readings → Excel logs → Bi-weekly meetings → Reactive responses → 1-2 week coordination delays</p>
-                <p><strong>After:</strong> OAS real-time sensors (1-min refresh) → Automated alerts → AI scenario analysis → Proactive optimization → <5 minute decision time</p>
-                <p><strong>Impact:</strong> Equipment failures detected instantly + Predictive maintenance enabled + $300K coordination failure prevented + Cross-system automated response</p>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Data Quality</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Signal Quality</div>
+                    <div class="metric-value">99.8%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Loss</div>
+                    <div class="metric-value">0.2%</div>
+                    <div class="metric-subtext">Within acceptable range</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">System Health</div>
+                    <div class="card-status status-operational">Stable</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Sync</div>
+                    <div class="metric-value" style="font-size: 1rem;">48 sec ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Sync Errors (24h)</div>
+                    <div class="metric-value">0</div>
+                </div>
             </div>
         </div>
     </main>
@@ -727,7 +662,7 @@
         function handleCoordinationEvent(event) {
             switch(event.type) {
                 case 'equipment_failure':
-                    showAlert('ME6 Unit Shutdown Detected - AI Optimizer analyzing compensation scenarios');
+                    showAlert('ME6 Unit Shutdown Detected');
                     simulateME6Failure();
                     break;
                 case 'reset':
@@ -744,22 +679,40 @@
         }
 
         function simulateME6Failure() {
-            // Update ME6 status
+            // Update ME6 unit card
             const me6Card = document.getElementById('me6Card');
             me6Card.classList.add('offline');
             document.getElementById('me6Status').className = 'unit-status-badge badge-offline';
-            document.getElementById('me6Status').textContent = '🔴 Offline';
-            document.getElementById('me6Output').textContent = '0 MT';
+            document.getElementById('me6Status').textContent = 'Offline';
+            document.getElementById('me6Output').textContent = '0 MT/day';
+            document.getElementById('me6Utilization').textContent = '0%';
+            document.getElementById('me6Runtime').textContent = '0 hrs';
             
-            // Update overall metrics
+            // Update overall status
             document.getElementById('totalOutput').textContent = '620 MT/day';
             document.getElementById('overallStatus').className = 'card-status status-critical';
             document.getElementById('overallStatus').textContent = 'Degraded';
             
-            // Suggest ME5 compensation
-            setTimeout(() => {
-                alert('AI Optimizer Recommendation: Increase ME5 capacity to 775 MT/day (105% utilization) to compensate for ME6 shutdown. Net savings: $75K. Click "Ask AI Optimizer" for full scenario analysis.');
-            }, 2000);
+            // Update sensor readings to show failure
+            document.getElementById('me6Temp').textContent = '-- °C';
+            document.getElementById('me6TempCard').classList.add('critical');
+            document.getElementById('me6TempStatus').textContent = 'No signal';
+            document.getElementById('me6TempStatus').className = 'sensor-status critical';
+            
+            document.getElementById('me6Pressure').textContent = '-- bar';
+            document.getElementById('me6PressureCard').classList.add('critical');
+            document.getElementById('me6PressureStatus').textContent = 'No signal';
+            document.getElementById('me6PressureStatus').className = 'sensor-status critical';
+            
+            document.getElementById('me6Flow').textContent = '0 m³/h';
+            document.getElementById('me6FlowCard').classList.add('critical');
+            document.getElementById('me6FlowStatus').textContent = 'Unit offline';
+            document.getElementById('me6FlowStatus').className = 'sensor-status critical';
+            
+            document.getElementById('me6Vibration').textContent = '-- mm/s';
+            document.getElementById('me6VibrationCard').classList.add('critical');
+            document.getElementById('me6VibrationStatus').textContent = 'No signal';
+            document.getElementById('me6VibrationStatus').className = 'sensor-status critical';
         }
 
         function resetDashboard() {
@@ -769,13 +722,36 @@
             const me6Card = document.getElementById('me6Card');
             me6Card.classList.remove('offline');
             document.getElementById('me6Status').className = 'unit-status-badge badge-online';
-            document.getElementById('me6Status').textContent = '🟢 Online';
-            document.getElementById('me6Output').textContent = '345 MT';
+            document.getElementById('me6Status').textContent = 'Online';
+            document.getElementById('me6Output').textContent = '345 MT/day';
+            document.getElementById('me6Utilization').textContent = '100%';
+            document.getElementById('me6Runtime').textContent = '14.2 hrs';
             
-            // Reset overall metrics
+            // Reset overall status
             document.getElementById('totalOutput').textContent = '965 MT/day';
             document.getElementById('overallStatus').className = 'card-status status-operational';
             document.getElementById('overallStatus').textContent = 'Operational';
+            
+            // Reset sensors
+            document.getElementById('me6Temp').textContent = '138°C';
+            document.getElementById('me6TempCard').classList.remove('critical');
+            document.getElementById('me6TempStatus').textContent = 'Normal (135-142°C)';
+            document.getElementById('me6TempStatus').className = 'sensor-status';
+            
+            document.getElementById('me6Pressure').textContent = '2.1 bar';
+            document.getElementById('me6PressureCard').classList.remove('critical');
+            document.getElementById('me6PressureStatus').textContent = 'Normal (1.8-2.3 bar)';
+            document.getElementById('me6PressureStatus').className = 'sensor-status';
+            
+            document.getElementById('me6Flow').textContent = '42 m³/h';
+            document.getElementById('me6FlowCard').classList.remove('critical');
+            document.getElementById('me6FlowStatus').textContent = 'Normal';
+            document.getElementById('me6FlowStatus').className = 'sensor-status';
+            
+            document.getElementById('me6Vibration').textContent = '1.8 mm/s';
+            document.getElementById('me6VibrationCard').classList.remove('critical');
+            document.getElementById('me6VibrationStatus').textContent = 'Normal (<3.0 mm/s)';
+            document.getElementById('me6VibrationStatus').className = 'sensor-status';
         }
 
         // Initialize
@@ -785,4 +761,10 @@
         });
     </script>
 </body>
-</html>
+</html>    <div class="maintenance-info">
+                        <div class="maintenance-unit">ME5 - 24hr Cycle Maintenance</div>
+                        <div class="maintenance-desc">9 times annually + 12hrs startup (13.5 days total)</div>
+                    </div>
+                    <div class="maintenance-date">Next: Nov 2</div>
+                </div>
+                <div class="maintenance-item">

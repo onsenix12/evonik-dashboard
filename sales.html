@@ -4,264 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Team Dashboard - Evonik</title>
+    <link rel="stylesheet" href="shared-styles.css">
     <style>
-        :root {
-            --evonik-purple: #8B2E8B;
-            --sales-blue: #2563EB;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --border-gray: #E5E7EB;
-            --bg-gray: #F9FAFB;
-            --success-green: #16A34A;
-            --warning-orange: #EA580C;
-            --alert-red: #DC2626;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-gray);
-            color: var(--text-dark);
-        }
-
+        /* Page-specific styles for sales.html */
         .header {
             background: linear-gradient(135deg, var(--sales-blue) 0%, #1E40AF 100%);
-            color: white;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .back-nav {
-            background: white;
-            border-bottom: 2px solid var(--border-gray);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-btn {
-            color: var(--evonik-purple);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
         }
 
         .back-btn:hover {
             color: var(--sales-blue);
         }
 
-        .breadcrumb {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .optimizer-btn {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--evonik-purple), #A855F7);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(139, 46, 139, 0.3);
-        }
-
-        .optimizer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(139, 46, 139, 0.4);
-        }
-
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .alerts-banner {
-            background: var(--alert-red);
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        .alerts-banner.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dashboard-grid {
+        .pipeline-stages {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            border: 1px solid var(--border-gray);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .card-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-operational {
-            background: rgba(22, 163, 74, 0.1);
-            color: var(--success-green);
-        }
-
-        .status-warning {
-            background: rgba(234, 88, 12, 0.1);
-            color: var(--warning-orange);
-        }
-
-        .metric {
-            margin: 0.75rem 0;
-        }
-
-        .metric-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 0.25rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .ai-insights-panel {
-            background: linear-gradient(135deg, rgba(139, 46, 139, 0.1), rgba(37, 99, 235, 0.1));
-            border: 2px solid var(--evonik-purple);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .ai-insights-panel h3 {
-            color: var(--evonik-purple);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .quick-queries {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             margin-top: 1rem;
         }
 
-        .quick-query-btn {
-            background: white;
-            border: 2px solid var(--border-gray);
+        .stage-card {
+            background: var(--bg-gray);
             padding: 1rem;
             border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
+            text-align: center;
+            border: 2px solid var(--border-gray);
         }
 
-        .quick-query-btn:hover {
-            border-color: var(--evonik-purple);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(139, 46, 139, 0.2);
+        .stage-card.active {
+            border-color: var(--sales-blue);
+            background: rgba(37, 99, 235, 0.05);
         }
 
-        .quick-query-btn strong {
-            display: block;
-            color: var(--sales-blue);
+        .stage-title {
+            font-size: 0.85rem;
+            color: var(--text-light);
             margin-bottom: 0.5rem;
         }
 
-        .quick-query-btn p {
-            font-size: 0.85rem;
-            color: var(--text-light);
+        .stage-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
-        .input-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-bottom: 2rem;
+        .stage-volume {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
         }
 
         .upload-section {
@@ -272,7 +65,7 @@
         }
 
         .upload-option {
-            background: linear-gradient(to bottom, rgba(37, 99, 235, 0.05), white);
+            background: var(--bg-gray);
             border: 2px dashed var(--sales-blue);
             border-radius: 12px;
             padding: 2rem;
@@ -283,8 +76,7 @@
 
         .upload-option:hover {
             border-style: solid;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            background: rgba(37, 99, 235, 0.05);
         }
 
         .upload-icon {
@@ -319,95 +111,62 @@
 
         .upload-btn:hover, .sync-btn:hover {
             background: #1E40AF;
-            transform: translateY(-1px);
-        }
-
-        .automation-highlight {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 4px solid var(--success-green);
-        }
-
-        .automation-highlight h4 {
-            color: var(--success-green);
-            margin-bottom: 0.5rem;
-        }
-
-        .orders-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-bottom: 2rem;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .orders-table th {
-            background: var(--bg-gray);
-            padding: 0.75rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-dark);
-            border-bottom: 2px solid var(--border-gray);
-        }
-
-        .orders-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--border-gray);
-        }
-
-        .orders-table tr:hover {
-            background: rgba(37, 99, 235, 0.05);
-        }
-
-        .order-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-fulfilled {
-            background: rgba(22, 163, 74, 0.1);
-            color: var(--success-green);
-        }
-
-        .status-pending {
-            background: rgba(234, 88, 12, 0.1);
-            color: var(--warning-orange);
         }
 
         .file-input {
             display: none;
         }
 
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .forecast-accuracy {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
 
-            .quick-queries {
-                grid-template-columns: repeat(2, 1fr);
+        .accuracy-card {
+            background: var(--bg-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .accuracy-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .accuracy-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .accuracy-trend {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .pipeline-stages {
+                grid-template-columns: repeat(3, 1fr);
             }
 
             .upload-section {
                 grid-template-columns: 1fr;
             }
+
+            .forecast-accuracy {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            .pipeline-stages {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .quick-queries {
+            .forecast-accuracy {
                 grid-template-columns: 1fr;
             }
         }
@@ -420,11 +179,11 @@
                 <div class="logo">📈 Evonik</div>
                 <div>
                     <div style="font-size: 1.2rem; font-weight: 600;">Sales Team Dashboard</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">Automated Order Management & IBP Integration</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Order Management & Customer Fulfillment</div>
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">👤 Sarah Chen</div>
+                <div style="font-size: 1.1rem; font-weight: 600;">Sarah Chen</div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Regional Sales Manager</div>
             </div>
         </div>
@@ -434,63 +193,23 @@
         <div class="nav-content">
             <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
             <a href="optimizer.html" class="optimizer-btn">
-                🤖 Ask AI Optimizer
+                AI Decision Support
             </a>
-            <div class="breadcrumb">Sales Team Dashboard</div>
+            <div class="breadcrumb">Sales Team</div>
         </div>
     </nav>
 
     <div class="alerts-banner" id="alertsBanner">
-        <strong>🚨 PRODUCTION ALERT:</strong> <span id="alertMessage"></span>
+        <strong>CUSTOMER ALERT:</strong> <span id="alertMessage"></span>
     </div>
 
     <main class="main-content">
-        <!-- AI Insights Panel -->
-        <div class="ai-insights-panel">
-            <h3>🤖 AI-Powered Sales Intelligence</h3>
-            <p>Ask the AI Optimizer about order fulfillment, customer impact, and demand scenarios</p>
-            <div class="quick-queries">
-                <div class="quick-query-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>📊 Impact Analysis</strong>
-                    <p>What's the impact of 500 MT shortage on customer commitments?</p>
-                </div>
-                <div class="quick-query-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>⚡ Urgent Orders</strong>
-                    <p>Can we fulfill an urgent 847 MT order by next week?</p>
-                </div>
-                <div class="quick-query-btn" onclick="window.location.href='optimizer.html'">
-                    <strong>📅 Delivery Forecast</strong>
-                    <p>Show me delivery capacity for next 30 days</p>
-                </div>
-            </div>
-        </div>
-
-        <h2>📈 Automated Sales Operations & IBP Integration</h2>
-        
-        <!-- Key Metrics -->
+        <!-- Order Fulfillment Dashboard -->
+        <h2 class="section-title">Order Fulfillment Overview</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">IBP-SAP Integration</div>
-                    <div class="card-status status-operational" id="ibpStatus">Automated</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Last IBP Sync</div>
-                    <div class="metric-value" id="lastIbpSync">5 min ago</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Manual Entry</div>
-                    <div class="metric-value" style="color: var(--success-green); font-size: 1rem;">Eliminated</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Coordination Speed</div>
-                    <div class="metric-value" style="font-size: 1rem;">Real-Time</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Order Fulfillment</div>
+                    <div class="card-title">Fulfillment Status</div>
                     <div class="card-status status-operational" id="fulfillmentStatus">On Track</div>
                 </div>
                 <div class="metric">
@@ -498,85 +217,122 @@
                     <div class="metric-value">29,000 MT</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Current Achievement</div>
-                    <div class="metric-value">22,620 MT</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Achievement Rate</div>
-                    <div class="metric-value" style="color: var(--success-green);">78%</div>
+                    <div class="metric-label">Committed Orders</div>
+                    <div class="metric-value" id="committedOrders">28,200 MT</div>
+                    <div class="metric-subtext">97% of capacity allocated</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Customer Orders</div>
-                    <div class="card-status status-operational">Active</div>
+                    <div class="card-title">Production Capacity</div>
+                    <div class="card-status status-operational" id="capacityStatus">Available</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Open Orders</div>
-                    <div class="metric-value">47</div>
+                    <div class="metric-label">Current Output</div>
+                    <div class="metric-value" id="currentOutput">965 MT/day</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Pending Volume</div>
-                    <div class="metric-value">6,380 MT</div>
+                    <div class="metric-label">Available Capacity</div>
+                    <div class="metric-value" id="availableCapacity">800 MT</div>
+                    <div class="metric-subtext">Remaining this month</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Delivery Performance</div>
+                    <div class="card-status status-operational">Excellent</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">On-Time Delivery</div>
-                    <div class="metric-value" style="color: var(--success-green);">96%</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Cross-System Sync</div>
-                    <div class="card-status status-operational" id="coordinationStatus">Synced</div>
+                    <div class="metric-value">96%</div>
+                    <div class="metric-subtext">Last 30 days</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Decision Time</div>
-                    <div class="metric-value" id="responseTime" style="font-size: 1rem;">< 5 minutes</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Manual Coordination</div>
-                    <div class="metric-value" style="color: var(--success-green); font-size: 1rem;">Eliminated</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">System Updates</div>
-                    <div class="metric-value" style="font-size: 1rem;">Instant</div>
+                    <div class="metric-label">Delayed Shipments</div>
+                    <div class="metric-value" id="delayedShipments">2</div>
                 </div>
             </div>
         </div>
 
-        <!-- Automated Order Management -->
-        <div class="input-panel">
-            <h3>🔄 Automated Order Management</h3>
-            <div class="automation-highlight">
-                <h4>📊 Digital Transformation Impact</h4>
-                <p><strong>Before:</strong> Manual Excel entry (4+ hours daily) → Email coordination → 1-2 week delays → Data silos across teams</p>
-                <p><strong>After:</strong> Automated IBP-SAP sync → Real-time updates → Instant coordination across all stakeholders → Zero manual entry</p>
-            </div>
-            
-            <p style="margin-top: 1rem;">Choose your preferred method for order processing - both integrate automatically with production planning:</p>
-            <div class="upload-section">
-                <div class="upload-option" onclick="document.getElementById('bulkFileInput').click()">
-                    <div class="upload-icon">📊</div>
-                    <div class="upload-title">Bulk Order Upload</div>
-                    <div class="upload-description">Upload Excel/CSV files with multiple orders for automatic processing</div>
-                    <button class="upload-btn">📁 Upload Orders File</button>
-                    <input type="file" id="bulkFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleBulkUpload(event)">
+        <!-- Order Pipeline -->
+        <div class="section-panel">
+            <h3 class="section-title">Order Pipeline Status</h3>
+            <div class="pipeline-stages">
+                <div class="stage-card">
+                    <div class="stage-title">New</div>
+                    <div class="stage-count" id="newOrders">8</div>
+                    <div class="stage-volume">1,240 MT</div>
                 </div>
-                <div class="upload-option">
-                    <div class="upload-icon">🔄</div>
-                    <div class="upload-title">IBP System Sync</div>
-                    <div class="upload-description">Sync directly with IBP forecasting system for seamless data integration</div>
-                    <button class="sync-btn" onclick="syncWithIBP()">⚡ Sync with IBP</button>
-                    <button class="sync-btn" onclick="syncWithSAP()">🗄️ Sync with SAP</button>
+                <div class="stage-card active">
+                    <div class="stage-title">Confirmed</div>
+                    <div class="stage-count" id="confirmedOrders">23</div>
+                    <div class="stage-volume">5,180 MT</div>
+                </div>
+                <div class="stage-card active">
+                    <div class="stage-title">Allocated</div>
+                    <div class="stage-count">12</div>
+                    <div class="stage-volume">3,420 MT</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-title">In Production</div>
+                    <div class="stage-count">8</div>
+                    <div class="stage-volume">2,150 MT</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-title">Shipped</div>
+                    <div class="stage-count">15</div>
+                    <div class="stage-volume">4,210 MT</div>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Orders Table -->
-        <div class="orders-section">
-            <h3>📋 Recent Orders (Auto-Synced from IBP)</h3>
+        <!-- Customer Impact Tracking -->
+        <div class="section-panel">
+            <h3 class="section-title">Customer Impact Monitoring</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">At-Risk Orders</div>
+                        <div class="card-status status-operational" id="atRiskStatus">None</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Production Issues</div>
+                        <div class="metric-value" id="atRiskCount">0</div>
+                        <div class="metric-subtext" id="atRiskDetail">No active production disruptions</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Customer Notifications</div>
+                        <div class="card-status status-operational">Current</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Sent Today</div>
+                        <div class="metric-value" id="notificationsSent">12</div>
+                        <div class="metric-subtext">Order confirmations, shipping updates</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Urgent Inquiries</div>
+                        <div class="card-status status-operational">Low</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Pending Response</div>
+                        <div class="metric-value">3</div>
+                        <div class="metric-subtext">Avg response time: 2.3 hours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Orders Table -->
+        <div class="section-panel">
+            <h3 class="section-title">Active Customer Orders</h3>
             <table class="orders-table">
                 <thead>
                     <tr>
@@ -585,7 +341,7 @@
                         <th>Volume (MT)</th>
                         <th>Delivery Date</th>
                         <th>Status</th>
-                        <th>AI Analysis</th>
+                        <th>Stage</th>
                     </tr>
                 </thead>
                 <tbody id="ordersTableBody">
@@ -594,35 +350,102 @@
                         <td>Charoen Pokphand Foods</td>
                         <td>1,250</td>
                         <td>Oct 28, 2025</td>
-                        <td><span class="order-status status-fulfilled">✓ Fulfilled</span></td>
-                        <td><button class="sync-btn" onclick="window.location.href='optimizer.html'" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ask AI</button></td>
+                        <td><span class="order-status status-shipped">Shipped</span></td>
+                        <td>Delivered</td>
                     </tr>
                     <tr>
                         <td>#ORD-2848</td>
                         <td>Cargill Thailand</td>
                         <td>847</td>
                         <td>Nov 2, 2025</td>
-                        <td><span class="order-status status-pending">⏳ Pending</span></td>
-                        <td><button class="sync-btn" onclick="window.location.href='optimizer.html'" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ask AI</button></td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>Allocated</td>
                     </tr>
                     <tr>
                         <td>#ORD-2849</td>
                         <td>BRF S.A.</td>
                         <td>2,100</td>
                         <td>Nov 5, 2025</td>
-                        <td><span class="order-status status-fulfilled">✓ Fulfilled</span></td>
-                        <td><button class="sync-btn" onclick="window.location.href='optimizer.html'" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ask AI</button></td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>In Production</td>
                     </tr>
                     <tr>
                         <td>#ORD-2850</td>
                         <td>Tyson Foods</td>
                         <td>1,580</td>
                         <td>Nov 8, 2025</td>
-                        <td><span class="order-status status-pending">⏳ Pending</span></td>
-                        <td><button class="sync-btn" onclick="window.location.href='optimizer.html'" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ask AI</button></td>
+                        <td><span class="order-status status-pending">Pending Allocation</span></td>
+                        <td>Confirmed</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- IBP Integration Status -->
+        <div class="section-panel">
+            <h3 class="section-title">IBP Demand Forecast Integration</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Sync Status</div>
+                        <div class="card-status status-operational" id="ibpStatus">Active</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Last Sync</div>
+                        <div class="metric-value" id="lastIbpSync">5 min ago</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Data Quality</div>
+                        <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Excellent</div>
+                        <div class="metric-subtext">No validation errors</div>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <div class="card-title">Forecast Accuracy</div>
+                        <div class="card-status status-operational">Good</div>
+                    </div>
+                    <div class="forecast-accuracy">
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">This Month</div>
+                            <div class="accuracy-value" style="color: var(--success-green);">94%</div>
+                            <div class="accuracy-trend" style="color: var(--success-green);">▲ +2% vs last month</div>
+                        </div>
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">Forecast vs Actual</div>
+                            <div class="accuracy-value">28,400 MT</div>
+                            <div class="accuracy-trend">Forecast: 29,000 MT</div>
+                        </div>
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">Variance</div>
+                            <div class="accuracy-value" style="color: var(--warning-orange);">-2.1%</div>
+                            <div class="accuracy-trend">Within acceptable range</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Input Methods -->
+        <div class="section-panel">
+            <h3 class="section-title">Order Input Methods</h3>
+            <div class="upload-section">
+                <div class="upload-option" onclick="document.getElementById('bulkFileInput').click()">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">Bulk Order Upload</div>
+                    <div class="upload-description">Upload Excel/CSV files with multiple orders</div>
+                    <button class="upload-btn">Upload File</button>
+                    <input type="file" id="bulkFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleBulkUpload(event)">
+                </div>
+                <div class="upload-option">
+                    <div class="upload-icon">🔄</div>
+                    <div class="upload-title">IBP System Sync</div>
+                    <div class="upload-description">Sync directly with IBP forecasting system</div>
+                    <button class="sync-btn" onclick="syncWithIBP()">Sync with IBP</button>
+                    <button class="sync-btn" onclick="syncWithSAP()">Sync with SAP</button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -638,12 +461,12 @@
         function handleCoordinationEvent(event) {
             switch(event.type) {
                 case 'equipment_failure':
-                    showAlert('Production disruption detected - Check AI Optimizer for customer impact scenarios');
-                    updateFulfillmentStatus('warning');
+                    showAlert('Production disruption detected - 3 customer orders may be impacted');
+                    updateCustomerImpact();
                     break;
                 case 'bulk_order_sync':
-                    showAlert('Bulk orders processed - All systems updated automatically');
-                    addNewOrders();
+                    showAlert('Bulk orders processed successfully');
+                    updateOrderCounts();
                     break;
                 case 'reset':
                     resetDashboard();
@@ -658,43 +481,70 @@
             setTimeout(() => banner.classList.remove('show'), 8000);
         }
 
-        function updateFulfillmentStatus(status) {
-            const statusElement = document.getElementById('fulfillmentStatus');
-            if (status === 'warning') {
-                statusElement.className = 'card-status status-warning';
-                statusElement.textContent = 'At Risk';
-            } else {
-                statusElement.className = 'card-status status-operational';
-                statusElement.textContent = 'On Track';
-            }
+        function updateCustomerImpact() {
+            // Production issue affects fulfillment
+            document.getElementById('currentOutput').textContent = '620 MT/day';
+            document.getElementById('availableCapacity').textContent = '0 MT';
+            document.getElementById('capacityStatus').className = 'card-status status-warning';
+            document.getElementById('capacityStatus').textContent = 'Limited';
+            
+            document.getElementById('fulfillmentStatus').className = 'card-status status-warning';
+            document.getElementById('fulfillmentStatus').textContent = 'At Risk';
+            
+            document.getElementById('atRiskCount').textContent = '3';
+            document.getElementById('atRiskStatus').className = 'card-status status-warning';
+            document.getElementById('atRiskStatus').textContent = '3 Orders';
+            document.getElementById('atRiskDetail').textContent = 'ME6 shutdown impacting 3 customer commitments';
+            
+            // Mark affected orders
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows[1].querySelector('.order-status').className = 'order-status status-at-risk';
+            rows[1].querySelector('.order-status').textContent = 'At Risk';
+            rows[3].querySelector('.order-status').className = 'order-status status-at-risk';
+            rows[3].querySelector('.order-status').textContent = 'At Risk';
         }
 
-        function addNewOrders() {
-            const tbody = document.getElementById('ordersTableBody');
-            const newRow = tbody.insertRow(0);
-            newRow.innerHTML = `
-                <td>#ORD-2851</td>
-                <td>New Customer (Bulk Upload)</td>
-                <td>3,200</td>
-                <td>Nov 12, 2025</td>
-                <td><span class="order-status status-pending">⏳ Processing</span></td>
-                <td><button class="sync-btn" onclick="window.location.href='optimizer.html'" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ask AI</button></td>
-            `;
-            newRow.style.animation = 'slideDown 0.5s ease';
+        function updateOrderCounts() {
+            document.getElementById('newOrders').textContent = '13';
+            document.getElementById('confirmedOrders').textContent = '28';
         }
 
         function resetDashboard() {
             document.getElementById('alertsBanner').classList.remove('show');
-            updateFulfillmentStatus('operational');
+            document.getElementById('currentOutput').textContent = '965 MT/day';
+            document.getElementById('availableCapacity').textContent = '800 MT';
+            document.getElementById('capacityStatus').className = 'card-status status-operational';
+            document.getElementById('capacityStatus').textContent = 'Available';
+            
+            document.getElementById('fulfillmentStatus').className = 'card-status status-operational';
+            document.getElementById('fulfillmentStatus').textContent = 'On Track';
+            
+            document.getElementById('atRiskCount').textContent = '0';
+            document.getElementById('atRiskStatus').className = 'card-status status-operational';
+            document.getElementById('atRiskStatus').textContent = 'None';
+            document.getElementById('atRiskDetail').textContent = 'No active production disruptions';
+            
+            document.getElementById('newOrders').textContent = '8';
+            document.getElementById('confirmedOrders').textContent = '23';
+            
+            // Reset order statuses
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows[1].querySelector('.order-status').className = 'order-status status-confirmed';
+            rows[1].querySelector('.order-status').textContent = 'Confirmed';
+            rows[3].querySelector('.order-status').className = 'order-status status-pending';
+            rows[3].querySelector('.order-status').textContent = 'Pending Allocation';
         }
 
         function handleBulkUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                showAlert('Processing bulk order file: ' + file.name);
+                showAlert(`Bulk upload initiated: ${file.name}`);
+                // Simulate processing
                 setTimeout(() => {
-                    broadcastToStakeholders('bulk_order_sync', { file: file.name, orders: 25 });
-                    addNewOrders();
+                    updateOrderCounts();
+                    showAlert('Bulk orders processed successfully');
                 }, 2000);
             }
         }
@@ -702,45 +552,26 @@
         function syncWithIBP() {
             showAlert('Syncing with IBP system...');
             setTimeout(() => {
-                showAlert('IBP sync complete - All forecasts updated across systems');
-            }, 2000);
+                document.getElementById('lastIbpSync').textContent = 'Just now';
+                showAlert('IBP sync completed successfully');
+            }, 1500);
         }
 
         function syncWithSAP() {
             showAlert('Syncing with SAP system...');
             setTimeout(() => {
-                showAlert('SAP sync complete - Production schedules updated');
-            }, 2000);
+                document.getElementById('lastIbpSync').textContent = 'Just now';
+                showAlert('SAP sync completed successfully');
+            }, 1500);
         }
 
-        function broadcastToStakeholders(eventType, data) {
-            const broadcastData = {
-                type: eventType,
-                timestamp: new Date().toISOString(),
-                source: 'sales_team',
-                data: data
-            };
-
-            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
-            
-            setTimeout(() => {
-                localStorage.removeItem('evonik_coordination_event');
-            }, 1000);
-        }
-
-        // Auto-update sync time
-        function updateSyncTime() {
-            const now = new Date();
-            const minutes = Math.floor(Math.random() * 8) + 3;
-            document.getElementById('lastIbpSync').textContent = `${minutes} min ago`;
-        }
-
-        setInterval(updateSyncTime, 60000);
-
-        // Initialize
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Sales Team Dashboard initialized');
-            console.log('IBP-SAP automation active');
+            // Set initial sync time
+            document.getElementById('lastIbpSync').textContent = '5 min ago';
+            
+            // Update notification count
+            document.getElementById('notificationsSent').textContent = '12';
         });
     </script>
 </body>

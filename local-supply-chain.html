@@ -4,420 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local Supply Chain Dashboard - Jason Neo</title>
+    <link rel="stylesheet" href="shared-styles.css">
     <style>
-        :root {
-            --evonik-purple: #8B2E8B;
-            --supply-orange: #EA580C;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --border-gray: #E5E7EB;
-            --bg-gray: #F9FAFB;
-            --success-green: #16A34A;
-            --warning-orange: #EA580C;
-            --alert-red: #DC2626;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-gray);
-            color: var(--text-dark);
-        }
-
+        /* Page-specific styles for local-supply-chain.html */
         .header {
             background: linear-gradient(135deg, var(--supply-orange) 0%, #C2410C 100%);
-            color: white;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .back-nav {
-            background: white;
-            border-bottom: 2px solid var(--border-gray);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-btn {
-            color: var(--evonik-purple);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
         }
 
         .back-btn:hover {
             color: var(--supply-orange);
         }
 
-        .breadcrumb {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .optimizer-btn {
-            padding: 0.75rem 1.5rem;
-            background: linear-gradient(135deg, var(--evonik-purple), #A855F7);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(139, 46, 139, 0.3);
-        }
-
-        .optimizer-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(139, 46, 139, 0.4);
-        }
-
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .alerts-banner {
-            background: var(--alert-red);
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        .alerts-banner.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            border: 1px solid var(--border-gray);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .card-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status-operational {
-            background: rgba(22, 163, 74, 0.1);
-            color: var(--success-green);
-        }
-
-        .status-warning {
-            background: rgba(234, 88, 12, 0.1);
-            color: var(--warning-orange);
-        }
-
-        .metric {
-            margin: 0.75rem 0;
-        }
-
-        .metric-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 0.25rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .sap-excel-panel {
-            background: linear-gradient(to right, rgba(234, 88, 12, 0.05), white);
-            border: 2px solid var(--supply-orange);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .sap-excel-panel h3 {
-            color: var(--supply-orange);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .automation-highlight {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border-left: 4px solid var(--success-green);
-        }
-
-        .automation-highlight h4 {
-            color: var(--success-green);
-            margin-bottom: 0.5rem;
-        }
-
-        .automation-highlight p {
-            line-height: 1.6;
-            margin: 0.5rem 0;
-        }
-
-        .excel-mockup {
-            background: white;
-            border: 2px solid var(--border-gray);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-        }
-
-        .excel-header {
-            background: #217346;
-            color: white;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .excel-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0.5rem;
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border-gray);
-        }
-
-        .excel-row:hover {
-            background: rgba(234, 88, 12, 0.05);
-        }
-
-        .excel-cell {
-            padding: 0.25rem;
-        }
-
-        .excel-cell.header {
-            font-weight: 600;
-            color: var(--supply-orange);
-        }
-
-        .jason-highlight {
-            background: linear-gradient(135deg, rgba(234, 88, 12, 0.1), rgba(168, 85, 247, 0.1));
-            border: 2px solid var(--supply-orange);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .jason-highlight h3 {
-            color: var(--supply-orange);
-            margin-bottom: 1rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .stat-box {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--success-green);
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 0.25rem;
-        }
-
-        .raw-materials-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-            margin-bottom: 2rem;
-        }
-
         .materials-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            gap: 1.5rem;
             margin-top: 1rem;
         }
 
         .material-card {
             background: var(--bg-gray);
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             border: 2px solid var(--border-gray);
+            transition: border-color 0.3s;
+        }
+
+        .material-card:hover {
+            border-color: var(--supply-orange);
+        }
+
+        .material-card.critical {
+            border-color: var(--alert-red);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .material-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
         }
 
         .material-name {
             font-weight: 600;
             color: var(--text-dark);
-            margin-bottom: 0.5rem;
         }
 
-        .material-stock {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
-        }
-
-        .stock-status {
+        .material-status {
             padding: 0.25rem 0.75rem;
             border-radius: 12px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
-            display: inline-block;
         }
 
-        .stock-adequate {
+        .status-adequate {
             background: rgba(22, 163, 74, 0.1);
             color: var(--success-green);
         }
 
-        .stock-low {
+        .status-monitor {
             background: rgba(234, 88, 12, 0.1);
             color: var(--warning-orange);
         }
 
-        .ai-suggest-btn {
-            background: var(--evonik-purple);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            transition: all 0.3s;
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
         }
 
-        .ai-suggest-btn:hover {
-            background: #A855F7;
-            transform: translateY(-1px);
+        .material-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .material-metric-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .material-metric-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .procurement-table tr:hover {
+            background: rgba(234, 88, 12, 0.05);
+        }
+
+        .sync-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .sync-module {
+            padding: 1rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            border-left: 4px solid var(--success-green);
+        }
+
+        .sync-module.warning {
+            border-left-color: var(--warning-orange);
+        }
+
+        .sync-module-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sync-time {
+            font-size: 0.85rem;
+            color: var(--text-light);
         }
 
         @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
             .materials-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .sync-detail-grid {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
             .materials-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .excel-row {
-                grid-template-columns: 1fr;
-                font-size: 0.75rem;
             }
         }
     </style>
@@ -429,11 +146,11 @@
                 <div class="logo">📊 Evonik</div>
                 <div>
                     <div style="font-size: 1.2rem; font-weight: 600;">Local Supply Chain Dashboard</div>
-                    <div style="font-size: 0.9rem; opacity: 0.9;">SAP-Excel Automation & Smart Procurement - Singapore</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Inventory & Procurement Management - Singapore</div>
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">👤 Jason Neo</div>
+                <div style="font-size: 1.1rem; font-weight: 600;">Jason Neo</div>
                 <div style="font-size: 0.9rem; opacity: 0.9;">Local Supply Chain Manager</div>
             </div>
         </div>
@@ -443,64 +160,147 @@
         <div class="nav-content">
             <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
             <a href="optimizer.html" class="optimizer-btn">
-                🤖 Ask AI Optimizer
+                AI Decision Support
             </a>
-            <div class="breadcrumb">Local Supply Chain Dashboard</div>
+            <div class="breadcrumb">Local Supply Chain</div>
         </div>
     </nav>
 
     <div class="alerts-banner" id="alertsBanner">
-        <strong>🚨 SUPPLY CHAIN ALERT:</strong> <span id="alertMessage"></span>
+        <strong>SUPPLY CHAIN ALERT:</strong> <span id="alertMessage"></span>
     </div>
 
     <main class="main-content">
-        <!-- Jason's Digital Transformation Success -->
-        <div class="jason-highlight">
-            <h3>🎯 Jason Neo's Digital Transformation Impact</h3>
-            <p>Revolutionary SAP-Excel automation eliminating manual work and enabling real-time coordination</p>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-value">2.5 hrs</div>
-                    <div class="stat-label">Daily Time Saved</div>
+        <!-- SAP Integration Status -->
+        <h2 class="section-title">SAP Integration Status</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sync Health</div>
+                    <div class="card-status status-operational" id="syncHealth">Active</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value">15-20 hrs</div>
-                    <div class="stat-label">Weekly Efficiency Gain</div>
+                <div class="metric">
+                    <div class="metric-label">Last Sync</div>
+                    <div class="metric-value" id="lastSync">2 min ago</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value">$39K</div>
-                    <div class="stat-label">Annual Cost Savings</div>
+                <div class="metric">
+                    <div class="metric-label">Next Sync</div>
+                    <div class="metric-value">3 min</div>
+                    <div class="metric-subtext">Auto-sync every 5 minutes</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Data Freshness</div>
+                    <div class="card-status status-operational">Current</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Production Data</div>
+                    <div class="metric-value" style="font-size: 1rem;">2 min ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Inventory Data</div>
+                    <div class="metric-value" style="font-size: 1rem;">2 min ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">PO Data</div>
+                    <div class="metric-value" style="font-size: 1rem;">5 min ago</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sync Errors</div>
+                    <div class="card-status status-operational" id="syncErrors">None</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last 24 Hours</div>
+                    <div class="metric-value">0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Failed Sync</div>
+                    <div class="metric-value" style="font-size: 1rem;">Oct 18</div>
+                    <div class="metric-subtext">MM module timeout (resolved)</div>
                 </div>
             </div>
         </div>
 
-        <h2>📊 Real-Time Inventory & Procurement Management</h2>
-        
-        <!-- Key Metrics with Real Data -->
+        <!-- Procurement Overview -->
+        <h2 class="section-title">Procurement Pipeline</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Tank Inventory</div>
-                    <div class="card-status status-operational" id="tankStatus">Safe Zone</div>
+                    <div class="card-title">Open Purchase Orders</div>
+                    <div class="card-status status-operational">12 active</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Value</div>
+                    <div class="metric-value">$2.8M</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Urgent Items</div>
+                    <div class="metric-value" style="color: var(--warning-orange);" id="urgentPOs">2</div>
+                    <div class="metric-subtext">Require confirmation</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Deliveries This Week</div>
+                    <div class="card-status status-operational">5 expected</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On Schedule</div>
+                    <div class="metric-value">4</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Delayed</div>
+                    <div class="metric-value" style="color: var(--warning-orange);" id="delayedDeliveries">1</div>
+                    <div class="metric-subtext">Methanol - 2 days late</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Supplier Performance</div>
+                    <div class="card-status status-operational">Good</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On-Time Delivery Rate</div>
+                    <div class="metric-value">94%</div>
+                    <div class="metric-subtext">Last 30 days</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Quality Issues</div>
+                    <div class="metric-value">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Inventory -->
+        <h2 class="section-title">Current Inventory Status</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Finished Product Tank</div>
+                    <div class="card-status status-operational" id="tankStatus">Safe</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Current Level</div>
                     <div class="metric-value" id="tankLevel">4,200 MT</div>
+                    <div class="metric-subtext">Safe range: 3,000 - 6,000 MT</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Working Capacity</div>
                     <div class="metric-value">6,300 MT</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Safe Range</div>
-                    <div class="metric-value" style="font-size: 1rem;">3K - 6K MT</div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Co-mingled Inventory</div>
-                    <div class="card-status status-operational">Active</div>
+                    <div class="card-status status-operational">Allocated</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Mitsui Allocation</div>
@@ -518,162 +318,181 @@
 
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">SAP Integration</div>
-                    <div class="card-status status-operational" id="sapStatus">Live Sync</div>
+                    <div class="card-title">Consumption Rate</div>
+                    <div class="card-status status-operational">Normal</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Last Sync</div>
-                    <div class="metric-value" id="lastSync">2 min ago</div>
+                    <div class="metric-label">Daily Average</div>
+                    <div class="metric-value" id="consumptionRate">965 MT/day</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Auto-Sync Frequency</div>
-                    <div class="metric-value" style="font-size: 1rem;">Every 5 min</div>
+                    <div class="metric-label">Days Coverage</div>
+                    <div class="metric-value" id="daysCoverage">4.3 days</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-label">Manual Work</div>
-                    <div class="metric-value" style="color: var(--success-green); font-size: 1rem;">Eliminated</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Procurement Status</div>
-                    <div class="card-status status-operational" id="procurementStatus">On Track</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Active Orders</div>
-                    <div class="metric-value">12</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Pending Deliveries</div>
-                    <div class="metric-value">3,200 MT</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Lead Time Accuracy</div>
-                    <div class="metric-value" style="color: var(--success-green);">96%</div>
+                    <div class="metric-label">Trend</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Stable</div>
                 </div>
             </div>
         </div>
 
-        <!-- SAP-Excel Revolutionary Automation -->
-        <div class="sap-excel-panel">
-            <h3>🔄 Revolutionary SAP-Excel Automation</h3>
-            <div class="automation-highlight">
-                <h4>📈 Jason Neo's Digital Transformation Success Story</h4>
-                <p><strong>Before:</strong> Manual SAP data extraction (2-3 hours daily) → Excel maintenance → Email coordination → 1-2 week delays</p>
-                <p><strong>After:</strong> Automated sync every 5 minutes → Real-time Excel updates → Instant cross-system coordination → Information silos eliminated</p>
-                <p><strong>Business Impact:</strong> 15-20 hours weekly time savings + $300K coordination failure prevention + 85% faster decision-making</p>
-            </div>
-            
-            <div class="excel-mockup">
-                <div class="excel-header">📋 Live Production Planning Sheet (Auto-Updated from SAP)</div>
-                <div class="excel-row">
-                    <div class="excel-cell header">Date</div>
-                    <div class="excel-cell header">ME5 Output (MT)</div>
-                    <div class="excel-cell header">ME6 Output (MT)</div>
-                    <div class="excel-cell header">Tank Level (MT)</div>
-                    <div class="excel-cell header">Status</div>
-                </div>
-                <div class="excel-row">
-                    <div class="excel-cell">Oct 23</div>
-                    <div class="excel-cell">620</div>
-                    <div class="excel-cell">345</div>
-                    <div class="excel-cell">4,200</div>
-                    <div class="excel-cell" style="color: var(--success-green);">✓ On Track</div>
-                </div>
-                <div class="excel-row">
-                    <div class="excel-cell">Oct 24</div>
-                    <div class="excel-cell">615</div>
-                    <div class="excel-cell">350</div>
-                    <div class="excel-cell">4,165</div>
-                    <div class="excel-cell" style="color: var(--success-green);">✓ Forecast</div>
-                </div>
-                <div class="excel-row">
-                    <div class="excel-cell">Oct 25</div>
-                    <div class="excel-cell">620</div>
-                    <div class="excel-cell">345</div>
-                    <div class="excel-cell">4,130</div>
-                    <div class="excel-cell" style="color: var(--success-green);">✓ Forecast</div>
-                </div>
-            </div>
-            <p style="margin-top: 1rem; font-style: italic; color: var(--text-light);">
-                ⚡ Live data automatically synced from SAP every 5 minutes. No manual entry required. 
-                Jason's 2-3 hours daily manual work completely eliminated.
-            </p>
-        </div>
-
-        <!-- Raw Materials Tracking -->
-        <div class="raw-materials-section">
-            <h3>🛢️ Raw Materials Inventory (Real-Time OAS Integration)</h3>
+        <!-- Raw Materials -->
+        <div class="section-panel">
+            <h3 class="section-title">Raw Materials Status</h3>
             <div class="materials-grid">
                 <div class="material-card">
-                    <div class="material-name">Hydrogen (H2)</div>
-                    <div class="material-stock">4,800 MT</div>
-                    <div class="stock-status stock-adequate">✓ Adequate</div>
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                        Consumption: 85 MT/day<br>
-                        Days coverage: 56 days
-                    </p>
-                    <button class="ai-suggest-btn" onclick="window.location.href='optimizer.html'">
-                        Ask AI about H2 optimization
-                    </button>
+                    <div class="material-header">
+                        <div class="material-name">Hydrogen (H2)</div>
+                        <div class="material-status status-adequate">Adequate</div>
+                    </div>
+                    <div class="material-metrics">
+                        <div>
+                            <div class="material-metric-label">Current Stock</div>
+                            <div class="material-metric-value" id="h2Stock">4,800 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Consumption</div>
+                            <div class="material-metric-value">85 MT/day</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Reorder Point</div>
+                            <div class="material-metric-value">2,500 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Lead Time</div>
+                            <div class="material-metric-value">14 days</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="material-card">
-                    <div class="material-name">MMP (Methyl Mercaptopropionaldehyde)</div>
-                    <div class="material-stock">1,850 MT</div>
-                    <div class="stock-status stock-adequate">✓ Adequate</div>
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                        Consumption: 42 MT/day<br>
-                        Days coverage: 44 days
-                    </p>
-                    <button class="ai-suggest-btn" onclick="window.location.href='optimizer.html'">
-                        Ask AI about MMP levels
-                    </button>
+                    <div class="material-header">
+                        <div class="material-name">MMP</div>
+                        <div class="material-status status-adequate">Adequate</div>
+                    </div>
+                    <div class="material-metrics">
+                        <div>
+                            <div class="material-metric-label">Current Stock</div>
+                            <div class="material-metric-value" id="mmpStock">1,850 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Consumption</div>
+                            <div class="material-metric-value">42 MT/day</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Reorder Point</div>
+                            <div class="material-metric-value">1,200 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Lead Time</div>
+                            <div class="material-metric-value">21 days</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="material-card">
-                    <div class="material-name">Methanol (CH3OH)</div>
-                    <div class="material-stock">980 MT</div>
-                    <div class="stock-status stock-low">⚠️ Monitor</div>
-                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
-                        Consumption: 38 MT/day<br>
-                        Days coverage: 26 days
-                    </p>
-                    <button class="ai-suggest-btn" onclick="window.location.href='optimizer.html'">
-                        Ask AI for replenishment plan
-                    </button>
+                <div class="material-card" id="methanolCard">
+                    <div class="material-header">
+                        <div class="material-name">Methanol (CH3OH)</div>
+                        <div class="material-status status-monitor" id="methanolStatus">Monitor</div>
+                    </div>
+                    <div class="material-metrics">
+                        <div>
+                            <div class="material-metric-label">Current Stock</div>
+                            <div class="material-metric-value" id="methanolStock">980 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Consumption</div>
+                            <div class="material-metric-value">38 MT/day</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Reorder Point</div>
+                            <div class="material-metric-value">800 MT</div>
+                        </div>
+                        <div>
+                            <div class="material-metric-label">Lead Time</div>
+                            <div class="material-metric-value">18 days</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- OAS Integration Status -->
-        <div class="card" style="grid-column: span 4;">
-            <div class="card-header">
-                <div class="card-title">🔗 OAS Real-Time Data Integration</div>
-                <div class="card-status status-operational">Connected</div>
+        <!-- Active Purchase Orders -->
+        <div class="section-panel">
+            <h3 class="section-title">Active Purchase Orders</h3>
+            <table class="procurement-table">
+                <thead>
+                    <tr>
+                        <th>PO Number</th>
+                        <th>Material</th>
+                        <th>Quantity</th>
+                        <th>Supplier</th>
+                        <th>Expected Delivery</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="poTableBody">
+                    <tr>
+                        <td>PO-2847</td>
+                        <td>Hydrogen</td>
+                        <td>1,500 MT</td>
+                        <td>Supplier A</td>
+                        <td>Oct 28, 2025</td>
+                        <td><span class="po-status po-transit">In Transit</span></td>
+                    </tr>
+                    <tr>
+                        <td>PO-2848</td>
+                        <td>Methanol</td>
+                        <td>850 MT</td>
+                        <td>Supplier B</td>
+                        <td>Oct 26, 2025</td>
+                        <td><span class="po-status po-urgent">Delayed 2d</span></td>
+                    </tr>
+                    <tr>
+                        <td>PO-2849</td>
+                        <td>MMP</td>
+                        <td>600 MT</td>
+                        <td>Supplier C</td>
+                        <td>Nov 2, 2025</td>
+                        <td><span class="po-status po-open">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>PO-2850</td>
+                        <td>Hydrogen</td>
+                        <td>2,000 MT</td>
+                        <td>Supplier A</td>
+                        <td>Nov 5, 2025</td>
+                        <td><span class="po-status po-open">Awaiting Confirmation</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SAP Module Sync Details -->
+        <div class="section-panel">
+            <h3 class="section-title">SAP Module Sync Details</h3>
+            <div class="sync-detail-grid">
+                <div class="sync-module">
+                    <div class="sync-module-name">MM (Materials Management)</div>
+                    <div class="sync-time">Last sync: 2 minutes ago</div>
+                    <div class="sync-time">Status: Active | No errors</div>
+                </div>
+                <div class="sync-module">
+                    <div class="sync-module-name">PP (Production Planning)</div>
+                    <div class="sync-time">Last sync: 2 minutes ago</div>
+                    <div class="sync-time">Status: Active | No errors</div>
+                </div>
+                <div class="sync-module">
+                    <div class="sync-module-name">IM (Inventory Management)</div>
+                    <div class="sync-time">Last sync: 2 minutes ago</div>
+                    <div class="sync-time">Status: Active | No errors</div>
+                </div>
+                <div class="sync-module">
+                    <div class="sync-module-name">PUR (Purchasing)</div>
+                    <div class="sync-time">Last sync: 5 minutes ago</div>
+                    <div class="sync-time">Status: Active | No errors</div>
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
-                <div class="metric">
-                    <div class="metric-label">Data Refresh Rate</div>
-                    <div class="metric-value" style="font-size: 1.2rem;">1 minute</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Reports Available</div>
-                    <div class="metric-value" style="font-size: 1.2rem;">12 types</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Connection Status</div>
-                    <div class="metric-value" style="font-size: 1.2rem; color: var(--success-green);">🟢 Live</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">API Integration</div>
-                    <div class="metric-value" style="font-size: 1.2rem; color: var(--success-green);">Active</div>
-                </div>
-            </div>
-            <p style="margin-top: 1rem; padding: 1rem; background: rgba(22, 163, 74, 0.1); border-radius: 8px;">
-                <strong>✓ Automated Data Flow:</strong> OAS → SAP (midnight API) → Excel (5-min sync) → All stakeholders (instant coordination)
-            </p>
         </div>
     </main>
 
@@ -689,11 +508,12 @@
         function handleCoordinationEvent(event) {
             switch(event.type) {
                 case 'equipment_failure':
-                    showAlert('ME6 Shutdown Detected - Check AI Optimizer for scenarios');
-                    updateInventoryImpact();
+                    showAlert('ME6 shutdown detected - Monitor tank depletion rate');
+                    updateConsumptionImpact();
                     break;
                 case 'supply_chain_adjustment':
-                    showAlert('Raw Material Delay - Automated inventory adjustment active');
+                    showAlert('Methanol shipment delayed - Alternative sourcing required');
+                    updateMethanolDelay();
                     break;
                 case 'reset':
                     resetDashboard();
@@ -708,18 +528,35 @@
             setTimeout(() => banner.classList.remove('show'), 8000);
         }
 
-        function updateInventoryImpact() {
-            const tankLevel = document.getElementById('tankLevel');
-            tankLevel.textContent = '4,150 MT';
-            document.getElementById('tankStatus').textContent = 'Monitoring';
-            document.getElementById('tankStatus').className = 'card-status status-warning';
+        function updateConsumptionImpact() {
+            // Tank will deplete faster with reduced production
+            document.getElementById('consumptionRate').textContent = '620 MT/day';
+            document.getElementById('daysCoverage').textContent = '6.8 days';
+        }
+
+        function updateMethanolDelay() {
+            const methanolCard = document.getElementById('methanolCard');
+            methanolCard.classList.add('critical');
+            document.getElementById('methanolStock').textContent = '780 MT';
+            document.getElementById('methanolStatus').className = 'material-status status-critical';
+            document.getElementById('methanolStatus').textContent = 'Critical';
+            document.getElementById('delayedDeliveries').textContent = '1';
+            document.getElementById('urgentPOs').textContent = '3';
         }
 
         function resetDashboard() {
             document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('consumptionRate').textContent = '965 MT/day';
+            document.getElementById('daysCoverage').textContent = '4.3 days';
             document.getElementById('tankLevel').textContent = '4,200 MT';
-            document.getElementById('tankStatus').textContent = 'Safe Zone';
-            document.getElementById('tankStatus').className = 'card-status status-operational';
+            
+            const methanolCard = document.getElementById('methanolCard');
+            methanolCard.classList.remove('critical');
+            document.getElementById('methanolStock').textContent = '980 MT';
+            document.getElementById('methanolStatus').className = 'material-status status-monitor';
+            document.getElementById('methanolStatus').textContent = 'Monitor';
+            document.getElementById('delayedDeliveries').textContent = '1';
+            document.getElementById('urgentPOs').textContent = '2';
         }
 
         // Auto-update sync time
@@ -734,7 +571,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Local Supply Chain Dashboard initialized');
-            console.log('Jason Neo - SAP-Excel automation active');
+            console.log('Jason Neo - SAP integration active');
         });
     </script>
 </body>

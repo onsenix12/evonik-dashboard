@@ -15,9 +15,10 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 - `global-supply-chain.html`: Global view. Simulates cross-site capacity rebalancing.
 - `local-supply-chain.html`: Local SC view. Simulates SAP/Excel-style procurement and inventory triggers.
 - `production.html`: Plant production view. Equipment status, OEE, maintenance, and predictive analytics.
- - `optimizer.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
+- `optimizer.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
+- `shared-styles.css`: Common CSS styles and design system used across all pages for consistent branding and UI components.
 
-> Each page is self-contained and includes styles and scripts inline for portability.
+> Pages now use shared styles for consistency while maintaining portability. Each page includes its own inline styles for page-specific elements.
 
 ---
 
@@ -105,7 +106,7 @@ Tested on recent versions of Chrome and Edge. Firefox works for most features. S
 
 ## Extending the Demo
 - Add real data sources or APIs by replacing the simulated event broadcasters.
-- If desired, extract shared styles/scripts into separate files and link them across pages.
+- Customize the design system by modifying `shared-styles.css` for consistent branding across all pages.
 - Persist event history by storing an array of events instead of transient keys.
 
 ---

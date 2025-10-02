@@ -5,45 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Decision Optimizer - Evonik Methionine Production</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="shared-styles.css">
     <style>
-        :root {
-            --evonik-purple: #8B2E8B;
-            --evonik-light-purple: #A855F7;
-            --evonik-dark-purple: #6B1B6B;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --border-gray: #E5E7EB;
-            --bg-gray: #F9FAFB;
-            --success-green: #16A34A;
-            --warning-orange: #EA580C;
-            --alert-red: #DC2626;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-gray);
-            color: var(--text-dark);
-        }
-
+        /* Page-specific styles for optimizer.html */
         .header {
             background: linear-gradient(135deg, var(--evonik-purple) 0%, var(--evonik-dark-purple) 100%);
-            color: white;
             padding: 1.5rem 2rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header-content {
             max-width: 1600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .header-title {
@@ -149,11 +121,6 @@
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -167,17 +134,6 @@
             display: flex;
             gap: 0.75rem;
             animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .message.user {
@@ -391,18 +347,6 @@
             border: 1px solid var(--border-gray);
         }
 
-        .metric-label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 0.5rem;
-        }
-
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
         .metric-change {
             font-size: 0.85rem;
             margin-top: 0.25rem;
@@ -418,17 +362,6 @@
             padding: 1.5rem;
             margin-bottom: 1rem;
             animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .scenario-card.recommended {
@@ -636,11 +569,43 @@
             }
         };
 
+        // Current operational data (aligned with other dashboards)
+        const operationalData = {
+            production: {
+                monthlyTarget: 29000,
+                currentProduction: 22620,
+                dailyOutput: 965,
+                me5Output: 620,
+                me6Output: 345,
+                me5MaxCapacity: 775,
+                me6MaxCapacity: 430
+            },
+            inventory: {
+                tankLevel: 4200,
+                tankCapacity: 6300,
+                safeRange: { min: 3000, max: 6000 },
+                mitsuiAllocation: 600,
+                akemaAllocation: 0,
+                heelStock: 836
+            },
+            costs: {
+                dailyCost: 78.5,
+                monthlyActual: 2.3,
+                monthlyBudget: 2.4,
+                costPerMT: 102
+            },
+            rawMaterials: {
+                h2: { stock: 4800, consumption: 85, leadTime: 14 },
+                mmp: { stock: 1850, consumption: 42, leadTime: 21 },
+                methanol: { stock: 980, consumption: 38, leadTime: 18 }
+            }
+        };
+
         // Initialize chat
         function initChat() {
             const greeting = roleContexts[currentRole].greeting;
             addSystemMessage(greeting);
-            addSystemMessage('I have access to real-time data from SAP, OAS, and IBP systems. What would you like to know?');
+            addSystemMessage('Current SAP sync: Active, last sync 2 min ago. I have access to real-time data from SAP, OAS, and IBP systems. What would you like to know?');
         }
 
         // Add message functions
@@ -738,10 +703,7 @@
                 addSystemMessage('I can help you with: production status, tank levels, cost analysis, and optimization scenarios. What would you like to explore?');
             }
 
-            // Auto-trigger crisis after 2-3 normal interactions
-            if (messageCount >= 2 && !crisisTriggered) {
-                setTimeout(triggerCrisis, 3000);
-            }
+            // Crisis will be triggered by demo events from index.html
         }
 
         // Visualization functions
@@ -749,21 +711,24 @@
             addSystemMessage('Here is your current production status for October 2025:');
             updateVizTitle('Production Status - ME5 & ME6 Units');
             
+            const data = operationalData.production;
+            const progress = Math.round((data.currentProduction / data.monthlyTarget) * 100);
+            
             const content = `
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Monthly Target</div>
-                        <div class="metric-value">29,000 MT</div>
+                        <div class="metric-value">${data.monthlyTarget.toLocaleString()} MT</div>
                         <div class="metric-change positive">▲ On track</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Current Production</div>
-                        <div class="metric-value">22,620 MT</div>
-                        <div class="metric-change positive">▲ 78% complete</div>
+                        <div class="metric-value">${data.currentProduction.toLocaleString()} MT</div>
+                        <div class="metric-change positive">▲ ${progress}% complete</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Daily Average</div>
-                        <div class="metric-value">965 MT/day</div>
+                        <div class="metric-value">${data.dailyOutput} MT/day</div>
                         <div class="metric-change positive">▲ Above baseline</div>
                     </div>
                 </div>
@@ -826,22 +791,26 @@
             addSystemMessage('Current tank inventory status:');
             updateVizTitle('Tank Capacity & Inventory Levels');
             
+            const data = operationalData.inventory;
+            const utilization = Math.round((data.tankLevel / data.tankCapacity) * 100);
+            const availableSpace = data.tankCapacity - data.tankLevel;
+            
             const content = `
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Current Inventory</div>
-                        <div class="metric-value">4,200 MT</div>
-                        <div class="metric-change positive">▲ Safe zone (3K-6K)</div>
+                        <div class="metric-value">${data.tankLevel.toLocaleString()} MT</div>
+                        <div class="metric-change positive">▲ Safe zone (${data.safeRange.min}K-${data.safeRange.max}K)</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Tank Capacity</div>
-                        <div class="metric-value">6,300 MT</div>
-                        <div class="metric-change neutral">67% utilized</div>
+                        <div class="metric-value">${data.tankCapacity.toLocaleString()} MT</div>
+                        <div class="metric-change neutral">${utilization}% utilized</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Available Space</div>
-                        <div class="metric-value">2,100 MT</div>
-                        <div class="metric-change positive">▲ 33% buffer</div>
+                        <div class="metric-value">${availableSpace.toLocaleString()} MT</div>
+                        <div class="metric-change positive">▲ ${Math.round((availableSpace / data.tankCapacity) * 100)}% buffer</div>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -849,10 +818,10 @@
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(22, 163, 74, 0.1); border-left: 4px solid #16A34A; border-radius: 8px;">
                     <strong>Co-mingled Inventory:</strong><br>
-                    • Mitsui: 600 MT<br>
-                    • Akema: 0 MT<br>
-                    • Working Capacity Max: 6,300 MT<br>
-                    • Combined Heel Stock: 836 MT
+                    • Mitsui: ${data.mitsuiAllocation} MT<br>
+                    • Akema: ${data.akemaAllocation} MT<br>
+                    • Working Capacity Max: ${data.tankCapacity.toLocaleString()} MT<br>
+                    • Combined Heel Stock: ${data.heelStock} MT
                 </div>
             `;
             
@@ -899,22 +868,26 @@
             addSystemMessage('Here is your production cost analysis for October:');
             updateVizTitle('Production Cost Analysis');
             
+            const data = operationalData.costs;
+            const savings = data.monthlyBudget - data.monthlyActual;
+            const savingsPercent = Math.round((savings / data.monthlyBudget) * 100);
+            
             const content = `
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <div class="metric-label">Total Production Cost</div>
-                        <div class="metric-value">$2.3M</div>
-                        <div class="metric-change positive">▼ 5% vs forecast</div>
+                        <div class="metric-value">$${data.monthlyActual}M</div>
+                        <div class="metric-change positive">▼ ${savingsPercent}% vs budget</div>
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">Cost per MT</div>
-                        <div class="metric-value">$102</div>
+                        <div class="metric-value">$${data.costPerMT}</div>
                         <div class="metric-change positive">▼ Optimized</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-label">Savings This Month</div>
-                        <div class="metric-value">$125K</div>
-                        <div class="metric-change positive">▲ vs baseline</div>
+                        <div class="metric-label">Daily Cost</div>
+                        <div class="metric-value">$${data.dailyCost}K</div>
+                        <div class="metric-change positive">▲ Within budget</div>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -982,7 +955,7 @@
             // Hide quick actions during crisis
             document.getElementById('quickActions').style.display = 'none';
             
-            addSystemMessage('⚠️ ALERT: Unplanned equipment shutdown detected on ME6 unit at 14:23. Analyzing impact on production...', true);
+            addSystemMessage('⚠️ ALERT: ME6 unit offline - OAS sensor detection. Analyzing production impact...', true);
             
             setTimeout(() => {
                 showCrisisImpact();
@@ -990,7 +963,7 @@
         }
 
         function showCrisisImpact() {
-            addSystemMessage('Impact analysis complete. ME6 shutdown will reduce daily production by 180 MT. Estimated downtime: 3-5 days.');
+            addSystemMessage('Impact analysis complete. ME6 shutdown will reduce daily production by 345 MT. Estimated downtime: 3-5 days.');
             updateVizTitle('⚠️ Crisis Impact Analysis - ME6 Shutdown');
             
             const content = `
@@ -1004,8 +977,8 @@
                         </div>
                         <div>
                             <strong>Estimated Downtime:</strong> 3-5 days<br>
-                            <strong>Production Impact:</strong> -180 MT/day<br>
-                            <strong>Total Shortfall:</strong> 540-900 MT
+                            <strong>Production Impact:</strong> -345 MT/day<br>
+                            <strong>Total Shortfall:</strong> 1,035-1,725 MT
                         </div>
                     </div>
                 </div>
@@ -1014,10 +987,10 @@
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(139, 46, 139, 0.1); border-left: 4px solid #8B2E8B; border-radius: 8px;">
                     <strong>Current Situation:</strong><br>
-                    • Daily target: 965 MT → Reduced to 785 MT<br>
+                    • Daily target: 965 MT → Reduced to 620 MT<br>
                     • Monthly forecast at risk: 78% → 72% projected<br>
                     • Customer commitments may be impacted<br>
-                    • Tank inventory buffer: 4,200 MT (3-4 days coverage)
+                    • Tank inventory buffer: 4,200 MT (6.8 days coverage)
                 </div>
             `;
             
@@ -1032,7 +1005,7 @@
                     datasets: [
                         {
                             label: 'Daily Production (MT)',
-                            data: [965, 785, 920],
+                            data: [965, 620, 920],
                             backgroundColor: [
                                 'rgba(22, 163, 74, 0.6)',
                                 'rgba(220, 38, 38, 0.6)',
@@ -1100,7 +1073,7 @@
                     <div class="scenario-metrics">
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Cost Impact</div>
-                            <div class="scenario-metric-value value-positive">-$75K</div>
+                            <div class="scenario-metric-value value-positive">-$25K</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Timeline</div>
@@ -1113,15 +1086,15 @@
                     </div>
                     <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
                         <strong>Financial Analysis:</strong><br>
-                        • Increased utilities: +$45K<br>
+                        • Increased utilities & efficiency loss: +$95K<br>
                         • Avoided shortage penalty: -$120K<br>
-                        • <strong>Net Savings: $75K</strong>
+                        • <strong>Net Savings: $25K</strong>
                     </div>
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
-            addSystemMessage('Scenario A: Increase ME5 production by 20%. Net savings: $75K. Timeline: Immediate execution possible.');
+            addSystemMessage('Scenario A: Increase ME5 production by 20%. Net savings: $25K. Timeline: Immediate execution possible.');
             
             setTimeout(() => {
                 showScenarioB();
@@ -1231,14 +1204,14 @@
                         <div class="reason-item">
                             <div class="reason-icon">2</div>
                             <div class="reason-text">
-                                <strong>Best Financial Outcome:</strong> Net savings of $75K vs $60K cost (Scenario B) or $30K savings with high risk (Scenario C). 
+                                <strong>Best Financial Outcome:</strong> Net savings of $25K vs $60K cost (Scenario B) or $30K savings with high risk (Scenario C). 
                                 Clear economic advantage.
                             </div>
                         </div>
                         <div class="reason-item">
                             <div class="reason-icon">3</div>
                             <div class="reason-text">
-                                <strong>Tank Buffer Provides Safety:</strong> Current inventory of 4,200 MT provides 3-4 days coverage during ME5 ramp-up period. 
+                                <strong>Tank Buffer Provides Safety:</strong> Current inventory of 4,200 MT provides 6.8 days coverage during ME5 ramp-up period. 
                                 No immediate customer impact risk.
                             </div>
                         </div>
@@ -1359,9 +1332,30 @@
             document.getElementById('vizTimestamp').textContent = `Updated: ${now.toLocaleTimeString()}`;
         }
 
+        // Demo trigger detection
+        function checkForDemoTrigger() {
+            const eventData = localStorage.getItem('evonik_coordination_event');
+            if (eventData) {
+                const event = JSON.parse(eventData);
+                if (event.demo_trigger && event.type === 'equipment_failure') {
+                    // Clear the event to prevent re-triggering
+                    localStorage.removeItem('evonik_coordination_event');
+                    
+                    // Trigger crisis immediately
+                    setTimeout(() => {
+                        triggerCrisis();
+                    }, 1000);
+                }
+            }
+        }
+
+        // Check for demo triggers every 500ms
+        setInterval(checkForDemoTrigger, 500);
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initChat();
+            checkForDemoTrigger();
         });
     </script>
 </body>

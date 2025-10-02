@@ -485,6 +485,13 @@
                     <option value="global_sc">Global Supply Chain</option>
                 </select>
             </div>
+            <div class="scenario-selector" style="margin-left: 2rem;">
+                <label>Scenario Type:</label>
+                <select id="scenarioSelector" onchange="switchScenario()">
+                    <option value="equipment_failure">Equipment Failure</option>
+                    <option value="supply_delay">Supply Delay</option>
+                </select>
+            </div>
         </div>
         <div class="nav-links">
             <a href="index.html" class="nav-link">← Coordination Dashboard</a>
@@ -514,6 +521,8 @@
                     <button class="quick-action-btn" onclick="sendQuickMessage('Show current production status')">📊 Production Status</button>
                     <button class="quick-action-btn" onclick="sendQuickMessage('What are my tank levels?')">🛢️ Tank Levels</button>
                     <button class="quick-action-btn" onclick="sendQuickMessage('Show production costs')">💰 Cost Analysis</button>
+                    <button class="quick-action-btn" onclick="triggerCrisis('equipment_failure')" style="background: #FEF2F2; border-color: #DC2626; color: #DC2626;">⚠️ Equipment Failure</button>
+                    <button class="quick-action-btn" onclick="triggerCrisis('supply_delay')" style="background: #FEF2F2; border-color: #DC2626; color: #DC2626;">🚚 Supply Delay</button>
                 </div>
                 <div class="chat-input-wrapper">
                     <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything about your production planning..." onkeypress="handleKeyPress(event)">
@@ -544,6 +553,7 @@
         let conversationState = 'initial';
         let messageCount = 0;
         let crisisTriggered = false;
+        let currentScenarioType = 'equipment_failure'; // 'equipment_failure' or 'supply_delay'
 
         // Role-specific contexts
         const roleContexts = {
@@ -566,6 +576,117 @@
                 name: 'Global Supply Chain',
                 focus: 'cross-plant coordination, global inventory, strategic allocation',
                 greeting: 'Hello! I can help you with global coordination, multi-site optimization, and strategic planning.'
+            }
+        };
+
+        // Scenario-specific data models
+        const scenarioData = {
+            equipment_failure: {
+                name: "Equipment Failure",
+                description: "ME6 unit offline - OAS sensor detection",
+                impact: {
+                    productionReduction: 345, // MT/day
+                    downtime: "3-5 days",
+                    totalShortfall: "1,035-1,725 MT",
+                    affectedUnit: "ME6",
+                    detectionTime: "Oct 23, 2025 14:23"
+                },
+                scenarios: [
+                    {
+                        id: "A",
+                        title: "Increase ME5 Production",
+                        description: "Increase ME5 unit capacity by 20% to compensate for ME6 shutdown",
+                        costImpact: -25000,
+                        timeline: "Immediate",
+                        riskLevel: "Low",
+                        details: {
+                            increasedUtilities: 95000,
+                            avoidedShortagePenalty: -120000,
+                            netSavings: 25000
+                        }
+                    },
+                    {
+                        id: "B", 
+                        title: "Divert to Malaysia Plant",
+                        description: "Transfer production allocation to Malaysia facility",
+                        costImpact: 60000,
+                        timeline: "3 days",
+                        riskLevel: "Medium",
+                        details: {
+                            transferLogistics: 180000,
+                            avoidedShortagePenalty: -120000,
+                            netCost: 60000
+                        }
+                    },
+                    {
+                        id: "C",
+                        title: "Defer Customer Shipments", 
+                        description: "Negotiate shipment delays with customers using tank inventory buffer",
+                        costImpact: -30000,
+                        timeline: "2 days",
+                        riskLevel: "High",
+                        details: {
+                            demurrageFees: 90000,
+                            avoidedShortagePenalty: -120000,
+                            netSavings: 30000,
+                            customerRisk: true
+                        }
+                    }
+                ]
+            },
+            supply_delay: {
+                name: "Supply Delay",
+                description: "Critical raw material delivery delayed - H2 supply disruption",
+                impact: {
+                    productionReduction: 200, // MT/day
+                    downtime: "2-4 days", 
+                    totalShortfall: "400-800 MT",
+                    affectedMaterial: "H2 (Hydrogen)",
+                    detectionTime: "Oct 23, 2025 11:15"
+                },
+                scenarios: [
+                    {
+                        id: "A",
+                        title: "Activate Emergency H2 Reserves",
+                        description: "Use emergency hydrogen reserves and expedite alternative supplier",
+                        costImpact: -15000,
+                        timeline: "Immediate",
+                        riskLevel: "Low",
+                        details: {
+                            emergencyReserveCost: 25000,
+                            expeditedSupplier: 40000,
+                            avoidedShortagePenalty: -80000,
+                            netSavings: 15000
+                        }
+                    },
+                    {
+                        id: "B",
+                        title: "Reduce Production Rate",
+                        description: "Temporarily reduce ME5/ME6 production to 80% capacity",
+                        costImpact: 35000,
+                        timeline: "Immediate", 
+                        riskLevel: "Medium",
+                        details: {
+                            productionLoss: 115000,
+                            avoidedShortagePenalty: -80000,
+                            netCost: 35000
+                        }
+                    },
+                    {
+                        id: "C",
+                        title: "Switch to Alternative Feedstock",
+                        description: "Temporarily use alternative H2 source with quality adjustments",
+                        costImpact: 50000,
+                        timeline: "1 day",
+                        riskLevel: "High",
+                        details: {
+                            alternativeFeedstock: 130000,
+                            avoidedShortagePenalty: -80000,
+                            netCost: 50000,
+                            qualityRisk: true
+                        }
+                    }
+                ]
             }
         };
 
@@ -948,9 +1069,15 @@
         }
 
         // Crisis trigger
-        function triggerCrisis() {
+        function triggerCrisis(scenarioType = null) {
             crisisTriggered = true;
             conversationState = 'crisis';
+            
+            // Set scenario type if provided
+            if (scenarioType) {
+                currentScenarioType = scenarioType;
+                document.getElementById('scenarioSelector').value = scenarioType;
+            }
             
             // Hide quick actions during crisis
             document.getElementById('quickActions').style.display = 'none';
@@ -958,7 +1085,8 @@
             // Clear any existing messages
             document.getElementById('chatMessages').innerHTML = '';
             
-            addSystemMessage('⚠️ ALERT: ME6 unit offline - OAS sensor detection. Analyzing production impact...', true);
+            const scenario = scenarioData[currentScenarioType];
+            addSystemMessage(`⚠️ ALERT: ${scenario.description}. Analyzing production impact...`, true);
             
             setTimeout(() => {
                 showCrisisImpact();
@@ -966,22 +1094,25 @@
         }
 
         function showCrisisImpact() {
-            addSystemMessage('Impact analysis complete. ME6 shutdown will reduce daily production by 345 MT. Estimated downtime: 3-5 days.');
-            updateVizTitle('⚠️ Crisis Impact Analysis - ME6 Shutdown');
+            const scenario = scenarioData[currentScenarioType];
+            const impact = scenario.impact;
+            
+            addSystemMessage(`Impact analysis complete. ${scenario.name} will reduce daily production by ${impact.productionReduction} MT. Estimated downtime: ${impact.downtime}.`);
+            updateVizTitle(`⚠️ Crisis Impact Analysis - ${scenario.name}`);
             
             const content = `
                 <div style="background: #FEF2F2; border: 2px solid #DC2626; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <h3 style="color: #DC2626; margin-bottom: 1rem;">⚠️ Unplanned Shutdown Alert</h3>
+                    <h3 style="color: #DC2626; margin-bottom: 1rem;">⚠️ ${scenario.name} Alert</h3>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                         <div>
-                            <strong>Equipment:</strong> ME6 Unit<br>
-                            <strong>Status:</strong> Offline<br>
-                            <strong>Time:</strong> Oct 23, 2025 14:23
+                            <strong>${currentScenarioType === 'equipment_failure' ? 'Equipment' : 'Material'}:</strong> ${currentScenarioType === 'equipment_failure' ? impact.affectedUnit : impact.affectedMaterial}<br>
+                            <strong>Status:</strong> ${currentScenarioType === 'equipment_failure' ? 'Offline' : 'Delayed'}<br>
+                            <strong>Time:</strong> ${impact.detectionTime}
                         </div>
                         <div>
-                            <strong>Estimated Downtime:</strong> 3-5 days<br>
-                            <strong>Production Impact:</strong> -345 MT/day<br>
-                            <strong>Total Shortfall:</strong> 1,035-1,725 MT
+                            <strong>Estimated Downtime:</strong> ${impact.downtime}<br>
+                            <strong>Production Impact:</strong> -${impact.productionReduction} MT/day<br>
+                            <strong>Total Shortfall:</strong> ${impact.totalShortfall}
                         </div>
                     </div>
                 </div>
@@ -990,8 +1121,8 @@
                 </div>
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(139, 46, 139, 0.1); border-left: 4px solid #8B2E8B; border-radius: 8px;">
                     <strong>Current Situation:</strong><br>
-                    • Daily target: 965 MT → Reduced to 620 MT<br>
-                    • Monthly forecast at risk: 78% → 72% projected<br>
+                    • Daily target: 965 MT → Reduced to ${965 - impact.productionReduction} MT<br>
+                    • Monthly forecast at risk: 78% → ${Math.round(78 - (impact.productionReduction/965)*100)}% projected<br>
                     • Customer commitments may be impacted<br>
                     • Tank inventory buffer: 4,200 MT (6.8 days coverage)
                 </div>
@@ -999,16 +1130,20 @@
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Create impact chart
+            // Create impact chart with scenario-specific data
             const ctx = document.getElementById('impactChart').getContext('2d');
+            const beforeValue = 965;
+            const duringValue = beforeValue - impact.productionReduction;
+            const recoveryValue = beforeValue - Math.round(impact.productionReduction * 0.3);
+            
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Before Shutdown', 'During Shutdown', 'Recovery Period'],
+                    labels: ['Before Crisis', 'During Crisis', 'Recovery Period'],
                     datasets: [
                         {
                             label: 'Daily Production (MT)',
-                            data: [965, 620, 920],
+                            data: [beforeValue, duringValue, recoveryValue],
                             backgroundColor: [
                                 'rgba(22, 163, 74, 0.6)',
                                 'rgba(220, 38, 38, 0.6)',
@@ -1054,7 +1189,7 @@
 
         function showScenarios() {
             addSystemMessage('Analyzing optimization scenarios based on current constraints...');
-            updateVizTitle('Optimization Scenarios - Decision Support');
+            updateVizTitle(`Optimization Scenarios - ${scenarioData[currentScenarioType].name}`);
             
             // Show scenarios one by one
             setTimeout(() => {
@@ -1063,41 +1198,44 @@
         }
 
         function showScenarioA() {
+            const scenario = scenarioData[currentScenarioType].scenarios[0];
+            const details = scenario.details;
+            const costSign = scenario.costImpact < 0 ? '-' : '+';
+            const costValue = Math.abs(scenario.costImpact);
+            
             const content = `
                 <div class="scenario-card recommended">
                     <div class="scenario-header">
-                        <div class="scenario-title">📈 Scenario A: Increase ME5 Production</div>
+                        <div class="scenario-title">📈 Scenario A: ${scenario.title}</div>
                         <span class="scenario-badge badge-recommended">✓ RECOMMENDED</span>
                     </div>
                     <p style="margin: 1rem 0; line-height: 1.6;">
-                        Increase ME5 unit capacity by 20% to compensate for ME6 shutdown. 
-                        Utilize existing headroom and optimize runtime scheduling.
+                        ${scenario.description}
                     </p>
                     <div class="scenario-metrics">
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Cost Impact</div>
-                            <div class="scenario-metric-value value-positive">-$25K</div>
+                            <div class="scenario-metric-value ${scenario.costImpact < 0 ? 'value-positive' : 'value-negative'}">${costSign}$${costValue.toLocaleString()}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Timeline</div>
-                            <div class="scenario-metric-value value-positive">Immediate</div>
+                            <div class="scenario-metric-value value-positive">${scenario.timeline}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Risk Level</div>
-                            <div class="scenario-metric-value value-positive">Low</div>
+                            <div class="scenario-metric-value value-positive">${scenario.riskLevel}</div>
                         </div>
                     </div>
                     <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
                         <strong>Financial Analysis:</strong><br>
-                        • Increased utilities & efficiency loss: +$95K<br>
-                        • Avoided shortage penalty: -$120K<br>
-                        • <strong>Net Savings: $25K</strong>
+                        ${Object.entries(details).filter(([key, value]) => key !== 'netSavings' && key !== 'netCost' && key !== 'customerRisk' && key !== 'qualityRisk').map(([key, value]) => `• ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${value < 0 ? '-' : '+'}$${Math.abs(value).toLocaleString()}`).join('<br>')}<br>
+                        • <strong>Net ${scenario.costImpact < 0 ? 'Savings' : 'Cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}</strong>
                     </div>
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
-            addSystemMessage('Scenario A: Increase ME5 production by 20%. Net savings: $25K. Timeline: Immediate execution possible.');
+            addSystemMessage(`Scenario A: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
             
             setTimeout(() => {
                 showScenarioB();
@@ -1105,41 +1243,44 @@
         }
 
         function showScenarioB() {
+            const scenario = scenarioData[currentScenarioType].scenarios[1];
+            const details = scenario.details;
+            const costSign = scenario.costImpact < 0 ? '-' : '+';
+            const costValue = Math.abs(scenario.costImpact);
+            
             const existingContent = document.getElementById('vizContent').innerHTML;
             const content = existingContent + `
                 <div class="scenario-card">
                     <div class="scenario-header">
-                        <div class="scenario-title">🌏 Scenario B: Divert to Malaysia Plant</div>
+                        <div class="scenario-title">🌏 Scenario B: ${scenario.title}</div>
                     </div>
                     <p style="margin: 1rem 0; line-height: 1.6;">
-                        Transfer production allocation to Malaysia facility. 
-                        Requires cross-site coordination and logistics planning.
+                        ${scenario.description}
                     </p>
                     <div class="scenario-metrics">
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Cost Impact</div>
-                            <div class="scenario-metric-value value-negative">+$60K</div>
+                            <div class="scenario-metric-value ${scenario.costImpact < 0 ? 'value-positive' : 'value-negative'}">${costSign}$${costValue.toLocaleString()}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Timeline</div>
-                            <div class="scenario-metric-value value-neutral">3 days</div>
+                            <div class="scenario-metric-value value-neutral">${scenario.timeline}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Risk Level</div>
-                            <div class="scenario-metric-value value-neutral">Medium</div>
+                            <div class="scenario-metric-value value-neutral">${scenario.riskLevel}</div>
                         </div>
                     </div>
                     <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
                         <strong>Financial Analysis:</strong><br>
-                        • Transfer & logistics: +$180K<br>
-                        • Avoided shortage penalty: -$120K<br>
-                        • <strong>Net Cost: $60K</strong>
+                        ${Object.entries(details).filter(([key, value]) => key !== 'netSavings' && key !== 'netCost' && key !== 'customerRisk' && key !== 'qualityRisk').map(([key, value]) => `• ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${value < 0 ? '-' : '+'}$${Math.abs(value).toLocaleString()}`).join('<br>')}<br>
+                        • <strong>Net ${scenario.costImpact < 0 ? 'Savings' : 'Cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}</strong>
                     </div>
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
-            addSystemMessage('Scenario B: Divert production to Malaysia plant. Net cost: $60K. Timeline: 3-day lead time required.');
+            addSystemMessage(`Scenario B: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
             
             setTimeout(() => {
                 showScenarioC();
@@ -1147,42 +1288,46 @@
         }
 
         function showScenarioC() {
+            const scenario = scenarioData[currentScenarioType].scenarios[2];
+            const details = scenario.details;
+            const costSign = scenario.costImpact < 0 ? '-' : '+';
+            const costValue = Math.abs(scenario.costImpact);
+            
             const existingContent = document.getElementById('vizContent').innerHTML;
             const content = existingContent + `
                 <div class="scenario-card">
                     <div class="scenario-header">
-                        <div class="scenario-title">📦 Scenario C: Defer Customer Shipments</div>
+                        <div class="scenario-title">📦 Scenario C: ${scenario.title}</div>
                     </div>
                     <p style="margin: 1rem 0; line-height: 1.6;">
-                        Negotiate shipment delays with customers. Use tank inventory buffer (4,200 MT) 
-                        to maintain critical commitments while deferring non-urgent orders.
+                        ${scenario.description}
                     </p>
                     <div class="scenario-metrics">
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Cost Impact</div>
-                            <div class="scenario-metric-value value-positive">-$30K</div>
+                            <div class="scenario-metric-value ${scenario.costImpact < 0 ? 'value-positive' : 'value-negative'}">${costSign}$${costValue.toLocaleString()}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Timeline</div>
-                            <div class="scenario-metric-value value-negative">2 days</div>
+                            <div class="scenario-metric-value value-negative">${scenario.timeline}</div>
                         </div>
                         <div class="scenario-metric">
                             <div class="scenario-metric-label">Risk Level</div>
-                            <div class="scenario-metric-value value-negative">High</div>
+                            <div class="scenario-metric-value value-negative">${scenario.riskLevel}</div>
                         </div>
                     </div>
                     <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px;">
                         <strong>Financial Analysis:</strong><br>
-                        • Demurrage fees: +$90K<br>
-                        • Avoided shortage penalty: -$120K<br>
-                        • <strong>Net Savings: $30K</strong><br>
-                        <span style="color: #DC2626;">⚠️ Requires customer approval & impacts relationships</span>
+                        ${Object.entries(details).filter(([key, value]) => key !== 'netSavings' && key !== 'netCost' && key !== 'customerRisk' && key !== 'qualityRisk').map(([key, value]) => `• ${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}: ${value < 0 ? '-' : '+'}$${Math.abs(value).toLocaleString()}`).join('<br>')}<br>
+                        • <strong>Net ${scenario.costImpact < 0 ? 'Savings' : 'Cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}</strong>
+                        ${details.customerRisk ? '<br><span style="color: #DC2626;">⚠️ Requires customer approval & impacts relationships</span>' : ''}
+                        ${details.qualityRisk ? '<br><span style="color: #DC2626;">⚠️ Quality risk with alternative feedstock</span>' : ''}
                     </div>
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
-            addSystemMessage('Scenario C: Defer shipments. Net savings: $30K. Timeline: 2 days for customer approvals. Note: Higher customer relationship risk.');
+            addSystemMessage(`Scenario C: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}. Note: ${scenario.riskLevel} risk level.`);
             
             setTimeout(() => {
                 addSystemMessage('Based on comprehensive analysis, I recommend Scenario A. Would you like to understand why?');
@@ -1329,6 +1474,16 @@
             initChat();
         }
 
+        function switchScenario() {
+            const selector = document.getElementById('scenarioSelector');
+            currentScenarioType = selector.value;
+            
+            // If crisis is already triggered, update the display
+            if (crisisTriggered) {
+                showCrisisImpact();
+            }
+        }
+
         function updateVizTitle(title) {
             document.getElementById('vizTitle').textContent = title;
             const now = new Date();
@@ -1357,13 +1512,13 @@
             const eventData = localStorage.getItem('evonik_coordination_event');
             if (eventData) {
                 const event = JSON.parse(eventData);
-                if (event.demo_trigger && event.type === 'equipment_failure') {
+                if (event.demo_trigger && (event.type === 'equipment_failure' || event.type === 'supply_delay')) {
                     // Clear the event to prevent re-triggering
                     localStorage.removeItem('evonik_coordination_event');
                     
-                    // Trigger crisis immediately
+                    // Trigger crisis with specific scenario type
                     setTimeout(() => {
-                        triggerCrisis();
+                        triggerCrisis(event.type);
                     }, 1000);
                 }
             }

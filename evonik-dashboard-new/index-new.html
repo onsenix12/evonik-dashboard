@@ -393,6 +393,8 @@
         .chip-low { background: var(--text-light); }
         /* Simple Leaflet world map */
         #plantWorldMap { height: 480px; border-radius: 12px; border: 1px solid var(--border-gray); overflow: hidden; }
+        /* Make interactive layers show pointer cursor */
+        .leaflet-interactive { cursor: pointer; }
     </style>
     <!-- Leaflet CSS for simple interactive world map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -740,35 +742,7 @@
         </p>
         <div id="plantWorldMap"></div>
 
-        <!-- Regional Fulfillment Map (Overview) -->
-        <h2 class="section-title">Regional Fulfillment Map</h2>
-        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
-            Visual flows from plants to regions, sized by allocated volume and colored by priority
-        </p>
-        <div class="map-panel">
-            <div style="display:flex; justify-content: space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
-                <div class="map-legend">
-                    <span class="legend-item"><span class="legend-chip chip-high"></span> High Priority</span>
-                    <span class="legend-item"><span class="legend-chip chip-medium"></span> Medium Priority</span>
-                    <span class="legend-item"><span class="legend-chip chip-low"></span> Standard</span>
-                </div>
-                <div style="font-size:0.9rem; color: var(--text-light);">
-                    Plant filter:
-                    <select id="plantFilter" style="padding:0.4rem 0.6rem; border:1px solid var(--border-gray); border-radius:6px;">
-                        <option value="all">All</option>
-                        <option value="Singapore">Singapore</option>
-                        <option value="Antwerp">Antwerp</option>
-                        <option value="Mobile">Mobile</option>
-                    </select>
-                </div>
-            </div>
-            <svg id="fulfillmentMap" viewBox="0 0 900 420" width="100%" height="420" preserveAspectRatio="xMidYMid meet" style="display:block; background: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/BlankMap-World.svg') center/contain no-repeat;">
-                <!-- Static Nodes (plants & regions) -->
-                <g id="mapNodes"></g>
-                <!-- Dynamic flows -->
-                <g id="mapFlows"></g>
-            </svg>
-        </div>
+        <!-- Regional Fulfillment Map removed for simplification -->
         <div class="dashboard-grid">
             <!-- Plant Operations -->
             <div class="card">
@@ -1397,14 +1371,6 @@
                 renderRegionalPricingChart();
                 renderNext48Chart();
             }
-            // Render map and hook filter
-            renderFulfillmentMap('all');
-            const filter = document.getElementById('plantFilter');
-            if (filter) {
-                filter.addEventListener('change', function() {
-                    renderFulfillmentMap(this.value);
-                });
-            }
         });
 
         // Update market price dynamically
@@ -1751,9 +1717,9 @@
             const mapEl = document.getElementById('plantWorldMap');
             if (!mapEl) return;
 
-            const map = L.map('plantWorldMap', { zoomControl: true }).setView([20, 0], 2);
+            const map = L.map('plantWorldMap', { zoomControl: true, worldCopyJump: true }).setView([20, 0], 2);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 6,
+                maxZoom: 8,
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
@@ -1768,7 +1734,7 @@
             fetch('https://unpkg.com/geojson-world@1.0.0/countries.geo.json')
                 .then(r => r.json())
                 .then(geo => {
-                    L.geoJSON(geo, {
+                    const countriesLayer = L.geoJSON(geo, {
                         style: feature => {
                             const name = feature.properties.name;
                             if (plantCountries[name]) {
@@ -1785,18 +1751,27 @@
                                 layer.bindPopup(`<div style="min-width:220px"><strong>${name}</strong><br/>${plants}</div>`);
                                 layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.4 }));
                                 layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.25 }));
+                                layer.on('click', () => layer.openPopup());
                             }
                         }
                     }).addTo(map);
 
                     // Add plant markers with popups for extra clarity
+                    const markers = [];
                     Object.entries(plantCountries).forEach(([country, cfg]) => {
                         cfg.plants.forEach(p => {
-                            L.circleMarker([p.lat, p.lon], { radius: 6, color: '#8B2E8B', weight: 2, fillColor: '#8B2E8B', fillOpacity: 0.8 })
+                            const marker = L.circleMarker([p.lat, p.lon], { radius: 6, color: '#8B2E8B', weight: 2, fillColor: '#8B2E8B', fillOpacity: 0.8 })
                                 .addTo(map)
                                 .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`);
+                            markers.push(marker);
                         });
                     });
+
+                    // Fit map to all markers
+                    if (markers.length) {
+                        const group = L.featureGroup(markers);
+                        map.fitBounds(group.getBounds().pad(0.4));
+                    }
                 })
                 .catch(err => console.warn('World GeoJSON failed to load:', err));
         });

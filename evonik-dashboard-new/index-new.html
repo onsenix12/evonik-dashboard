@@ -1760,9 +1760,17 @@
                     const markers = [];
                     Object.entries(plantCountries).forEach(([country, cfg]) => {
                         cfg.plants.forEach(p => {
-                            const marker = L.circleMarker([p.lat, p.lon], { radius: 6, color: '#8B2E8B', weight: 2, fillColor: '#8B2E8B', fillOpacity: 0.8 })
+                            const marker = L.circleMarker([p.lat, p.lon], {
+                                radius: 8,
+                                color: '#FFFFFF',        // white stroke for contrast
+                                weight: 2,
+                                fillColor: '#8B2E8B',    // Evonik purple fill
+                                fillOpacity: 0.95
+                            })
                                 .addTo(map)
-                                .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`);
+                                .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`)
+                                .bindTooltip(p.city, { permanent: false, direction: 'top' });
+                            if (marker.bringToFront) marker.bringToFront();
                             markers.push(marker);
                         });
                     });
@@ -1770,7 +1778,7 @@
                     // Fit map to all markers
                     if (markers.length) {
                         const group = L.featureGroup(markers);
-                        map.fitBounds(group.getBounds().pad(0.4));
+                        map.fitBounds(group.getBounds().pad(0.5));
                     }
                 })
                 .catch(err => console.warn('World GeoJSON failed to load:', err));

@@ -279,6 +279,13 @@
             gap: 1rem;
         }
 
+        /* Ensure 5 tiles per row on large screens */
+        @media (min-width: 1200px) {
+            .fulfillment-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
         .fulfillment-card {
             background: white;
             padding: 1rem;

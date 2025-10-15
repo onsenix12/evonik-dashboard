@@ -374,6 +374,8 @@
             border: 1px solid var(--border-gray);
             padding: 1rem;
         }
+        /* Subtle white backdrop behind the world map to keep flows legible */
+        #fulfillmentMap { background-color: #ffffff; }
         .map-legend {
             display: flex;
             gap: 1rem;
@@ -746,7 +748,7 @@
                     </select>
                 </div>
             </div>
-            <svg id="fulfillmentMap" viewBox="0 0 900 420" width="100%" height="420" preserveAspectRatio="xMidYMid meet" style="display:block">
+            <svg id="fulfillmentMap" viewBox="0 0 900 420" width="100%" height="420" preserveAspectRatio="xMidYMid meet" style="display:block; background: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg') center/contain no-repeat;">
                 <!-- Static Nodes (plants & regions) -->
                 <g id="mapNodes"></g>
                 <!-- Dynamic flows -->

@@ -359,6 +359,26 @@
         .data-table tbody tr:hover {
             background: rgba(139, 46, 139, 0.03);
         }
+
+        /* Fulfillment Map */
+        .map-panel {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            padding: 1rem;
+        }
+        .map-legend {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0 1rem 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .legend-chip { width: 14px; height: 4px; border-radius: 2px; }
+        .chip-high { background: var(--alert-red); }
+        .chip-medium { background: var(--warning-orange); }
+        .chip-low { background: var(--text-light); }
     </style>
 </head>
 <body>
@@ -603,6 +623,9 @@
                 <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
                     <canvas id="shipmentsMiniChart" height="80"></canvas>
                 </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="onTimeDonut" height="120"></canvas>
+                </div>
             </div>
 
             <div class="card">
@@ -680,6 +703,36 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Regional Fulfillment Map (Overview) -->
+        <h2 class="section-title">Regional Fulfillment Map</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            Visual flows from plants to regions, sized by allocated volume and colored by priority
+        </p>
+        <div class="map-panel">
+            <div style="display:flex; justify-content: space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div class="map-legend">
+                    <span class="legend-item"><span class="legend-chip chip-high"></span> High Priority</span>
+                    <span class="legend-item"><span class="legend-chip chip-medium"></span> Medium Priority</span>
+                    <span class="legend-item"><span class="legend-chip chip-low"></span> Standard</span>
+                </div>
+                <div style="font-size:0.9rem; color: var(--text-light);">
+                    Plant filter:
+                    <select id="plantFilter" style="padding:0.4rem 0.6rem; border:1px solid var(--border-gray); border-radius:6px;">
+                        <option value="all">All</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Antwerp">Antwerp</option>
+                        <option value="Mobile">Mobile</option>
+                    </select>
+                </div>
+            </div>
+            <svg id="fulfillmentMap" viewBox="0 0 900 420" width="100%" height="420" preserveAspectRatio="xMidYMid meet" style="display:block">
+                <!-- Static Nodes (plants & regions) -->
+                <g id="mapNodes"></g>
+                <!-- Dynamic flows -->
+                <g id="mapFlows"></g>
+            </svg>
         </div>
         <div class="dashboard-grid">
             <!-- Plant Operations -->
@@ -1303,6 +1356,15 @@
             if (window.Chart) {
                 renderPriceMiniChart();
                 renderShipmentsMiniChart();
+                renderOnTimeDonut();
+            }
+            // Render map and hook filter
+            renderFulfillmentMap('all');
+            const filter = document.getElementById('plantFilter');
+            if (filter) {
+                filter.addEventListener('change', function() {
+                    renderFulfillmentMap(this.value);
+                });
             }
         });
 
@@ -1383,6 +1445,126 @@
                     plugins: { legend: { display: false }, tooltip: { enabled: true } },
                     scales: { x: { display: false }, y: { display: false } }
                 }
+            });
+        }
+
+        // Donut for on-time delivery
+        function renderOnTimeDonut() {
+            const el = document.getElementById('onTimeDonut');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const onTime = 94;
+            const late = 6;
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['On Time', 'Late'],
+                    datasets: [{
+                        data: [onTime, late],
+                        backgroundColor: ['rgba(22, 163, 74, 0.8)', 'rgba(234, 88, 12, 0.3)'],
+                        borderColor: ['rgba(22, 163, 74, 1)', 'rgba(234, 88, 12, 0.6)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Data-driven Regional Fulfillment Map
+        const mapData = {
+            plants: {
+                Singapore: { x: 150, y: 210 },
+                Antwerp: { x: 450, y: 110 },
+                Mobile: { x: 700, y: 300 }
+            },
+            regions: {
+                APAC: { x: 320, y: 274 },
+                Europe: { x: 580, y: 74 },
+                Americas: { x: 840, y: 214 }
+            },
+            flows: [
+                { from: 'Singapore', to: 'APAC', volume: 28950, priority: 'high' },
+                { from: 'Antwerp', to: 'Europe', volume: 15600, priority: 'medium' },
+                { from: 'Mobile', to: 'Americas', volume: 11400, priority: 'low' }
+            ]
+        };
+
+        function priorityColor(priority) {
+            if (priority === 'high') return getComputedStyle(document.documentElement).getPropertyValue('--alert-red').trim() || '#DC2626';
+            if (priority === 'medium') return getComputedStyle(document.documentElement).getPropertyValue('--warning-orange').trim() || '#EA580C';
+            return getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() || '#6B7280';
+        }
+
+        function renderFulfillmentMap(filterPlant = 'all') {
+            const svg = document.getElementById('fulfillmentMap');
+            if (!svg) return;
+            const nodesGroup = document.getElementById('mapNodes');
+            const flowsGroup = document.getElementById('mapFlows');
+            nodesGroup.innerHTML = '';
+            flowsGroup.innerHTML = '';
+
+            // Plants
+            Object.entries(mapData.plants).forEach(([name, p]) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', p.x);
+                circle.setAttribute('cy', p.y);
+                circle.setAttribute('r', '10');
+                circle.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B');
+                nodesGroup.appendChild(circle);
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', p.x);
+                label.setAttribute('y', p.y - 15);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('style', 'font-size:12px; fill: #6B7280;');
+                label.textContent = name;
+                nodesGroup.appendChild(label);
+            });
+
+            // Regions (rect + label)
+            function addRegionRect(regionName, color, x, y) {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x - 60);
+                rect.setAttribute('y', y - 14);
+                rect.setAttribute('width', 120);
+                rect.setAttribute('height', 28);
+                rect.setAttribute('rx', 6);
+                rect.setAttribute('ry', 6);
+                rect.setAttribute('fill', color.bg);
+                rect.setAttribute('stroke', color.stroke);
+                nodesGroup.appendChild(rect);
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', x);
+                t.setAttribute('y', y + 5);
+                t.setAttribute('text-anchor', 'middle');
+                t.setAttribute('style', `font-size:12px; fill:${color.stroke};`);
+                t.textContent = regionName;
+                nodesGroup.appendChild(t);
+            }
+
+            addRegionRect('APAC', { bg: 'rgba(37, 99, 235, 0.08)', stroke: '#2563EB' }, mapData.regions.APAC.x, mapData.regions.APAC.y);
+            addRegionRect('Europe', { bg: 'rgba(139, 46, 139, 0.08)', stroke: getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B' }, mapData.regions.Europe.x, mapData.regions.Europe.y);
+            addRegionRect('Americas', { bg: 'rgba(22, 163, 74, 0.08)', stroke: getComputedStyle(document.documentElement).getPropertyValue('--success-green').trim() || '#16A34A' }, mapData.regions.Americas.x, mapData.regions.Americas.y);
+
+            // Flows
+            const flows = mapData.flows.filter(f => filterPlant === 'all' || f.from === filterPlant);
+            flows.forEach(f => {
+                const from = mapData.plants[f.from];
+                const to = mapData.regions[f.to];
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const c1x = (from.x + to.x) / 2;
+                const c1y = (from.y + to.y) / 2;
+                path.setAttribute('d', `M${from.x},${from.y} C${c1x},${from.y} ${c1x},${to.y} ${to.x},${to.y}`);
+                const width = Math.max(3, Math.min(8, Math.round(f.volume / 6000))); // normalize width
+                path.setAttribute('stroke-width', String(width));
+                path.setAttribute('stroke', priorityColor(f.priority));
+                path.setAttribute('fill', 'none');
+                path.setAttribute('opacity', '0.9');
+                flowsGroup.appendChild(path);
             });
         }
     </script>

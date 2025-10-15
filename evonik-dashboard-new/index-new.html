@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evonik Production Coordination Hub</title>
-    <link rel="stylesheet" href="shared-styles.css">
+    <link rel="stylesheet" href="shared-styles-new.css">
     <style>
         /* Page-specific styles for index.html */
         .header {
@@ -403,19 +403,19 @@
             <div class="stakeholder-btn active">
                 🎯 Coordination Hub
             </div>
-            <a href="optimizer.html" class="stakeholder-btn optimizer">
+            <a href="optimizer-new.html" class="stakeholder-btn optimizer">
                 🤖 AI Decision Optimizer
             </a>
-            <a href="sales.html" class="stakeholder-btn">
+            <a href="sales-new.html" class="stakeholder-btn">
                 📈 Sales
             </a>
-            <a href="global-supply-chain.html" class="stakeholder-btn">
+            <a href="global-supply-chain-new.html" class="stakeholder-btn">
                 🌏 Global SC
             </a>
-            <a href="local-supply-chain.html" class="stakeholder-btn">
+            <a href="local-supply-chain-new.html" class="stakeholder-btn">
                 📊 Local SC
             </a>
-            <a href="production.html" class="stakeholder-btn">
+            <a href="production-new.html" class="stakeholder-btn">
                 🏭 Production
             </a>
         </div>
@@ -483,6 +483,12 @@
                     <div class="metric-value" style="font-size: 1rem;">-$0.04/kg</div>
                     <div class="metric-subtext" style="color: var(--success-green);">2% below target cost</div>
                 </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="costMiniChart" height="80"></canvas>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="marginDonut" height="120"></canvas>
+                </div>
             </div>
 
             <div class="card">
@@ -501,6 +507,9 @@
                 <div class="metric">
                     <div class="metric-label">Americas (Mobile)</div>
                     <div class="metric-value" style="font-size: 1rem;">$2.95/kg</div>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="regionalPricingChart" height="160"></canvas>
                 </div>
             </div>
         </div>
@@ -913,35 +922,35 @@
         <div class="stakeholder-links">
             <h3>Stakeholder System Access</h3>
             <div class="links-grid">
-                <a href="optimizer.html" class="stakeholder-link">
+                <a href="optimizer-new.html" class="stakeholder-link">
                     <div class="stakeholder-icon">🤖</div>
                     <div class="stakeholder-info">
                         <h4>AI Decision Optimizer</h4>
                         <p>Scenario analysis, crisis management, explainable recommendations</p>
                     </div>
                 </a>
-                <a href="sales.html" class="stakeholder-link">
+                <a href="sales-new.html" class="stakeholder-link">
                     <div class="stakeholder-icon">📈</div>
                     <div class="stakeholder-info">
                         <h4>Sales Team</h4>
                         <p>Customer orders, demand forecasting, delivery coordination</p>
                     </div>
                 </a>
-                <a href="global-supply-chain.html" class="stakeholder-link">
+                <a href="global-supply-chain-new.html" class="stakeholder-link">
                     <div class="stakeholder-icon">🌏</div>
                     <div class="stakeholder-info">
                         <h4>Global Supply Chain</h4>
                         <p>Multi-site coordination, capacity allocation, global optimization</p>
                     </div>
                 </a>
-                <a href="local-supply-chain.html" class="stakeholder-link">
+                <a href="local-supply-chain-new.html" class="stakeholder-link">
                     <div class="stakeholder-icon">📊</div>
                     <div class="stakeholder-info">
                         <h4>Local Supply Chain</h4>
                         <p>SAP-Excel integration, procurement, inventory management</p>
                     </div>
                 </a>
-                <a href="production.html" class="stakeholder-link">
+                <a href="production-new.html" class="stakeholder-link">
                     <div class="stakeholder-icon">🏭</div>
                     <div class="stakeholder-info">
                         <h4>Plant Production</h4>
@@ -1051,7 +1060,7 @@
             }, 3000);
             
             // Highlight optimizer button
-            document.querySelector('.optimizer-btn').classList.add('crisis-active');
+            document.querySelector('.stakeholder-btn.optimizer').classList.add('crisis-active');
             
             // Broadcast to other windows
             broadcastToStakeholders('equipment_failure', { unit: 'ME6', impact: 345 });
@@ -1215,7 +1224,7 @@
             document.getElementById('alertsBanner').classList.remove('show');
             
             // Remove crisis highlighting
-            document.querySelector('.optimizer-btn').classList.remove('crisis-active');
+            document.querySelector('.stakeholder-btn.optimizer').classList.remove('crisis-active');
             
             // Make any new event log entries clickable
             makeEventLogClickable();
@@ -1224,11 +1233,11 @@
         }
 
         function openAllStakeholders() {
-            window.open('sales.html', '_blank');
-            window.open('global-supply-chain.html', '_blank');
-            window.open('local-supply-chain.html', '_blank');
-            window.open('production.html', '_blank');
-            window.open('optimizer.html', '_blank');
+            window.open('sales-new.html', '_blank');
+            window.open('global-supply-chain-new.html', '_blank');
+            window.open('local-supply-chain-new.html', '_blank');
+            window.open('production-new.html', '_blank');
+            window.open('optimizer-new.html', '_blank');
             toggleDemoMenu();
         }
 
@@ -1256,7 +1265,7 @@
             // Add click handler for AI analysis entries
             if (isAIAnalysis) {
                 eventItem.addEventListener('click', function() {
-                    window.open('optimizer.html?crisis=true', '_blank');
+                    window.open('optimizer-new.html?crisis=true', '_blank');
                 });
             }
             
@@ -1333,7 +1342,7 @@
                 if (content && (content.textContent.includes('View AI analysis') || content.textContent.includes('Decision Optimizer'))) {
                     item.classList.add('clickable');
                     item.addEventListener('click', function() {
-                        window.open('optimizer.html?crisis=true', '_blank');
+                        window.open('optimizer-new.html?crisis=true', '_blank');
                     });
                 }
             });
@@ -1357,6 +1366,9 @@
                 renderPriceMiniChart();
                 renderShipmentsMiniChart();
                 renderOnTimeDonut();
+                renderCostMiniChart();
+                renderMarginDonut();
+                renderRegionalPricingChart();
             }
             // Render map and hook filter
             renderFulfillmentMap('all');
@@ -1471,6 +1483,98 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     cutout: '65%'
+                }
+            });
+        }
+
+        // Cost sparkline (last 14 days)
+        function renderCostMiniChart() {
+            const el = document.getElementById('costMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = Array.from({length: 14}, (_, i) => i + 1);
+            const data = [1.98,1.97,1.95,1.94,1.93,1.92,1.91,1.92,1.94,1.93,1.92,1.91,1.90,1.92];
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [{
+                    label: 'Cost ($/kg)',
+                    data,
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--production-indigo').trim() || '#6366F1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 0
+                }]},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        // Gross margin donut
+        function renderMarginDonut() {
+            const el = document.getElementById('marginDonut');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const margin = 32.6;
+            const cost = 67.4;
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Margin', 'Cost Share'],
+                    datasets: [{
+                        data: [margin, cost],
+                        backgroundColor: ['rgba(22, 163, 74, 0.8)', 'rgba(139, 46, 139, 0.15)'],
+                        borderColor: ['rgba(22, 163, 74, 1)', 'rgba(139, 46, 139, 0.3)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Regional pricing horizontal bars
+        function renderRegionalPricingChart() {
+            const el = document.getElementById('regionalPricingChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = ['APAC (SG)', 'Europe (Antwerp)', 'Americas (Mobile)'];
+            const data = [2.85, 3.12, 2.95];
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{
+                    label: '$/kg',
+                    data,
+                    backgroundColor: [
+                        'rgba(37, 99, 235, 0.25)',
+                        'rgba(139, 46, 139, 0.25)',
+                        'rgba(22, 163, 74, 0.25)'
+                    ],
+                    borderColor: [
+                        '#2563EB',
+                        getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B',
+                        getComputedStyle(document.documentElement).getPropertyValue('--success-green').trim() || '#16A34A'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]},
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { callback: (v) => '$' + v } },
+                        y: { grid: { display: false } }
+                    }
                 }
             });
         }

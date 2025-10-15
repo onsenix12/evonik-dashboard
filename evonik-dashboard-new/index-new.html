@@ -689,6 +689,9 @@
                     <div class="metric-label">Avg Delay (when late)</div>
                     <div class="metric-value" style="font-size: 1rem;">1.2 days</div>
                 </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="deliveryPerfMiniChart" height="100"></canvas>
+                </div>
             </div>
         </div>
 
@@ -1370,6 +1373,7 @@
                 renderMarginDonut();
                 renderRegionalPricingChart();
                 renderNext48Chart();
+                renderDeliveryPerfMiniChart();
             }
         });
 
@@ -1382,6 +1386,37 @@
             if (priceEl) {
                 priceEl.textContent = '$' + currentPrice + '/kg';
             }
+        }
+
+        // Mini line chart for Delivery Performance
+        function renderDeliveryPerfMiniChart() {
+            const el = document.getElementById('deliveryPerfMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            // Example last 14 days on-time %
+            const labels = Array.from({ length: 14 }, (_, i) => `D-${13 - i}`);
+            const data = [97.8, 98.1, 98.4, 98.6, 98.2, 98.9, 98.7, 98.3, 98.6, 98.8, 98.4, 98.9, 98.7, 98.5];
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'On-time %',
+                        data,
+                        borderColor: 'rgba(22, 163, 74, 1)',
+                        backgroundColor: 'rgba(22, 163, 74, 0.08)',
+                        borderWidth: 2,
+                        tension: 0.25,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
         }
 
         // Next 48 hours stacked bar (departures vs arrivals)

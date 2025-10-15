@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evonik Production Coordination Hub</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        /* Page-specific styles for index.html */
+        .header {
+            background: linear-gradient(135deg, var(--evonik-purple) 0%, var(--evonik-dark-purple) 100%);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--success-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .panel-tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border-gray);
+            margin-bottom: 1rem;
+        }
+
+        .panel-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .panel-tab.active {
+            color: var(--evonik-purple);
+            border-bottom-color: var(--evonik-purple);
+        }
+
+        .panel-content {
+            display: none;
+        }
+
+        .panel-content.active {
+            display: block;
+        }
+
+        .event-log {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid var(--evonik-purple);
+            background: rgba(139, 46, 139, 0.05);
+            border-radius: 0 8px 8px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .event-item.alert {
+            border-left-color: var(--alert-red);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .event-item.update {
+            border-left-color: var(--success-green);
+            background: rgba(22, 163, 74, 0.05);
+        }
+
+        .event-item.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .event-item.clickable:hover {
+            background: rgba(22, 163, 74, 0.1);
+            transform: translateX(4px);
+        }
+
+        .event-item.clickable .event-content {
+            color: var(--evonik-purple);
+            font-weight: 500;
+        }
+
+        .event-time {
+            font-weight: 600;
+            min-width: 60px;
+            color: var(--text-dark);
+        }
+
+        .event-content {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .pending-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .pending-item {
+            padding: 1rem;
+            background: rgba(234, 88, 12, 0.05);
+            border-left: 4px solid var(--warning-orange);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .pending-item.completed {
+            background: rgba(22, 163, 74, 0.05);
+            border-left-color: var(--success-green);
+            opacity: 0.7;
+        }
+
+        .pending-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .pending-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .pending-owner {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .pending-desc {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .stakeholder-links {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-top: 2rem;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stakeholder-link {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .stakeholder-link:hover {
+            border-color: var(--evonik-purple);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(139, 46, 139, 0.2);
+        }
+
+        .stakeholder-icon {
+            font-size: 2.5rem;
+        }
+
+        .stakeholder-info h4 {
+            margin-bottom: 0.5rem;
+            color: var(--evonik-purple);
+        }
+
+        .stakeholder-info p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Floating Demo Controls */
+        .demo-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .demo-fab-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--evonik-purple), var(--evonik-light-purple));
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(139, 46, 139, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .demo-fab-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(139, 46, 139, 0.6);
+        }
+
+        .demo-menu {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 1rem;
+            min-width: 200px;
+            display: none;
+        }
+
+        .demo-menu.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .demo-menu-item {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-gray);
+        }
+
+        .demo-menu-item:hover {
+            background: var(--evonik-purple);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Regional Fulfillment Styles */
+        .plant-fulfillment-section {
+            margin-bottom: 2rem;
+        }
+
+        .plant-fulfillment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .plant-fulfillment-header h3 {
+            font-size: 1.3rem;
+            color: var(--evonik-purple);
+        }
+
+        .fulfillment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .fulfillment-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .priority-high-border {
+            border-left-color: var(--alert-red);
+            background: rgba(220, 38, 38, 0.02);
+        }
+
+        .priority-medium-border {
+            border-left-color: var(--warning-orange);
+            background: rgba(234, 88, 12, 0.02);
+        }
+
+        .priority-low-border {
+            border-left-color: var(--border-gray);
+            background: rgba(100, 116, 139, 0.02);
+        }
+
+        .fulfillment-priority {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .fulfillment-customer {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .fulfillment-details {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        /* Data Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table thead {
+            background: var(--bg-gray);
+        }
+
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(139, 46, 139, 0.03);
+        }
+
+        /* Fulfillment Map */
+        .map-panel {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            padding: 1rem;
+        }
+        .map-legend {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0 1rem 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .legend-chip { width: 14px; height: 4px; border-radius: 2px; }
+        .chip-high { background: var(--alert-red); }
+        .chip-medium { background: var(--warning-orange); }
+        .chip-low { background: var(--text-light); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">🧪 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Production Coordination Hub</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Jurong Island Methionine Complex - Singapore</div>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Live System</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="stakeholder-nav">
+        <div class="nav-content">
+            <div class="stakeholder-btn active">
+                🎯 Coordination Hub
+            </div>
+            <a href="optimizer.html" class="stakeholder-btn optimizer">
+                🤖 AI Decision Optimizer
+            </a>
+            <a href="sales.html" class="stakeholder-btn">
+                📈 Sales
+            </a>
+            <a href="global-supply-chain.html" class="stakeholder-btn">
+                🌏 Global SC
+            </a>
+            <a href="local-supply-chain.html" class="stakeholder-btn">
+                📊 Local SC
+            </a>
+            <a href="production.html" class="stakeholder-btn">
+                🏭 Production
+            </a>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>🚨 ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <!-- Current Status Overview -->
+        <div class="section-header">
+            <h2 class="section-title">Current Status</h2>
+            <div style="color: var(--text-light); font-size: 0.9rem;">
+                Last updated: <span id="lastUpdate">Just now</span>
+            </div>
+        </div>
+
+        <!-- Market Intelligence -->
+        <h2 class="section-title">Market Intelligence</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📈 Methionine Spot Price (APAC)</div>
+                    <div class="card-status status-operational">Live Data</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Price</div>
+                    <div class="metric-value" id="methioninePrice" style="color: var(--evonik-purple);">$2.85/kg</div>
+                    <div class="metric-subtext" id="priceChange" style="color: var(--success-green);">
+                        ▲ +2.3% vs last week
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">7-Day Range</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.78 - $2.92</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Market Trend</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Rising</div>
+                    <div class="metric-subtext">Strong demand in SE Asia</div>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="priceMiniChart" height="80"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Cost Analysis</div>
+                    <div class="card-status status-operational">On Target</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Average Cost Today</div>
+                    <div class="metric-value" id="productionCost">$1.92/kg</div>
+                    <div class="metric-subtext">Within budget</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Gross Margin</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">32.6%</div>
+                    <div class="metric-subtext">$0.93/kg profit</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">vs Plan</div>
+                    <div class="metric-value" style="font-size: 1rem;">-$0.04/kg</div>
+                    <div class="metric-subtext" style="color: var(--success-green);">2% below target cost</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Regional Pricing</div>
+                    <div class="card-status" style="background: rgba(139, 46, 139, 0.1); color: var(--evonik-purple);">Reference</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">APAC (Singapore)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.85/kg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Europe (Antwerp)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$3.12/kg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Americas (Mobile)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.95/kg</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regional Order Fulfillment -->
+        <h2 class="section-title">Regional Order Fulfillment Status</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            Live view of which orders each plant is currently fulfilling, prioritized by customer importance
+        </p>
+        
+        <div class="section-panel">
+            <!-- Singapore Plant Orders -->
+            <div class="plant-fulfillment-section">
+                <div class="plant-fulfillment-header">
+                    <h3>🇸🇬 Singapore Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 7 Orders</span>
+                </div>
+                
+                <div class="fulfillment-grid">
+                    <!-- High Priority Orders -->
+                    <div class="fulfillment-card priority-high-border">
+                        <div class="fulfillment-priority">🔴 HIGH PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>PT Indonesia Feed</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Indonesia | 🏭 850 MT</div>
+                            <div>⏰ Ship: Oct 18-20 | ⚡ Status: In Production</div>
+                        </div>
+                    </div>
+
+                    <div class="fulfillment-card priority-high-border">
+                        <div class="fulfillment-priority">🔴 HIGH PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Thai Union Group</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Thailand | 🏭 620 MT</div>
+                            <div>⏰ Ship: Oct 19-21 | ⚡ Status: Queued Next</div>
+                        </div>
+                    </div>
+
+                    <!-- Medium Priority Orders -->
+                    <div class="fulfillment-card priority-medium-border">
+                        <div class="fulfillment-priority">🟡 MEDIUM PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Charoen Pokphand</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Thailand | 🏭 580 MT</div>
+                            <div>⏰ Ship: Oct 21-23 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+
+                    <div class="fulfillment-card priority-medium-border">
+                        <div class="fulfillment-priority">🟡 MEDIUM PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Vietnam Feed Co.</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Vietnam | 🏭 480 MT</div>
+                            <div>⏰ Ship: Oct 22-24 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+
+                    <!-- Low Priority / Buffer -->
+                    <div class="fulfillment-card priority-low-border">
+                        <div class="fulfillment-priority">⚪ STANDARD</div>
+                        <div class="fulfillment-customer"><strong>Malaysia Poultry</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Malaysia | 🏭 420 MT</div>
+                            <div>⏰ Ship: Oct 23-25 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="border-top: 2px dashed var(--border-gray); margin: 2rem 0;"></div>
+
+            <!-- Antwerp Plant Orders (collapsed view) -->
+            <div class="plant-fulfillment-section">
+                <div class="plant-fulfillment-header">
+                    <h3>🇧🇪 Antwerp Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 10 Orders</span>
+                </div>
+                <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Top priorities: Nutreco (1,200 MT), ForFarmers (980 MT), De Heus (750 MT)
+                </div>
+            </div>
+
+            <!-- Mobile Plant Orders (collapsed view) -->
+            <div class="plant-fulfillment-section" style="margin-top: 1.5rem;">
+                <div class="plant-fulfillment-header">
+                    <h3>🇺🇸 Mobile Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 6 Orders</span>
+                </div>
+                <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Top priorities: Tyson Foods (1,500 MT), Perdue Farms (820 MT), Pilgrim's Pride (640 MT)
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping & Logistics Status -->
+        <h2 class="section-title">Global Shipping Status</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            📦 Real-time shipment tracking via Katoen Natie logistics integration
+        </p>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Shipments in Transit</div>
+                    <div class="card-status status-operational">On Schedule</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Shipments</div>
+                    <div class="metric-value" id="activeShipments">18</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Volume</div>
+                    <div class="metric-value">2,340 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On Time</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">94%</div>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="shipmentsMiniChart" height="80"></canvas>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="onTimeDonut" height="120"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Next 48 Hours</div>
+                    <div class="card-status" style="background: rgba(139, 46, 139, 0.1); color: var(--evonik-purple);">Scheduled</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Departures (from Katoen Natie)</div>
+                    <div class="metric-value" id="scheduledDepartures">12</div>
+                    <div class="metric-subtext">1,480 MT total</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Arrivals</div>
+                    <div class="metric-value">8</div>
+                    <div class="metric-subtext">1,120 MT to customers</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Delivery Performance</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">This Month</div>
+                    <div class="metric-value" style="color: var(--success-green);">98.5%</div>
+                    <div class="metric-subtext">On-time delivery rate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Avg Delay (when late)</div>
+                    <div class="metric-value" style="font-size: 1rem;">1.2 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent/Upcoming Shipments Table -->
+        <div class="section-panel" style="margin-top: 1.5rem;">
+            <h3 class="section-title">Upcoming Shipments (Next 7 Days)</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Departure Date</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Volume</th>
+                        <th>Transit Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Oct 18</td>
+                        <td><strong>PT Indonesia Feed</strong></td>
+                        <td>🇮🇩 Jakarta, Indonesia</td>
+                        <td>850 MT</td>
+                        <td>5 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 19</td>
+                        <td><strong>Thai Union Group</strong></td>
+                        <td>🇹🇭 Bangkok, Thailand</td>
+                        <td>620 MT</td>
+                        <td>4 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 20</td>
+                        <td><strong>Charoen Pokphand</strong></td>
+                        <td>🇹🇭 Chonburi, Thailand</td>
+                        <td>580 MT</td>
+                        <td>4 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Regional Fulfillment Map (Overview) -->
+        <h2 class="section-title">Regional Fulfillment Map</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            Visual flows from plants to regions, sized by allocated volume and colored by priority
+        </p>
+        <div class="map-panel">
+            <div style="display:flex; justify-content: space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                <div class="map-legend">
+                    <span class="legend-item"><span class="legend-chip chip-high"></span> High Priority</span>
+                    <span class="legend-item"><span class="legend-chip chip-medium"></span> Medium Priority</span>
+                    <span class="legend-item"><span class="legend-chip chip-low"></span> Standard</span>
+                </div>
+                <div style="font-size:0.9rem; color: var(--text-light);">
+                    Plant filter:
+                    <select id="plantFilter" style="padding:0.4rem 0.6rem; border:1px solid var(--border-gray); border-radius:6px;">
+                        <option value="all">All</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Antwerp">Antwerp</option>
+                        <option value="Mobile">Mobile</option>
+                    </select>
+                </div>
+            </div>
+            <svg id="fulfillmentMap" viewBox="0 0 900 420" width="100%" height="420" preserveAspectRatio="xMidYMid meet" style="display:block">
+                <!-- Static Nodes (plants & regions) -->
+                <g id="mapNodes"></g>
+                <!-- Dynamic flows -->
+                <g id="mapFlows"></g>
+            </svg>
+        </div>
+        <div class="dashboard-grid">
+            <!-- Plant Operations -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Plant Operations</div>
+                    <div class="card-status status-operational" id="plantStatus">Operational</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">ME5 Unit</div>
+                    <div class="metric-value" id="me5Output">620 MT/day</div>
+                    <div class="metric-subtext" id="me5Status">Online</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">ME6 Unit</div>
+                    <div class="metric-value" id="me6Output">345 MT/day</div>
+                    <div class="metric-subtext" id="me6Status">Online</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Output</div>
+                    <div class="metric-value" id="totalOutput">965 MT/day</div>
+                </div>
+            </div>
+
+            <!-- Production Status -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Status</div>
+                    <div class="card-status status-operational" id="productionStatus">On Track</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Monthly Progress</div>
+                    <div class="metric-value" id="monthlyProduction">22,620 MT</div>
+                    <div class="metric-subtext">Target: 29,000 MT (78% complete)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Days Remaining</div>
+                    <div class="metric-value" id="daysRemaining">8 days</div>
+                </div>
+            </div>
+
+            <!-- Inventory -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Finished Product Inventory</div>
+                    <div class="card-status status-operational" id="inventoryStatus">Safe</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Tank Level</div>
+                    <div class="metric-value" id="tankLevel">4,200 MT</div>
+                    <div class="metric-subtext">Capacity: 6,300 MT (Safe range: 3K-6K)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Days Coverage</div>
+                    <div class="metric-value" id="daysCoverage">4.3 days</div>
+                </div>
+            </div>
+
+            <!-- Raw Materials -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Raw Materials</div>
+                    <div class="card-status status-operational" id="rawMaterialsStatus">Adequate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Hydrogen (H2)</div>
+                    <div class="metric-value" id="h2Stock">4,800 MT</div>
+                    <div class="metric-subtext">56 days coverage</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">MMP</div>
+                    <div class="metric-value" id="mmpStock">1,850 MT</div>
+                    <div class="metric-subtext">44 days coverage</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Methanol</div>
+                    <div class="metric-value" id="methanolStock">980 MT</div>
+                    <div class="metric-subtext" style="color: var(--warning-orange);" id="methanolStatus">26 days - Monitor</div>
+                </div>
+            </div>
+
+            <!-- Cost Today -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Cost</div>
+                    <div class="card-status status-operational" id="costStatus">Within Budget</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Today's Cost</div>
+                    <div class="metric-value" id="todayCost">$78.5K</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Monthly Actual</div>
+                    <div class="metric-value" id="monthlyCost">$2.3M</div>
+                    <div class="metric-subtext">Budget: $2.4M</div>
+                </div>
+            </div>
+
+            <!-- Customer Orders -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Customer Orders</div>
+                    <div class="card-status status-operational" id="ordersStatus">On Schedule</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Orders</div>
+                    <div class="metric-value" id="activeOrders">47</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Pending Volume</div>
+                    <div class="metric-value" id="pendingVolume">6,380 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On-Time Delivery</div>
+                    <div class="metric-value" id="onTimeDelivery">96%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Flow Panel -->
+        <div class="info-panel">
+            <div class="panel-tabs">
+                <div class="panel-tab active" onclick="switchTab('events')">24/7 Event Log</div>
+                <div class="panel-tab" onclick="switchTab('pending')">Pending Actions</div>
+            </div>
+
+            <div id="eventsPanel" class="panel-content active">
+                <div class="event-log" id="eventLog">
+                    <div class="event-item update">
+                        <div class="event-time">08:30</div>
+                        <div class="event-content">
+                            📊 Daily production sync completed - All systems updated (SAP, IBP, PIMS, OAS)
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-time">10:15</div>
+                        <div class="event-content">
+                            🚚 Raw material delivery confirmed - Methanol 850 MT received
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-time">14:20</div>
+                        <div class="event-content">
+                            📧 Production forecast updated - Notifications sent to Sales, Global SC
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pendingPanel" class="panel-content">
+                <div class="pending-actions" id="pendingActions">
+                    <div class="pending-item completed">
+                        <div class="pending-header">
+                            <div class="pending-title">✓ H2 supplier contract renewal</div>
+                            <div class="pending-owner">Procurement</div>
+                        </div>
+                        <div class="pending-desc">Completed: Renewed for Q4 2025</div>
+                    </div>
+                    <div class="pending-item">
+                        <div class="pending-header">
+                            <div class="pending-title">⏳ ME6 maintenance schedule confirmation</div>
+                            <div class="pending-owner">Plant Manager</div>
+                        </div>
+                        <div class="pending-desc">Due: Oct 25 - Need final approval for Nov maintenance window</div>
+                    </div>
+                    <div class="pending-item">
+                        <div class="pending-header">
+                            <div class="pending-title">⏳ Q4 demand forecast alignment</div>
+                            <div class="pending-owner">Sales + Global SC</div>
+                        </div>
+                        <div class="pending-desc">Due: Oct 28 - IBP forecast needs review for Nov-Dec planning</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stakeholder Access -->
+        <div class="stakeholder-links">
+            <h3>Stakeholder System Access</h3>
+            <div class="links-grid">
+                <a href="optimizer.html" class="stakeholder-link">
+                    <div class="stakeholder-icon">🤖</div>
+                    <div class="stakeholder-info">
+                        <h4>AI Decision Optimizer</h4>
+                        <p>Scenario analysis, crisis management, explainable recommendations</p>
+                    </div>
+                </a>
+                <a href="sales.html" class="stakeholder-link">
+                    <div class="stakeholder-icon">📈</div>
+                    <div class="stakeholder-info">
+                        <h4>Sales Team</h4>
+                        <p>Customer orders, demand forecasting, delivery coordination</p>
+                    </div>
+                </a>
+                <a href="global-supply-chain.html" class="stakeholder-link">
+                    <div class="stakeholder-icon">🌏</div>
+                    <div class="stakeholder-info">
+                        <h4>Global Supply Chain</h4>
+                        <p>Multi-site coordination, capacity allocation, global optimization</p>
+                    </div>
+                </a>
+                <a href="local-supply-chain.html" class="stakeholder-link">
+                    <div class="stakeholder-icon">📊</div>
+                    <div class="stakeholder-info">
+                        <h4>Local Supply Chain</h4>
+                        <p>SAP-Excel integration, procurement, inventory management</p>
+                    </div>
+                </a>
+                <a href="production.html" class="stakeholder-link">
+                    <div class="stakeholder-icon">🏭</div>
+                    <div class="stakeholder-info">
+                        <h4>Plant Production</h4>
+                        <p>Equipment monitoring, maintenance scheduling, efficiency tracking</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Demo Controls -->
+    <div class="demo-fab">
+        <button class="demo-fab-button" onclick="toggleDemoMenu()">⚙️</button>
+        <div class="demo-menu" id="demoMenu">
+            <div class="demo-menu-item" onclick="runScenario(1)">1: Equipment Failure</div>
+            <div class="demo-menu-item" onclick="runScenario(2)">2: Supply Delay</div>
+            <div class="demo-menu-item" onclick="resetDemo()" style="border-top: 1px solid var(--border-gray); margin-top: 0.5rem; padding-top: 0.75rem;">Reset</div>
+            <div class="demo-menu-item" onclick="openAllStakeholders()">Open All Views</div>
+        </div>
+    </div>
+
+    <script>
+        let demoMenuOpen = false;
+
+        function toggleDemoMenu() {
+            const menu = document.getElementById('demoMenu');
+            demoMenuOpen = !demoMenuOpen;
+            if (demoMenuOpen) {
+                menu.classList.add('show');
+            } else {
+                menu.classList.remove('show');
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'events') {
+                document.querySelector('.panel-tab').classList.add('active');
+                document.getElementById('eventsPanel').classList.add('active');
+            } else {
+                document.querySelectorAll('.panel-tab')[1].classList.add('active');
+                document.getElementById('pendingPanel').classList.add('active');
+            }
+        }
+
+        function runScenario(num) {
+            toggleDemoMenu();
+            switch(num) {
+                case 1:
+                    simulateEquipmentFailure();
+                    break;
+                case 2:
+                    simulateBulkOrderSync();
+                    break;
+                case 3:
+                    simulateSupplyChainAdjustment();
+                    break;
+                case 4:
+                    simulateGlobalRebalancing();
+                    break;
+            }
+        }
+
+        function simulateEquipmentFailure() {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            showAlert('ME6 Unit Shutdown Detected - Automated Response Activated');
+            
+            // Update plant operations
+            document.getElementById('me6Output').textContent = '0 MT/day';
+            document.getElementById('me6Status').textContent = 'Offline';
+            document.getElementById('me6Status').style.color = 'var(--alert-red)';
+            document.getElementById('totalOutput').textContent = '620 MT/day';
+            document.getElementById('plantStatus').className = 'card-status status-critical';
+            document.getElementById('plantStatus').textContent = 'Degraded';
+            
+            // Update production status
+            document.getElementById('productionStatus').className = 'card-status status-warning';
+            document.getElementById('productionStatus').textContent = 'At Risk';
+            
+            // Update cost
+            document.getElementById('todayCost').textContent = '$95.2K';
+            document.getElementById('costStatus').className = 'card-status status-warning';
+            document.getElementById('costStatus').textContent = 'Over Budget';
+            
+            // Update orders
+            document.getElementById('ordersStatus').className = 'card-status status-warning';
+            document.getElementById('ordersStatus').textContent = '3 orders at risk';
+            
+            // Add event log entries
+            addEventLog(now, '⚠️ ALERT: ME6 unit offline - PIMS sensor detection', 'alert');
+            
+            setTimeout(() => {
+                addEventLog(now, '📧 Notifications sent to: Local SC Manager, Alex Rodriguez, Sarah Chen, Maria Gonzalez<br>Alert details: Production reduced 345 MT/day, estimated downtime 3-5 days');
+            }, 1000);
+            
+            setTimeout(() => {
+                addPendingAction('ME6 repair timeline confirmation', 'Maintenance Team', 'Urgent: Confirm expected repair duration and parts availability');
+                addPendingAction('Customer communication for affected orders', 'Sales Team', 'Orders #2848, #2850 may be impacted - need mitigation plan');
+                addPendingAction('Production compensation decision', 'Plant Manager', 'Evaluate: Increase ME5 capacity vs divert to Malaysia plant');
+            }, 2000);
+            
+            setTimeout(() => {
+                addEventLog(now, '💡 View AI analysis in Decision Optimizer →', 'update');
+            }, 3000);
+            
+            // Highlight optimizer button
+            document.querySelector('.optimizer-btn').classList.add('crisis-active');
+            
+            // Broadcast to other windows
+            broadcastToStakeholders('equipment_failure', { unit: 'ME6', impact: 345 });
+        }
+
+        function simulateBulkOrderSync() {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            showAlert('Bulk Order Upload Detected - Auto-Syncing Across All Systems');
+            
+            // Update orders
+            document.getElementById('activeOrders').textContent = '52';
+            document.getElementById('pendingVolume').textContent = '9,580 MT';
+            
+            // Add event log
+            addEventLog(now, '📊 Bulk order file processed: 25 new orders uploaded');
+            setTimeout(() => {
+                addEventLog(now, '📧 Order confirmations sent to customers - SAP, IBP, Excel synchronized', 'update');
+            }, 1500);
+            
+            setTimeout(() => {
+                addPendingAction('Production capacity review for new orders', 'Global SC', 'Assess if current capacity sufficient for 3,200 MT additional volume');
+            }, 2000);
+            
+            setTimeout(() => {
+                addEventLog(now, '💡 View AI analysis in Decision Optimizer →', 'update');
+            }, 3000);
+            
+            broadcastToStakeholders('bulk_order_sync', { orders: 25, volume: 3200 });
+        }
+
+        function simulateSupplyChainAdjustment() {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            showAlert('Raw Material Delay Detected - Automated Inventory Adjustment');
+            
+            // Update raw materials
+            document.getElementById('methanolStock').textContent = '780 MT';
+            document.getElementById('methanolStatus').textContent = '21 days - Critical';
+            document.getElementById('methanolStatus').style.color = 'var(--alert-red)';
+            document.getElementById('rawMaterialsStatus').className = 'card-status status-warning';
+            document.getElementById('rawMaterialsStatus').textContent = 'Action Needed';
+            
+            // Add events
+            addEventLog(now, '⚠️ Methanol shipment delayed 3 days - supplier notification received', 'alert');
+            setTimeout(() => {
+                addEventLog(now, '📧 Notifications sent: Procurement, Local SC, Plant Manager<br>Impact: Current stock covers 21 days, need alternative sourcing');
+            }, 1000);
+            
+            setTimeout(() => {
+                addEventLog(now, '🔄 Alternative supplier contacted - expedited delivery quoted at +$12K', 'update');
+            }, 2500);
+            
+            setTimeout(() => {
+                addPendingAction('Approve expedited methanol delivery', 'Procurement', 'Cost: +$12K for 3-day expedited shipping vs production slowdown');
+            }, 3000);
+            
+            setTimeout(() => {
+                addEventLog(now, '💡 View AI analysis in Decision Optimizer →', 'update');
+            }, 4000);
+            
+            broadcastToStakeholders('supply_chain_adjustment', { material: 'methanol', delay_days: 3 });
+        }
+
+        function simulateGlobalRebalancing() {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            showAlert('Global Capacity Rebalancing - Multi-Site Coordination Active');
+            
+            // Update production
+            document.getElementById('monthlyProduction').textContent = '23,470 MT';
+            
+            // Add events
+            addEventLog(now, '🌏 Malaysia plant maintenance scheduled - 850 MT capacity reallocated to Singapore');
+            setTimeout(() => {
+                addEventLog(now, '📧 Coordination complete: Singapore accepts +850 MT, raw material orders adjusted', 'update');
+            }, 1500);
+            
+            setTimeout(() => {
+                addPendingAction('Confirm increased raw material delivery', 'Local SC', 'H2 and MMP orders increased by 12% for rebalanced production');
+            }, 2500);
+            
+            broadcastToStakeholders('global_capacity_rebalancing', { from: 'Malaysia', to: 'Singapore', volume: 850 });
+        }
+
+        function resetDemo() {
+            // Reset all metrics
+            document.getElementById('me6Output').textContent = '345 MT/day';
+            document.getElementById('me6Status').textContent = 'Online';
+            document.getElementById('me6Status').style.color = 'var(--text-light)';
+            document.getElementById('totalOutput').textContent = '965 MT/day';
+            document.getElementById('plantStatus').className = 'card-status status-operational';
+            document.getElementById('plantStatus').textContent = 'Operational';
+            
+            document.getElementById('productionStatus').className = 'card-status status-operational';
+            document.getElementById('productionStatus').textContent = 'On Track';
+            document.getElementById('monthlyProduction').textContent = '22,620 MT';
+            
+            document.getElementById('todayCost').textContent = '$78.5K';
+            document.getElementById('costStatus').className = 'card-status status-operational';
+            document.getElementById('costStatus').textContent = 'Within Budget';
+            
+            document.getElementById('activeOrders').textContent = '47';
+            document.getElementById('pendingVolume').textContent = '6,380 MT';
+            document.getElementById('ordersStatus').className = 'card-status status-operational';
+            document.getElementById('ordersStatus').textContent = 'On Schedule';
+            
+            document.getElementById('methanolStock').textContent = '980 MT';
+            document.getElementById('methanolStatus').textContent = '26 days - Monitor';
+            document.getElementById('methanolStatus').style.color = 'var(--warning-orange)';
+            document.getElementById('rawMaterialsStatus').className = 'card-status status-operational';
+            document.getElementById('rawMaterialsStatus').textContent = 'Adequate';
+            
+            // Reset event log
+            document.getElementById('eventLog').innerHTML = `
+                <div class="event-item update">
+                    <div class="event-time">08:30</div>
+                    <div class="event-content">
+                        📊 Daily production sync completed - All systems updated (SAP, IBP, PIMS, OAS)
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">10:15</div>
+                    <div class="event-content">
+                        🚚 Raw material delivery confirmed - Methanol 850 MT received
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">14:20</div>
+                    <div class="event-content">
+                        📧 Production forecast updated - Notifications sent to Sales, Global SC
+                    </div>
+                </div>
+            `;
+            
+            // Reset pending actions
+            document.getElementById('pendingActions').innerHTML = `
+                <div class="pending-item completed">
+                    <div class="pending-header">
+                        <div class="pending-title">✓ H2 supplier contract renewal</div>
+                        <div class="pending-owner">Procurement</div>
+                    </div>
+                    <div class="pending-desc">Completed: Renewed for Q4 2025</div>
+                </div>
+                <div class="pending-item">
+                    <div class="pending-header">
+                        <div class="pending-title">⏳ ME6 maintenance schedule confirmation</div>
+                        <div class="pending-owner">Plant Manager</div>
+                    </div>
+                    <div class="pending-desc">Due: Oct 25 - Need final approval for Nov maintenance window</div>
+                </div>
+                <div class="pending-item">
+                    <div class="pending-header">
+                        <div class="pending-title">⏳ Q4 demand forecast alignment</div>
+                        <div class="pending-owner">Sales + Global SC</div>
+                    </div>
+                    <div class="pending-desc">Due: Oct 28 - IBP forecast needs review for Nov-Dec planning</div>
+                </div>
+            `;
+            
+            document.getElementById('alertsBanner').classList.remove('show');
+            
+            // Remove crisis highlighting
+            document.querySelector('.optimizer-btn').classList.remove('crisis-active');
+            
+            // Make any new event log entries clickable
+            makeEventLogClickable();
+            
+            broadcastToStakeholders('reset', {});
+        }
+
+        function openAllStakeholders() {
+            window.open('sales.html', '_blank');
+            window.open('global-supply-chain.html', '_blank');
+            window.open('local-supply-chain.html', '_blank');
+            window.open('production.html', '_blank');
+            window.open('optimizer.html', '_blank');
+            toggleDemoMenu();
+        }
+
+        function showAlert(message) {
+            const banner = document.getElementById('alertsBanner');
+            document.getElementById('alertMessage').textContent = message;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 8000);
+        }
+
+        function addEventLog(time, content, type = '') {
+            const eventLog = document.getElementById('eventLog');
+            const eventItem = document.createElement('div');
+            
+            // Check if this is an AI analysis entry
+            const isAIAnalysis = content.includes('View AI analysis') || content.includes('Decision Optimizer');
+            const clickableClass = isAIAnalysis ? 'clickable' : '';
+            
+            eventItem.className = `event-item ${type} ${clickableClass}`;
+            eventItem.innerHTML = `
+                <div class="event-time">${time}</div>
+                <div class="event-content">${content}</div>
+            `;
+            
+            // Add click handler for AI analysis entries
+            if (isAIAnalysis) {
+                eventItem.addEventListener('click', function() {
+                    window.open('optimizer.html?crisis=true', '_blank');
+                });
+            }
+            
+            eventLog.insertBefore(eventItem, eventLog.firstChild);
+            
+            // Keep only last 10 events
+            while (eventLog.children.length > 10) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+        }
+
+        function addPendingAction(title, owner, desc) {
+            const pendingActions = document.getElementById('pendingActions');
+            const pendingItem = document.createElement('div');
+            pendingItem.className = 'pending-item';
+            pendingItem.innerHTML = `
+                <div class="pending-header">
+                    <div class="pending-title">⏳ ${title}</div>
+                    <div class="pending-owner">${owner}</div>
+                </div>
+                <div class="pending-desc">${desc}</div>
+            `;
+            pendingActions.insertBefore(pendingItem, pendingActions.children[1]);
+        }
+
+        function broadcastToStakeholders(eventType, data) {
+            const broadcastData = {
+                type: eventType,
+                timestamp: new Date().toISOString(),
+                source: 'coordination_hub',
+                data: data,
+                demo_trigger: true  // ADD THIS FLAG
+            };
+
+            localStorage.setItem('evonik_coordination_event', JSON.stringify(broadcastData));
+            
+            setTimeout(() => {
+                localStorage.removeItem('evonik_coordination_event');
+            }, 1000);
+        }
+
+        // Listen for events from other windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                if (eventData.source !== 'coordination_hub') {
+                    const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                    addEventLog(now, `📡 Update from ${eventData.source}: ${eventData.type}`, 'update');
+                }
+            }
+        });
+
+        // Update last update time
+        function updateTimestamp() {
+            const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdate').textContent = now;
+        }
+
+        setInterval(updateTimestamp, 30000); // Update every 30 seconds
+
+        // Close demo menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const demoFab = document.querySelector('.demo-fab');
+            if (!demoFab.contains(event.target) && demoMenuOpen) {
+                toggleDemoMenu();
+            }
+        });
+
+        // Make existing event log entries clickable
+        function makeEventLogClickable() {
+            const eventItems = document.querySelectorAll('.event-item');
+            eventItems.forEach(item => {
+                const content = item.querySelector('.event-content');
+                if (content && (content.textContent.includes('View AI analysis') || content.textContent.includes('Decision Optimizer'))) {
+                    item.classList.add('clickable');
+                    item.addEventListener('click', function() {
+                        window.open('optimizer.html?crisis=true', '_blank');
+                    });
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Evonik Production Coordination Hub initialized');
+            console.log('Real-time cross-system coordination active');
+            makeEventLogClickable();
+            // Market/Cost/Shipping dynamic updates
+            if (typeof updateMarketPrice === 'function') updateMarketPrice();
+            if (typeof updateProductionCost === 'function') updateProductionCost();
+            if (typeof updateShippingStatus === 'function') updateShippingStatus();
+            setInterval(() => {
+                if (typeof updateMarketPrice === 'function') updateMarketPrice();
+            }, 30000);
+
+            // Render mini charts if Chart.js is available
+            if (window.Chart) {
+                renderPriceMiniChart();
+                renderShipmentsMiniChart();
+                renderOnTimeDonut();
+            }
+            // Render map and hook filter
+            renderFulfillmentMap('all');
+            const filter = document.getElementById('plantFilter');
+            if (filter) {
+                filter.addEventListener('change', function() {
+                    renderFulfillmentMap(this.value);
+                });
+            }
+        });
+
+        // Update market price dynamically
+        function updateMarketPrice() {
+            const basePrice = 2.85;
+            const variation = (Math.random() - 0.5) * 0.02; // +/- $0.01
+            const currentPrice = (basePrice + variation).toFixed(2);
+            const priceEl = document.getElementById('methioninePrice');
+            if (priceEl) {
+                priceEl.textContent = '$' + currentPrice + '/kg';
+            }
+        }
+
+        // Update production cost
+        function updateProductionCost() {
+            const baseCost = 1.92;
+            const costEl = document.getElementById('productionCost');
+            if (costEl) {
+                costEl.textContent = '$' + baseCost.toFixed(2) + '/kg';
+            }
+        }
+
+        // Update shipping counts
+        function updateShippingStatus() {
+            const activeShipments = 18;
+            const activeShipmentsEl = document.getElementById('activeShipments');
+            if (activeShipmentsEl) {
+                activeShipmentsEl.textContent = activeShipments;
+            }
+        }
+
+        // Mini charts
+        function renderPriceMiniChart() {
+            const el = document.getElementById('priceMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const data = [2.80, 2.82, 2.79, 2.85, 2.88, 2.90, 2.85];
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [{
+                    label: 'APAC Spot ($/kg)',
+                    data,
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B',
+                    backgroundColor: 'rgba(139, 46, 139, 0.08)',
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 0
+                }]},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        function renderShipmentsMiniChart() {
+            const el = document.getElementById('shipmentsMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const data = [14, 16, 13, 18, 19, 17, 18];
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{
+                    label: 'Shipments in Transit',
+                    data,
+                    backgroundColor: 'rgba(22, 163, 74, 0.3)',
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--success-green').trim() || '#16A34A',
+                    borderWidth: 1,
+                }]},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        // Donut for on-time delivery
+        function renderOnTimeDonut() {
+            const el = document.getElementById('onTimeDonut');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const onTime = 94;
+            const late = 6;
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['On Time', 'Late'],
+                    datasets: [{
+                        data: [onTime, late],
+                        backgroundColor: ['rgba(22, 163, 74, 0.8)', 'rgba(234, 88, 12, 0.3)'],
+                        borderColor: ['rgba(22, 163, 74, 1)', 'rgba(234, 88, 12, 0.6)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Data-driven Regional Fulfillment Map
+        const mapData = {
+            plants: {
+                Singapore: { x: 150, y: 210 },
+                Antwerp: { x: 450, y: 110 },
+                Mobile: { x: 700, y: 300 }
+            },
+            regions: {
+                APAC: { x: 320, y: 274 },
+                Europe: { x: 580, y: 74 },
+                Americas: { x: 840, y: 214 }
+            },
+            flows: [
+                { from: 'Singapore', to: 'APAC', volume: 28950, priority: 'high' },
+                { from: 'Antwerp', to: 'Europe', volume: 15600, priority: 'medium' },
+                { from: 'Mobile', to: 'Americas', volume: 11400, priority: 'low' }
+            ]
+        };
+
+        function priorityColor(priority) {
+            if (priority === 'high') return getComputedStyle(document.documentElement).getPropertyValue('--alert-red').trim() || '#DC2626';
+            if (priority === 'medium') return getComputedStyle(document.documentElement).getPropertyValue('--warning-orange').trim() || '#EA580C';
+            return getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() || '#6B7280';
+        }
+
+        function renderFulfillmentMap(filterPlant = 'all') {
+            const svg = document.getElementById('fulfillmentMap');
+            if (!svg) return;
+            const nodesGroup = document.getElementById('mapNodes');
+            const flowsGroup = document.getElementById('mapFlows');
+            nodesGroup.innerHTML = '';
+            flowsGroup.innerHTML = '';
+
+            // Plants
+            Object.entries(mapData.plants).forEach(([name, p]) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', p.x);
+                circle.setAttribute('cy', p.y);
+                circle.setAttribute('r', '10');
+                circle.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B');
+                nodesGroup.appendChild(circle);
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', p.x);
+                label.setAttribute('y', p.y - 15);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('style', 'font-size:12px; fill: #6B7280;');
+                label.textContent = name;
+                nodesGroup.appendChild(label);
+            });
+
+            // Regions (rect + label)
+            function addRegionRect(regionName, color, x, y) {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x - 60);
+                rect.setAttribute('y', y - 14);
+                rect.setAttribute('width', 120);
+                rect.setAttribute('height', 28);
+                rect.setAttribute('rx', 6);
+                rect.setAttribute('ry', 6);
+                rect.setAttribute('fill', color.bg);
+                rect.setAttribute('stroke', color.stroke);
+                nodesGroup.appendChild(rect);
+                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t.setAttribute('x', x);
+                t.setAttribute('y', y + 5);
+                t.setAttribute('text-anchor', 'middle');
+                t.setAttribute('style', `font-size:12px; fill:${color.stroke};`);
+                t.textContent = regionName;
+                nodesGroup.appendChild(t);
+            }
+
+            addRegionRect('APAC', { bg: 'rgba(37, 99, 235, 0.08)', stroke: '#2563EB' }, mapData.regions.APAC.x, mapData.regions.APAC.y);
+            addRegionRect('Europe', { bg: 'rgba(139, 46, 139, 0.08)', stroke: getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B' }, mapData.regions.Europe.x, mapData.regions.Europe.y);
+            addRegionRect('Americas', { bg: 'rgba(22, 163, 74, 0.08)', stroke: getComputedStyle(document.documentElement).getPropertyValue('--success-green').trim() || '#16A34A' }, mapData.regions.Americas.x, mapData.regions.Americas.y);
+
+            // Flows
+            const flows = mapData.flows.filter(f => filterPlant === 'all' || f.from === filterPlant);
+            flows.forEach(f => {
+                const from = mapData.plants[f.from];
+                const to = mapData.regions[f.to];
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const c1x = (from.x + to.x) / 2;
+                const c1y = (from.y + to.y) / 2;
+                path.setAttribute('d', `M${from.x},${from.y} C${c1x},${from.y} ${c1x},${to.y} ${to.x},${to.y}`);
+                const width = Math.max(3, Math.min(8, Math.round(f.volume / 6000))); // normalize width
+                path.setAttribute('stroke-width', String(width));
+                path.setAttribute('stroke', priorityColor(f.priority));
+                path.setAttribute('fill', 'none');
+                path.setAttribute('opacity', '0.9');
+                flowsGroup.appendChild(path);
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

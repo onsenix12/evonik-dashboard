@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Team Dashboard - Evonik</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        /* Page-specific styles for sales.html */
+        .header {
+            background: linear-gradient(135deg, var(--sales-blue) 0%, #1E40AF 100%);
+        }
+
+        .back-btn:hover {
+            color: var(--sales-blue);
+        }
+
+        .pipeline-stages {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stage-card {
+            background: var(--bg-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--border-gray);
+        }
+
+        .stage-card.active {
+            border-color: var(--sales-blue);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .stage-title {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stage-volume {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .upload-option {
+            background: var(--bg-gray);
+            border: 2px dashed var(--sales-blue);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-option:hover {
+            border-style: solid;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--sales-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .upload-btn, .sync-btn {
+            background: var(--sales-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 0.25rem;
+        }
+
+        .upload-btn:hover, .sync-btn:hover {
+            background: #1E40AF;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .forecast-accuracy {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .accuracy-card {
+            background: var(--bg-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .accuracy-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .accuracy-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .accuracy-trend {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .pipeline-stages {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+
+            .forecast-accuracy {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pipeline-stages {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .forecast-accuracy {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">📈 Evonik</div>
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: 600;">Sales Team Dashboard</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">Order Management & Customer Fulfillment</div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div style="font-size: 1.1rem; font-weight: 600;">Sarah Chen</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Regional Sales Manager</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="back-nav">
+        <div class="nav-content">
+            <a href="index.html" class="back-btn">← Back to Coordination Hub</a>
+            <a href="optimizer.html" class="optimizer-btn">
+                AI Decision Support
+            </a>
+            <div class="breadcrumb">Sales Team</div>
+        </div>
+    </nav>
+
+    <div class="alerts-banner" id="alertsBanner">
+        <strong>CUSTOMER ALERT:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <main class="main-content">
+        <!-- Order Fulfillment Dashboard -->
+        <h2 class="section-title">Order Fulfillment Overview</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Fulfillment Status</div>
+                    <div class="card-status status-operational" id="fulfillmentStatus">On Track</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Monthly Target</div>
+                    <div class="metric-value">29,000 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Committed Orders</div>
+                    <div class="metric-value" id="committedOrders">28,200 MT</div>
+                    <div class="metric-subtext">97% of capacity allocated</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Capacity</div>
+                    <div class="card-status status-operational" id="capacityStatus">Available</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Output</div>
+                    <div class="metric-value" id="currentOutput">965 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Available Capacity</div>
+                    <div class="metric-value" id="availableCapacity">800 MT</div>
+                    <div class="metric-subtext">Remaining this month</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Delivery Performance</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On-Time Delivery</div>
+                    <div class="metric-value">96%</div>
+                    <div class="metric-subtext">Last 30 days</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Delayed Shipments</div>
+                    <div class="metric-value" id="delayedShipments">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Pipeline -->
+        <div class="section-panel">
+            <h3 class="section-title">Order Pipeline Status</h3>
+            <div class="pipeline-stages">
+                <div class="stage-card">
+                    <div class="stage-title">New</div>
+                    <div class="stage-count" id="newOrders">8</div>
+                    <div class="stage-volume">1,240 MT</div>
+                </div>
+                <div class="stage-card active">
+                    <div class="stage-title">Confirmed</div>
+                    <div class="stage-count" id="confirmedOrders">23</div>
+                    <div class="stage-volume">5,180 MT</div>
+                </div>
+                <div class="stage-card active">
+                    <div class="stage-title">Allocated</div>
+                    <div class="stage-count">12</div>
+                    <div class="stage-volume">3,420 MT</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-title">In Production</div>
+                    <div class="stage-count">8</div>
+                    <div class="stage-volume">2,150 MT</div>
+                </div>
+                <div class="stage-card">
+                    <div class="stage-title">Shipped</div>
+                    <div class="stage-count">15</div>
+                    <div class="stage-volume">4,210 MT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Impact Tracking -->
+        <div class="section-panel">
+            <h3 class="section-title">Customer Impact Monitoring</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">At-Risk Orders</div>
+                        <div class="card-status status-operational" id="atRiskStatus">None</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Production Issues</div>
+                        <div class="metric-value" id="atRiskCount">0</div>
+                        <div class="metric-subtext" id="atRiskDetail">No active production disruptions</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Customer Notifications</div>
+                        <div class="card-status status-operational">Current</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Sent Today</div>
+                        <div class="metric-value" id="notificationsSent">12</div>
+                        <div class="metric-subtext">Order confirmations, shipping updates</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Urgent Inquiries</div>
+                        <div class="card-status status-operational">Low</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Pending Response</div>
+                        <div class="metric-value">3</div>
+                        <div class="metric-subtext">Avg response time: 2.3 hours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Orders Table -->
+        <div class="section-panel">
+            <h3 class="section-title">Active Customer Orders</h3>
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Volume (MT)</th>
+                        <th>Delivery Date</th>
+                        <th>Status</th>
+                        <th>Stage</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr>
+                        <td>#ORD-2847</td>
+                        <td>Charoen Pokphand Foods</td>
+                        <td>1,250</td>
+                        <td>Oct 28, 2025</td>
+                        <td><span class="order-status status-shipped">Shipped</span></td>
+                        <td>Delivered</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD-2848</td>
+                        <td>Cargill Thailand</td>
+                        <td>847</td>
+                        <td>Nov 2, 2025</td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>Allocated</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD-2849</td>
+                        <td>BRF S.A.</td>
+                        <td>2,100</td>
+                        <td>Nov 5, 2025</td>
+                        <td><span class="order-status status-confirmed">Confirmed</span></td>
+                        <td>In Production</td>
+                    </tr>
+                    <tr>
+                        <td>#ORD-2850</td>
+                        <td>Tyson Foods</td>
+                        <td>1,580</td>
+                        <td>Nov 8, 2025</td>
+                        <td><span class="order-status status-pending">Pending Allocation</span></td>
+                        <td>Confirmed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- IBP Integration Status -->
+        <div class="section-panel">
+            <h3 class="section-title">IBP Demand Forecast Integration</h3>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Sync Status</div>
+                        <div class="card-status status-operational" id="ibpStatus">Active</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Last Sync</div>
+                        <div class="metric-value" id="lastIbpSync">5 min ago</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Data Quality</div>
+                        <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Excellent</div>
+                        <div class="metric-subtext">No validation errors</div>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header">
+                        <div class="card-title">Forecast Accuracy</div>
+                        <div class="card-status status-operational">Good</div>
+                    </div>
+                    <div class="forecast-accuracy">
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">This Month</div>
+                            <div class="accuracy-value" style="color: var(--success-green);">94%</div>
+                            <div class="accuracy-trend" style="color: var(--success-green);">▲ +2% vs last month</div>
+                        </div>
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">Forecast vs Actual</div>
+                            <div class="accuracy-value">28,400 MT</div>
+                            <div class="accuracy-trend">Forecast: 29,000 MT</div>
+                        </div>
+                        <div class="accuracy-card">
+                            <div class="accuracy-label">Variance</div>
+                            <div class="accuracy-value" style="color: var(--warning-orange);">-2.1%</div>
+                            <div class="accuracy-trend">Within acceptable range</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Input Methods -->
+        <div class="section-panel">
+            <h3 class="section-title">Order Input Methods</h3>
+            <div class="upload-section">
+                <div class="upload-option" onclick="document.getElementById('bulkFileInput').click()">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-title">Bulk Order Upload</div>
+                    <div class="upload-description">Upload Excel/CSV files with multiple orders</div>
+                    <button class="upload-btn">Upload File</button>
+                    <input type="file" id="bulkFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleBulkUpload(event)">
+                </div>
+                <div class="upload-option">
+                    <div class="upload-icon">🔄</div>
+                    <div class="upload-title">IBP System Sync</div>
+                    <div class="upload-description">Sync directly with IBP forecasting system</div>
+                    <button class="sync-btn" onclick="syncWithIBP()">Sync with IBP</button>
+                    <button class="sync-btn" onclick="syncWithSAP()">Sync with SAP</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Listen for coordination events
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'evonik_coordination_event') {
+                const eventData = JSON.parse(e.newValue);
+                handleCoordinationEvent(eventData);
+            }
+        });
+
+        function handleCoordinationEvent(event) {
+            switch(event.type) {
+                case 'equipment_failure':
+                    showAlert('Production disruption detected - 3 customer orders may be impacted');
+                    updateCustomerImpact();
+                    break;
+                case 'bulk_order_sync':
+                    showAlert('Bulk orders processed successfully');
+                    updateOrderCounts();
+                    break;
+                case 'reset':
+                    resetDashboard();
+                    break;
+            }
+        }
+
+        function showAlert(message) {
+            const banner = document.getElementById('alertsBanner');
+            document.getElementById('alertMessage').textContent = message;
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 8000);
+        }
+
+        function updateCustomerImpact() {
+            // Production issue affects fulfillment
+            document.getElementById('currentOutput').textContent = '620 MT/day';
+            document.getElementById('availableCapacity').textContent = '0 MT';
+            document.getElementById('capacityStatus').className = 'card-status status-warning';
+            document.getElementById('capacityStatus').textContent = 'Limited';
+            
+            document.getElementById('fulfillmentStatus').className = 'card-status status-warning';
+            document.getElementById('fulfillmentStatus').textContent = 'At Risk';
+            
+            document.getElementById('atRiskCount').textContent = '3';
+            document.getElementById('atRiskStatus').className = 'card-status status-warning';
+            document.getElementById('atRiskStatus').textContent = '3 Orders';
+            document.getElementById('atRiskDetail').textContent = 'ME6 shutdown impacting 3 customer commitments';
+            
+            // Mark affected orders
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows[1].querySelector('.order-status').className = 'order-status status-at-risk';
+            rows[1].querySelector('.order-status').textContent = 'At Risk';
+            rows[3].querySelector('.order-status').className = 'order-status status-at-risk';
+            rows[3].querySelector('.order-status').textContent = 'At Risk';
+        }
+
+        function updateOrderCounts() {
+            document.getElementById('newOrders').textContent = '13';
+            document.getElementById('confirmedOrders').textContent = '28';
+        }
+
+        function resetDashboard() {
+            document.getElementById('alertsBanner').classList.remove('show');
+            document.getElementById('currentOutput').textContent = '965 MT/day';
+            document.getElementById('availableCapacity').textContent = '800 MT';
+            document.getElementById('capacityStatus').className = 'card-status status-operational';
+            document.getElementById('capacityStatus').textContent = 'Available';
+            
+            document.getElementById('fulfillmentStatus').className = 'card-status status-operational';
+            document.getElementById('fulfillmentStatus').textContent = 'On Track';
+            
+            document.getElementById('atRiskCount').textContent = '0';
+            document.getElementById('atRiskStatus').className = 'card-status status-operational';
+            document.getElementById('atRiskStatus').textContent = 'None';
+            document.getElementById('atRiskDetail').textContent = 'No active production disruptions';
+            
+            document.getElementById('newOrders').textContent = '8';
+            document.getElementById('confirmedOrders').textContent = '23';
+            
+            // Reset order statuses
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            rows[1].querySelector('.order-status').className = 'order-status status-confirmed';
+            rows[1].querySelector('.order-status').textContent = 'Confirmed';
+            rows[3].querySelector('.order-status').className = 'order-status status-pending';
+            rows[3].querySelector('.order-status').textContent = 'Pending Allocation';
+        }
+
+        function handleBulkUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showAlert(`Bulk upload initiated: ${file.name}`);
+                // Simulate processing
+                setTimeout(() => {
+                    updateOrderCounts();
+                    showAlert('Bulk orders processed successfully');
+                }, 2000);
+            }
+        }
+
+        function syncWithIBP() {
+            showAlert('Syncing with IBP system...');
+            setTimeout(() => {
+                document.getElementById('lastIbpSync').textContent = 'Just now';
+                showAlert('IBP sync completed successfully');
+            }, 1500);
+        }
+
+        function syncWithSAP() {
+            showAlert('Syncing with SAP system...');
+            setTimeout(() => {
+                document.getElementById('lastIbpSync').textContent = 'Just now';
+                showAlert('SAP sync completed successfully');
+            }, 1500);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial sync time
+            document.getElementById('lastIbpSync').textContent = '5 min ago';
+            
+            // Update notification count
+            document.getElementById('notificationsSent').textContent = '12';
+        });
+    </script>
+</body>
+</html>

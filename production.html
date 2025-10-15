@@ -410,7 +410,7 @@
 
         <!-- Equipment Health Monitoring -->
         <div class="section-panel">
-            <h3 class="section-title">Equipment Health - Sensor Data (OAS)</h3>
+            <h3 class="section-title">Equipment Health - Sensor Data (PIMS)</h3>
             <div class="sensor-grid">
                 <div class="sensor-card">
                     <div class="sensor-label">ME5 Temperature</div>
@@ -457,65 +457,49 @@
 
         <!-- Shift Performance -->
         <div class="section-panel">
-            <h3 class="section-title">Current Shift Performance</h3>
+            <h3 class="section-title">Daily Production Performance</h3>
             <div class="dashboard-grid">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Shift A (06:00 - 14:00)</div>
-                        <div class="card-status status-operational">Active</div>
+                        <div class="card-title">Daily Production Rate</div>
+                        <div class="card-status status-operational">On Track</div>
                     </div>
                     <div class="metric">
-                        <div class="metric-label">Target</div>
-                        <div class="metric-value">320 MT</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Actual (6 hrs)</div>
-                        <div class="metric-value" id="shiftActual">245 MT</div>
-                        <div class="metric-subtext" style="color: var(--success-green);">On pace (40 MT/hr)</div>
+                        <div class="metric-label">Daily Production Rate</div>
+                        <div class="metric-value" id="dailyRate">965 MT/day</div>
+                        <div class="metric-subtext">Target: 965 MT/day</div>
                     </div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
                     <div class="card-header">
-                        <div class="card-title">Hourly Production Rate</div>
+                        <div class="card-title">Daily Summary</div>
                     </div>
-                    <div class="shift-performance">
-                        <div class="shift-hour above-target">
-                            <div class="hour-label">06:00</div>
-                            <div class="hour-value">42 MT</div>
+                    <div class="daily-summary">
+                        <div class="metric">
+                            <div class="metric-label">Today's Production</div>
+                            <div class="metric-value" id="todayProduction">782 MT</div>
+                            <div class="metric-subtext">As of 2:30 PM | 81% of daily target</div>
                         </div>
-                        <div class="shift-hour above-target">
-                            <div class="hour-label">07:00</div>
-                            <div class="hour-value">41 MT</div>
+                        <div class="metric">
+                            <div class="metric-label">Yesterday's Production</div>
+                            <div class="metric-value">958 MT</div>
+                            <div class="metric-subtext">99.3% of target</div>
                         </div>
-                        <div class="shift-hour above-target">
-                            <div class="hour-label">08:00</div>
-                            <div class="hour-value">40 MT</div>
+                        <div class="metric">
+                            <div class="metric-label">7-Day Average</div>
+                            <div class="metric-value">963 MT/day</div>
+                            <div class="metric-subtext">Consistent performance</div>
                         </div>
-                        <div class="shift-hour below-target">
-                            <div class="hour-label">09:00</div>
-                            <div class="hour-value">38 MT</div>
-                        </div>
-                        <div class="shift-hour above-target">
-                            <div class="hour-label">10:00</div>
-                            <div class="hour-value">42 MT</div>
-                        </div>
-                        <div class="shift-hour current">
-                            <div class="hour-label">11:00</div>
-                            <div class="hour-value">42 MT</div>
-                        </div>
-                        <div class="shift-hour">
-                            <div class="hour-label">12:00</div>
-                            <div class="hour-value">--</div>
-                        </div>
-                        <div class="shift-hour">
-                            <div class="hour-label">13:00</div>
-                            <div class="hour-value">--</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-light);">
-                        Target: 40 MT/hr | Current average: 40.8 MT/hr
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Production Trend (Daily) -->
+        <div class="section-panel">
+            <h3 class="section-title">Production Trend (Daily)</h3>
+            <div style="background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-gray);">
+                <canvas id="dailyTrendChart" height="120"></canvas>
             </div>
         </div>
 
@@ -599,12 +583,12 @@
             </div>
         </div>
 
-        <!-- OAS Integration Status -->
-        <h2 class="section-title">OAS Integration Status</h2>
+        <!-- PIMS Integration Status -->
+        <h2 class="section-title">PIMS Integration Status</h2>
         <div class="dashboard-grid">
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Sensor Connectivity</div>
+                    <div class="card-title">PIMS Connection</div>
                     <div class="card-status status-operational" id="oasStatus">Connected</div>
                 </div>
                 <div class="metric">
@@ -757,7 +741,46 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Production Operations Dashboard initialized');
-            console.log('OAS real-time monitoring active');
+            console.log('PIMS real-time monitoring active');
+
+            // Render Daily Trend Chart (Chart.js)
+            if (window.Chart && document.getElementById('dailyTrendChart')) {
+                const ctx = document.getElementById('dailyTrendChart').getContext('2d');
+                const labels = ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5', 'Oct 6', 'Oct 7', 'Oct 8', 'Oct 9', 'Oct 10', 'Oct 11', 'Oct 12', 'Oct 13', 'Oct 14', 'Oct 15'];
+                const data = [945, 972, 958, 961, 967, 955, 970, 968, 960, 964, 959, 961, 966, 969, 974];
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Daily Production (MT/day)',
+                            data,
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--production-indigo').trim() || '#6366F1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.25,
+                            pointRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                title: { display: true, text: 'MT/day' },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: true },
+                            tooltip: { enabled: true }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>

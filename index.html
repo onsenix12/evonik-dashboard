@@ -255,6 +255,110 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Regional Fulfillment Styles */
+        .plant-fulfillment-section {
+            margin-bottom: 2rem;
+        }
+
+        .plant-fulfillment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .plant-fulfillment-header h3 {
+            font-size: 1.3rem;
+            color: var(--evonik-purple);
+        }
+
+        .fulfillment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .fulfillment-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .priority-high-border {
+            border-left-color: var(--alert-red);
+            background: rgba(220, 38, 38, 0.02);
+        }
+
+        .priority-medium-border {
+            border-left-color: var(--warning-orange);
+            background: rgba(234, 88, 12, 0.02);
+        }
+
+        .priority-low-border {
+            border-left-color: var(--border-gray);
+            background: rgba(100, 116, 139, 0.02);
+        }
+
+        .fulfillment-priority {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .fulfillment-customer {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .fulfillment-details {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        /* Data Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table thead {
+            background: var(--bg-gray);
+        }
+
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(139, 46, 139, 0.03);
+        }
     </style>
 </head>
 <body>
@@ -310,6 +414,273 @@
             </div>
         </div>
 
+        <!-- Market Intelligence -->
+        <h2 class="section-title">Market Intelligence</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📈 Methionine Spot Price (APAC)</div>
+                    <div class="card-status status-operational">Live Data</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Price</div>
+                    <div class="metric-value" id="methioninePrice" style="color: var(--evonik-purple);">$2.85/kg</div>
+                    <div class="metric-subtext" id="priceChange" style="color: var(--success-green);">
+                        ▲ +2.3% vs last week
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">7-Day Range</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.78 - $2.92</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Market Trend</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Rising</div>
+                    <div class="metric-subtext">Strong demand in SE Asia</div>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="priceMiniChart" height="80"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Production Cost Analysis</div>
+                    <div class="card-status status-operational">On Target</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Average Cost Today</div>
+                    <div class="metric-value" id="productionCost">$1.92/kg</div>
+                    <div class="metric-subtext">Within budget</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Gross Margin</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">32.6%</div>
+                    <div class="metric-subtext">$0.93/kg profit</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">vs Plan</div>
+                    <div class="metric-value" style="font-size: 1rem;">-$0.04/kg</div>
+                    <div class="metric-subtext" style="color: var(--success-green);">2% below target cost</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Regional Pricing</div>
+                    <div class="card-status" style="background: rgba(139, 46, 139, 0.1); color: var(--evonik-purple);">Reference</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">APAC (Singapore)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.85/kg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Europe (Antwerp)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$3.12/kg</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Americas (Mobile)</div>
+                    <div class="metric-value" style="font-size: 1rem;">$2.95/kg</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Regional Order Fulfillment -->
+        <h2 class="section-title">Regional Order Fulfillment Status</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            Live view of which orders each plant is currently fulfilling, prioritized by customer importance
+        </p>
+        
+        <div class="section-panel">
+            <!-- Singapore Plant Orders -->
+            <div class="plant-fulfillment-section">
+                <div class="plant-fulfillment-header">
+                    <h3>🇸🇬 Singapore Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 7 Orders</span>
+                </div>
+                
+                <div class="fulfillment-grid">
+                    <!-- High Priority Orders -->
+                    <div class="fulfillment-card priority-high-border">
+                        <div class="fulfillment-priority">🔴 HIGH PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>PT Indonesia Feed</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Indonesia | 🏭 850 MT</div>
+                            <div>⏰ Ship: Oct 18-20 | ⚡ Status: In Production</div>
+                        </div>
+                    </div>
+
+                    <div class="fulfillment-card priority-high-border">
+                        <div class="fulfillment-priority">🔴 HIGH PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Thai Union Group</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Thailand | 🏭 620 MT</div>
+                            <div>⏰ Ship: Oct 19-21 | ⚡ Status: Queued Next</div>
+                        </div>
+                    </div>
+
+                    <!-- Medium Priority Orders -->
+                    <div class="fulfillment-card priority-medium-border">
+                        <div class="fulfillment-priority">🟡 MEDIUM PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Charoen Pokphand</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Thailand | 🏭 580 MT</div>
+                            <div>⏰ Ship: Oct 21-23 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+
+                    <div class="fulfillment-card priority-medium-border">
+                        <div class="fulfillment-priority">🟡 MEDIUM PRIORITY</div>
+                        <div class="fulfillment-customer"><strong>Vietnam Feed Co.</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Vietnam | 🏭 480 MT</div>
+                            <div>⏰ Ship: Oct 22-24 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+
+                    <!-- Low Priority / Buffer -->
+                    <div class="fulfillment-card priority-low-border">
+                        <div class="fulfillment-priority">⚪ STANDARD</div>
+                        <div class="fulfillment-customer"><strong>Malaysia Poultry</strong></div>
+                        <div class="fulfillment-details">
+                            <div>📍 Malaysia | 🏭 420 MT</div>
+                            <div>⏰ Ship: Oct 23-25 | ⚡ Status: Scheduled</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="border-top: 2px dashed var(--border-gray); margin: 2rem 0;"></div>
+
+            <!-- Antwerp Plant Orders (collapsed view) -->
+            <div class="plant-fulfillment-section">
+                <div class="plant-fulfillment-header">
+                    <h3>🇧🇪 Antwerp Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 10 Orders</span>
+                </div>
+                <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Top priorities: Nutreco (1,200 MT), ForFarmers (980 MT), De Heus (750 MT)
+                </div>
+            </div>
+
+            <!-- Mobile Plant Orders (collapsed view) -->
+            <div class="plant-fulfillment-section" style="margin-top: 1.5rem;">
+                <div class="plant-fulfillment-header">
+                    <h3>🇺🇸 Mobile Plant</h3>
+                    <span class="card-status status-operational">Fulfilling 6 Orders</span>
+                </div>
+                <div style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Top priorities: Tyson Foods (1,500 MT), Perdue Farms (820 MT), Pilgrim's Pride (640 MT)
+                </div>
+            </div>
+        </div>
+
+        <!-- Shipping & Logistics Status -->
+        <h2 class="section-title">Global Shipping Status</h2>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            📦 Real-time shipment tracking via Katoen Natie logistics integration
+        </p>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Shipments in Transit</div>
+                    <div class="card-status status-operational">On Schedule</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Shipments</div>
+                    <div class="metric-value" id="activeShipments">18</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Volume</div>
+                    <div class="metric-value">2,340 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">On Time</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">94%</div>
+                </div>
+                <div style="margin-top: 0.75rem; background: white; border: 1px solid var(--border-gray); border-radius: 8px; padding: 0.5rem;">
+                    <canvas id="shipmentsMiniChart" height="80"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Next 48 Hours</div>
+                    <div class="card-status" style="background: rgba(139, 46, 139, 0.1); color: var(--evonik-purple);">Scheduled</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Departures (from Katoen Natie)</div>
+                    <div class="metric-value" id="scheduledDepartures">12</div>
+                    <div class="metric-subtext">1,480 MT total</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Arrivals</div>
+                    <div class="metric-value">8</div>
+                    <div class="metric-subtext">1,120 MT to customers</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Delivery Performance</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">This Month</div>
+                    <div class="metric-value" style="color: var(--success-green);">98.5%</div>
+                    <div class="metric-subtext">On-time delivery rate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Avg Delay (when late)</div>
+                    <div class="metric-value" style="font-size: 1rem;">1.2 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent/Upcoming Shipments Table -->
+        <div class="section-panel" style="margin-top: 1.5rem;">
+            <h3 class="section-title">Upcoming Shipments (Next 7 Days)</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Departure Date</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Volume</th>
+                        <th>Transit Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Oct 18</td>
+                        <td><strong>PT Indonesia Feed</strong></td>
+                        <td>🇮🇩 Jakarta, Indonesia</td>
+                        <td>850 MT</td>
+                        <td>5 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 19</td>
+                        <td><strong>Thai Union Group</strong></td>
+                        <td>🇹🇭 Bangkok, Thailand</td>
+                        <td>620 MT</td>
+                        <td>4 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>Oct 20</td>
+                        <td><strong>Charoen Pokphand</strong></td>
+                        <td>🇹🇭 Chonburi, Thailand</td>
+                        <td>580 MT</td>
+                        <td>4 days</td>
+                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <div class="dashboard-grid">
             <!-- Plant Operations -->
             <div class="card">
@@ -440,7 +811,7 @@
                     <div class="event-item update">
                         <div class="event-time">08:30</div>
                         <div class="event-content">
-                            📊 Daily production sync completed - All systems updated (SAP, IBP, OAS)
+                            📊 Daily production sync completed - All systems updated (SAP, IBP, PIMS, OAS)
                         </div>
                     </div>
                     <div class="event-item">
@@ -610,7 +981,7 @@
             document.getElementById('ordersStatus').textContent = '3 orders at risk';
             
             // Add event log entries
-            addEventLog(now, '⚠️ ALERT: ME6 unit offline - OAS sensor detection', 'alert');
+            addEventLog(now, '⚠️ ALERT: ME6 unit offline - PIMS sensor detection', 'alert');
             
             setTimeout(() => {
                 addEventLog(now, '📧 Notifications sent to: Local SC Manager, Alex Rodriguez, Sarah Chen, Maria Gonzalez<br>Alert details: Production reduced 345 MT/day, estimated downtime 3-5 days');
@@ -746,7 +1117,7 @@
                 <div class="event-item update">
                     <div class="event-time">08:30</div>
                     <div class="event-content">
-                        📊 Daily production sync completed - All systems updated (SAP, IBP, OAS)
+                        📊 Daily production sync completed - All systems updated (SAP, IBP, PIMS, OAS)
                     </div>
                 </div>
                 <div class="event-item">
@@ -920,7 +1291,101 @@
             console.log('Evonik Production Coordination Hub initialized');
             console.log('Real-time cross-system coordination active');
             makeEventLogClickable();
+            // Market/Cost/Shipping dynamic updates
+            if (typeof updateMarketPrice === 'function') updateMarketPrice();
+            if (typeof updateProductionCost === 'function') updateProductionCost();
+            if (typeof updateShippingStatus === 'function') updateShippingStatus();
+            setInterval(() => {
+                if (typeof updateMarketPrice === 'function') updateMarketPrice();
+            }, 30000);
+
+            // Render mini charts if Chart.js is available
+            if (window.Chart) {
+                renderPriceMiniChart();
+                renderShipmentsMiniChart();
+            }
         });
+
+        // Update market price dynamically
+        function updateMarketPrice() {
+            const basePrice = 2.85;
+            const variation = (Math.random() - 0.5) * 0.02; // +/- $0.01
+            const currentPrice = (basePrice + variation).toFixed(2);
+            const priceEl = document.getElementById('methioninePrice');
+            if (priceEl) {
+                priceEl.textContent = '$' + currentPrice + '/kg';
+            }
+        }
+
+        // Update production cost
+        function updateProductionCost() {
+            const baseCost = 1.92;
+            const costEl = document.getElementById('productionCost');
+            if (costEl) {
+                costEl.textContent = '$' + baseCost.toFixed(2) + '/kg';
+            }
+        }
+
+        // Update shipping counts
+        function updateShippingStatus() {
+            const activeShipments = 18;
+            const activeShipmentsEl = document.getElementById('activeShipments');
+            if (activeShipmentsEl) {
+                activeShipmentsEl.textContent = activeShipments;
+            }
+        }
+
+        // Mini charts
+        function renderPriceMiniChart() {
+            const el = document.getElementById('priceMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const data = [2.80, 2.82, 2.79, 2.85, 2.88, 2.90, 2.85];
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [{
+                    label: 'APAC Spot ($/kg)',
+                    data,
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--evonik-purple').trim() || '#8B2E8B',
+                    backgroundColor: 'rgba(139, 46, 139, 0.08)',
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 0
+                }]},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        function renderShipmentsMiniChart() {
+            const el = document.getElementById('shipmentsMiniChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const data = [14, 16, 13, 18, 19, 17, 18];
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{
+                    label: 'Shipments in Transit',
+                    data,
+                    backgroundColor: 'rgba(22, 163, 74, 0.3)',
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--success-green').trim() || '#16A34A',
+                    borderWidth: 1,
+                }]},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

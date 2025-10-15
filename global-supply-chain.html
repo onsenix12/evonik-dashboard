@@ -94,6 +94,41 @@
             background: rgba(139, 46, 139, 0.05);
         }
 
+        /* Inventory allocation styles */
+        .section-note {
+            background: rgba(139, 46, 139, 0.05);
+            padding: 0.75rem 1rem;
+            border-left: 4px solid var(--evonik-purple);
+            border-radius: 4px;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+        }
+
+        .priority-medium {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .priority-low {
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--text-light);
+        }
+
+        .allocation-table tbody tr:hover {
+            background: rgba(139, 46, 139, 0.05);
+        }
+
         @media (max-width: 1024px) {
             .sites-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -290,6 +325,155 @@
             </div>
         </div>
 
+        <!-- Finished Product Inventory (Managed by Katoen Natie) -->
+        <h2 class="section-title">Finished Product Inventory</h2>
+        <p class="section-note" style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1rem 0;">
+            📦 Managed by <strong>Katoen Natie</strong> (Third-Party Logistics Partner) | Real-time warehouse integration
+        </p>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Singapore Warehouse (Silo)</div>
+                    <div class="card-status status-operational" id="sgSiloStatus">Safe Level</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Level</div>
+                    <div class="metric-value" id="sgSiloLevel">4,200 MT</div>
+                    <div class="metric-subtext">Safe range: 3,000 - 6,000 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Working Capacity</div>
+                    <div class="metric-value">6,300 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Utilization</div>
+                    <div class="metric-value" style="font-size: 1rem;">66.7%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Global Inventory Status</div>
+                    <div class="card-status status-operational">Adequate</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Total Network Inventory</div>
+                    <div class="metric-value">18,650 MT</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Singapore</div>
+                    <div class="metric-value" style="font-size: 1rem;">4,200 MT (22.5%)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Antwerp</div>
+                    <div class="metric-value" style="font-size: 1rem;">8,500 MT (45.6%)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Mobile</div>
+                    <div class="metric-value" style="font-size: 1rem;">5,950 MT (31.9%)</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Consumption & Coverage</div>
+                    <div class="card-status status-operational">Normal</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Global Daily Consumption</div>
+                    <div class="metric-value" id="globalConsumption">1,865 MT/day</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Network Coverage</div>
+                    <div class="metric-value">10.0 days</div>
+                    <div class="metric-subtext">Target: 8-12 days</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Trend</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Stable</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Allocation by Customer -->
+        <div class="section-panel">
+            <h3 class="section-title">Singapore Inventory Allocation by Customer</h3>
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">
+                Pre-allocated inventory at Katoen Natie warehouse for confirmed customer orders
+            </p>
+            <table class="allocation-table">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Region</th>
+                        <th>Allocated Volume</th>
+                        <th>Order Status</th>
+                        <th>Scheduled Shipment</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryAllocationBody">
+                    <tr>
+                        <td><strong>PT Indonesia Feed</strong></td>
+                        <td><span class="region-badge badge-apac">Indonesia</span></td>
+                        <td>850 MT</td>
+                        <td><span class="card-status status-operational">Confirmed</span></td>
+                        <td>Oct 18-20</td>
+                        <td><span class="priority-badge priority-high">High</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Thai Union Group</strong></td>
+                        <td><span class="region-badge badge-apac">Thailand</span></td>
+                        <td>620 MT</td>
+                        <td><span class="card-status status-operational">Confirmed</span></td>
+                        <td>Oct 19-21</td>
+                        <td><span class="priority-badge priority-high">High</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Charoen Pokphand</strong></td>
+                        <td><span class="region-badge badge-apac">Thailand</span></td>
+                        <td>580 MT</td>
+                        <td><span class="card-status status-operational">Confirmed</span></td>
+                        <td>Oct 21-23</td>
+                        <td><span class="priority-badge priority-medium">Medium</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vietnam Feed Co.</strong></td>
+                        <td><span class="region-badge badge-apac">Vietnam</span></td>
+                        <td>480 MT</td>
+                        <td><span class="card-status status-operational">Confirmed</span></td>
+                        <td>Oct 22-24</td>
+                        <td><span class="priority-badge priority-medium">Medium</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Malaysia Poultry</strong></td>
+                        <td><span class="region-badge badge-apac">Malaysia</span></td>
+                        <td>420 MT</td>
+                        <td><span class="card-status status-operational">Confirmed</span></td>
+                        <td>Oct 23-25</td>
+                        <td><span class="priority-badge priority-medium">Medium</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mitsui Co-mingled</strong></td>
+                        <td><span class="region-badge badge-apac">Japan</span></td>
+                        <td>600 MT</td>
+                        <td><span class="card-status status-operational">Reserved</span></td>
+                        <td>On demand</td>
+                        <td><span class="priority-badge priority-low">Co-mingled</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Buffer Stock</strong></td>
+                        <td><span class="region-badge badge-apac">APAC</span></td>
+                        <td>650 MT</td>
+                        <td><span class="card-status" style="background: rgba(100, 116, 139, 0.1); color: var(--text-light);">Unallocated</span></td>
+                        <td>—</td>
+                        <td><span class="priority-badge priority-low">Buffer</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
         <!-- Regional Demand Coverage -->
         <h2 class="section-title">Regional Demand Coverage</h2>
         <div class="dashboard-grid">
@@ -345,11 +529,15 @@
         <!-- Cross-Site Allocation -->
         <div class="section-panel">
             <h3 class="section-title">Cross-Site Allocation Status</h3>
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem;">
+                Production allocation across global sites with customer-level visibility
+            </p>
             <table class="allocation-table">
                 <thead>
                     <tr>
                         <th>Source Site</th>
                         <th>Destination Region</th>
+                        <th>Key Customers</th>
                         <th>Allocated Volume</th>
                         <th>Transit Time</th>
                         <th>Status</th>
@@ -357,23 +545,44 @@
                 </thead>
                 <tbody id="allocationTableBody">
                     <tr>
-                        <td>Singapore</td>
+                        <td><strong>Singapore</strong></td>
                         <td><span class="region-badge badge-apac">APAC</span></td>
-                        <td>28,950 MT/month</td>
+                        <td>
+                            <div style="font-size: 0.85rem;">
+                                PT Indonesia Feed (850 MT)<br>
+                                Thai Union Group (620 MT)<br>
+                                <span style="color: var(--text-light);">+5 more customers</span>
+                            </div>
+                        </td>
+                        <td><strong>28,950 MT/month</strong></td>
                         <td>Local</td>
                         <td><span class="card-status status-operational">Active</span></td>
                     </tr>
                     <tr>
-                        <td>Antwerp</td>
+                        <td><strong>Antwerp</strong></td>
                         <td><span class="region-badge badge-europe">Europe</span></td>
-                        <td>15,600 MT/month</td>
+                        <td>
+                            <div style="font-size: 0.85rem;">
+                                Nutreco (1,200 MT)<br>
+                                ForFarmers (980 MT)<br>
+                                <span style="color: var(--text-light);">+8 more customers</span>
+                            </div>
+                        </td>
+                        <td><strong>15,600 MT/month</strong></td>
                         <td>Local</td>
                         <td><span class="card-status status-operational">Active</span></td>
                     </tr>
                     <tr>
-                        <td>Mobile</td>
+                        <td><strong>Mobile</strong></td>
                         <td><span class="region-badge badge-americas">Americas</span></td>
-                        <td>11,400 MT/month</td>
+                        <td>
+                            <div style="font-size: 0.85rem;">
+                                Tyson Foods (1,500 MT)<br>
+                                Perdue Farms (820 MT)<br>
+                                <span style="color: var(--text-light);">+4 more customers</span>
+                            </div>
+                        </td>
+                        <td><strong>11,400 MT/month</strong></td>
                         <td>Local</td>
                         <td><span class="card-status status-operational">Active</span></td>
                     </tr>

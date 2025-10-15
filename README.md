@@ -1,21 +1,33 @@
 ## Evonik Coordination Hub – Digital Transformation Dashboard
 
-A lightweight, static multi-page demo that showcases real-time cross-system coordination across Sales, Global Supply Chain, Local Supply Chain, and Production. It simulates how manual, siloed processes can be automated and synchronized within minutes instead of weeks.
+A lightweight, static multi-page demo that showcases real-time cross-system coordination across Sales, Global Supply Chain, Local Supply Chain, Production, and the AI Decision Optimizer. It simulates how manual, siloed processes can be automated and synchronized within minutes instead of weeks.
 
 ### Highlights
 - **Single-click demo scenarios**: Trigger realistic coordination flows (equipment failure, bulk order sync, supply chain adjustment, global capacity rebalancing).
 - **Multi-window sync**: Open stakeholder pages manually; updates propagate instantly using `localStorage` events.
 - **No build or backend required**: Pure HTML/CSS/JS, run locally by opening `index.html`.
+- **Visual charts**: Compact widgets and charts powered by Chart.js for price trends, shipments, production, and costs.
 
 ---
 
 ## Project Structure
 - `index.html`: Coordination Hub (home). Launch demo flows and view consolidated status, timeline, and notifications.
+-   - Market Intelligence: Methionine spot price, production cost analysis, regional pricing
+-   - Regional Order Fulfillment: Priority cards per plant (APAC, Europe, Americas)
+-   - Global Shipping Status: Transit/next 48h/delivery performance + upcoming shipments table
 - `sales.html`: Sales team view. Receives events like bulk order sync and new orders.
 - `global-supply-chain.html`: Global view. Simulates cross-site capacity rebalancing.
 - `local-supply-chain.html`: Local SC view. Simulates SAP/Excel-style procurement and inventory triggers.
+    - Products Shipped Out (OAS Weighing System) retained (OAS is only for weighing)
 - `production.html`: Plant production view. Equipment status, OEE, maintenance, and predictive analytics.
+    - Daily Production Performance (migrated from hourly)
+    - Daily production trend chart (Chart.js)
 - `optimizer.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
+    - Downtime Estimation Methodology (historical, criticality, maintenance, uncertainty)
+    - Equipment Criticality flags (CRITICAL/IMPORTANT/NORMAL)
+    - User validation inputs to correct AI downtime estimates
+    - Updated optimization weights: Customer (70%), Cost (25%), Speed (5%)
+    - "Why this recommendation?" explainability with comparison table
 - `shared-styles.css`: Common CSS styles and design system used across all pages for consistent branding and UI components.
 
 > Pages now use shared styles for consistency while maintaining portability. Each page includes its own inline styles for page-specific elements.
@@ -55,7 +67,8 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ## Key Concepts
 - **Event bus via localStorage**: Pages broadcast coordination events by writing a JSON payload to the `localStorage` key `evonik_coordination_event`. Other pages listen for the browser `storage` event and react accordingly.
 - **Stateless demo**: Events are transient (the key is cleared shortly after write). UI reflects the latest state; `Reset Demo` reinitializes visuals and metrics.
-- **Self-contained UI**: All pages include their own styles and scripts; no external dependencies.
+- **Self-contained UI**: All pages include their own styles and scripts; Chart.js is loaded via CDN where charts are rendered.
+- **Terminology**: Plant/equipment data references use PIMS; OAS is retained for weighing machine tracking only in Local SC.
 
 ### Event Types (cross-page protocol)
 All events are emitted to `localStorage` as `{ type, data, timestamp, source }` under key `evonik_coordination_event`.
@@ -96,6 +109,7 @@ npx http-server -p 5500 --cors --silent
 Then open `http://localhost:5500/index.html`.
 
 - **Nothing updates after a while**: Click `🔄 Reset Demo` on the hub to restore initial state.
+- **Charts not rendering**: Ensure you are online (Chart.js CDN). If offline, add a local Chart.js script include.
 
 ---
 
@@ -108,6 +122,7 @@ Tested on recent versions of Chrome and Edge. Firefox works for most features. S
 - Add real data sources or APIs by replacing the simulated event broadcasters.
 - Customize the design system by modifying `shared-styles.css` for consistent branding across all pages.
 - Persist event history by storing an array of events instead of transient keys.
+- Add more widgets and charts by using Chart.js (already included in pages where needed).
 
 ---
 

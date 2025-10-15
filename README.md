@@ -1,6 +1,6 @@
 ## Evonik Coordination Hub – Digital Transformation Dashboard
 
-Live demo: https://onsenix12.github.io/evonik-dashboard-new/
+Live demo: https://onsenix12.github.io/evonik-dashboard/
 
 A lightweight, static multi-page demo that showcases real-time cross-system coordination across Sales, Global Supply Chain, Local Supply Chain, Production, and the AI Decision Optimizer. It simulates how manual, siloed processes can be automated and synchronized within minutes instead of weeks.
 

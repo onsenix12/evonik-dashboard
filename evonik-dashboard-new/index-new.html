@@ -1007,18 +1007,49 @@
             
             // World map initialization
             const mapEl = document.getElementById('plantWorldMap');
-            if (!mapEl) return;
+            if (!mapEl) {
+                console.error('Map element #plantWorldMap not found');
+                return;
+            }
 
-            const map = L.map('plantWorldMap', { zoomControl: true, worldCopyJump: true }).setView([20, 0], 2);
+            const map = L.map('plantWorldMap', { 
+                zoomControl: true, 
+                worldCopyJump: true 
+            }).setView([20, 0], 2);
+            
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 8,
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
             const plantCountries = {
-                'Singapore': { color: '#8B2E8B', plants: [{ name: 'Jurong Island (ME5/ME6)', city: 'Singapore', lat: 1.3009, lon: 103.7876 }] },
-                'Belgium': { color: '#8B2E8B', plants: [{ name: 'Antwerp Plant', city: 'Antwerp', lat: 51.2600, lon: 4.4020 }] },
-                'United States of America': { color: '#8B2E8B', plants: [{ name: 'Mobile Plant', city: 'Mobile, Alabama', lat: 30.6954, lon: -88.0399 }] }
+                'Singapore': { 
+                    color: '#8B2E8B', 
+                    plants: [{ 
+                        name: 'Jurong Island (ME5/ME6)', 
+                        city: 'Singapore', 
+                        lat: 1.3009, 
+                        lon: 103.7876 
+                    }] 
+                },
+                'Belgium': { 
+                    color: '#8B2E8B', 
+                    plants: [{ 
+                        name: 'Antwerp Plant', 
+                        city: 'Antwerp', 
+                        lat: 51.2600, 
+                        lon: 4.4020 
+                    }] 
+                },
+                'United States of America': { 
+                    color: '#8B2E8B', 
+                    plants: [{ 
+                        name: 'Mobile Plant', 
+                        city: 'Mobile, Alabama', 
+                        lat: 30.6954, 
+                        lon: -88.0399 
+                    }] 
+                }
             };
 
             fetch('https://unpkg.com/geojson-world@1.0.0/countries.geo.json')
@@ -1028,9 +1059,19 @@
                         style: feature => {
                             const name = feature.properties.name;
                             if (plantCountries[name]) {
-                                return { color: '#8B2E8B', weight: 1, fillColor: plantCountries[name].color, fillOpacity: 0.25 };
+                                return { 
+                                    color: '#8B2E8B', 
+                                    weight: 1, 
+                                    fillColor: plantCountries[name].color, 
+                                    fillOpacity: 0.25 
+                                };
                             }
-                            return { color: '#e5e7eb', weight: 1, fillColor: '#f8fafc', fillOpacity: 0.6 };
+                            return { 
+                                color: '#e5e7eb', 
+                                weight: 1, 
+                                fillColor: '#f8fafc', 
+                                fillOpacity: 0.6 
+                            };
                         },
                         onEachFeature: (feature, layer) => {
                             const name = feature.properties.name;
@@ -1045,6 +1086,7 @@
                         }
                     }).addTo(map);
 
+                    // Add plant markers
                     const markers = [];
                     Object.entries(plantCountries).forEach(([country, cfg]) => {
                         cfg.plants.forEach(p => {
@@ -1062,12 +1104,28 @@
                         });
                     });
 
+                    // Fit map to show all markers
                     if (markers.length) {
                         const group = L.featureGroup(markers);
                         map.fitBounds(group.getBounds().pad(0.5));
                     }
                 })
-                .catch(err => console.warn('World GeoJSON failed to load:', err));
+                .catch(err => {
+                    console.error('World GeoJSON failed to load:', err);
+                    // Show user-friendly error message
+                    const mapEl = document.getElementById('plantWorldMap');
+                    if (mapEl) {
+                        mapEl.innerHTML = `
+                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8fafc; color: #6B7280; text-align: center; padding: 2rem;">
+                                <div>
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🗺️</div>
+                                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Map Loading Error</div>
+                                    <div style="font-size: 0.9rem;">Unable to load world map data. Please check your internet connection.</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
         });
 
         // Listen for events from other pages

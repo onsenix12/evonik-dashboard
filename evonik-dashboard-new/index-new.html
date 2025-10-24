@@ -1052,8 +1052,28 @@
                 }
             };
 
-            fetch('https://unpkg.com/geojson-world@1.0.0/countries.geo.json')
-                .then(r => r.json())
+            // Try multiple GeoJSON sources to avoid CORS issues
+            const geoJsonSources = [
+                'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson',
+                'https://unpkg.com/geojson-world@1.0.0/countries.geo.json',
+                'https://cdn.jsdelivr.net/npm/geojson-world@1.0.0/countries.geo.json'
+            ];
+            
+            let geoJsonPromise = Promise.reject(new Error('No sources available'));
+            
+            for (const source of geoJsonSources) {
+                geoJsonPromise = geoJsonPromise.catch(() => 
+                    fetch(source, { 
+                        mode: 'cors',
+                        cache: 'no-cache'
+                    }).then(r => {
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                );
+            }
+            
+            geoJsonPromise
                 .then(geo => {
                     L.geoJSON(geo, {
                         style: feature => {
@@ -1111,19 +1131,45 @@
                     }
                 })
                 .catch(err => {
-                    console.error('World GeoJSON failed to load:', err);
-                    // Show user-friendly error message
+                    console.error('All GeoJSON sources failed to load:', err);
+                    
+                    // Fallback: Create a simple map with just plant markers
+                    console.log('Creating fallback map with plant markers only...');
+                    
                     const mapEl = document.getElementById('plantWorldMap');
                     if (mapEl) {
-                        mapEl.innerHTML = `
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8fafc; color: #6B7280; text-align: center; padding: 2rem;">
-                                <div>
-                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🗺️</div>
-                                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Map Loading Error</div>
-                                    <div style="font-size: 0.9rem;">Unable to load world map data. Please check your internet connection.</div>
-                                </div>
-                            </div>
-                        `;
+                        // Add plant markers directly
+                        const markers = [];
+                        Object.entries(plantCountries).forEach(([country, cfg]) => {
+                            cfg.plants.forEach(p => {
+                                const marker = L.circleMarker([p.lat, p.lon], {
+                                    radius: 12,
+                                    color: '#FFFFFF',
+                                    weight: 3,
+                                    fillColor: '#8B2E8B',
+                                    fillOpacity: 0.95
+                                })
+                                    .addTo(map)
+                                    .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`)
+                                    .bindTooltip(p.city, { permanent: false, direction: 'top' });
+                                markers.push(marker);
+                            });
+                        });
+
+                        // Fit map to show all markers
+                        if (markers.length) {
+                            const group = L.featureGroup(markers);
+                            map.fitBounds(group.getBounds().pad(0.5));
+                        }
+                        
+                        // Add a notice about simplified map
+                        const notice = L.control({position: 'topright'});
+                        notice.onAdd = function(map) {
+                            const div = L.DomUtil.create('div', 'leaflet-control-attribution');
+                            div.innerHTML = '<div style="background: rgba(255,255,255,0.8); padding: 5px 8px; border-radius: 4px; font-size: 11px; color: #666;">⚠️ Simplified map (world data unavailable)</div>';
+                            return div;
+                        };
+                        notice.addTo(map);
                     }
                 });
         });

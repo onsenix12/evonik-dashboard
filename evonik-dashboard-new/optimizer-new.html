@@ -750,6 +750,82 @@
         .comparison-table .total-row { font-weight: 700; background: var(--bg-gray); border-top: 2px solid var(--evonik-purple); }
         .reasoning-footer { margin-top: 2rem; padding: 1.5rem; background: rgba(139, 46, 139, 0.1); border-radius: 8px; border-left: 4px solid var(--evonik-purple); }
         .reasoning-footer p { line-height: 1.8; color: var(--text-dark); }
+
+        /* Explainability Section Styles */
+        .explainability-section {
+            background: linear-gradient(135deg, rgba(139, 46, 139, 0.05) 0%, rgba(139, 46, 139, 0.02) 100%);
+            border: 2px solid var(--evonik-purple);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .explainability-section h4 {
+            color: var(--evonik-purple);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .decision-tree {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--evonik-purple);
+        }
+
+        .step {
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            background: var(--bg-gray);
+            border-radius: 6px;
+            border-left: 3px solid var(--evonik-purple);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .step:first-child {
+            background: rgba(22, 163, 74, 0.1);
+            border-left-color: var(--success-green);
+        }
+
+        .step:nth-child(2) {
+            background: rgba(234, 88, 12, 0.1);
+            border-left-color: var(--warning-orange);
+        }
+
+        .step:nth-child(3) {
+            background: rgba(37, 99, 235, 0.1);
+            border-left-color: var(--sales-blue);
+        }
+
+        .step:last-child {
+            background: rgba(139, 46, 139, 0.1);
+            border-left-color: var(--evonik-purple);
+            font-weight: 600;
+        }
+
+        .compare-button {
+            background: linear-gradient(135deg, var(--evonik-purple), var(--evonik-light-purple));
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .compare-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 46, 139, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -2046,6 +2122,18 @@
                         in customer retention</strong>, which aligns with Evonik's customer-intimacy focus.</p>
                     </div>
                 </div>
+
+                <!-- New Explainability Section -->
+                <div class="explainability-section">
+                    <h4>🔍 How was this calculated?</h4>
+                    <div class="decision-tree">
+                        <div class="step">1. Historical data analysis (last 6 months)</div>
+                        <div class="step">2. Current constraints considered: [list]</div>
+                        <div class="step">3. Cost optimization variables: [list]</div>
+                        <div class="step">4. Confidence level: 87%</div>
+                    </div>
+                    <button class="compare-button" onclick="showComparison()">Compare: AI vs Manual Approach</button>
+                </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
@@ -2223,6 +2311,64 @@
 
         // Check for demo triggers every 500ms
         setInterval(checkForDemoTrigger, 500);
+
+        // Show comparison function for the new explainability section
+        function showComparison() {
+            addSystemMessage('Here is a comparison between AI and Manual approaches:');
+            updateVizTitle('AI vs Manual Approach Comparison');
+            
+            const content = `
+                <div class="explainability-section">
+                    <h4>🤖 AI vs 👤 Manual Approach Comparison</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin: 2rem 0;">
+                        <div style="background: rgba(22, 163, 74, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-green);">
+                            <h5 style="color: var(--success-green); margin-bottom: 1rem;">🤖 AI Approach</h5>
+                            <ul style="line-height: 1.8; padding-left: 1.5rem;">
+                                <li><strong>Speed:</strong> 2-3 minutes analysis</li>
+                                <li><strong>Data Sources:</strong> 15+ systems integrated</li>
+                                <li><strong>Historical Analysis:</strong> 6 months of data</li>
+                                <li><strong>Variables Considered:</strong> 50+ factors</li>
+                                <li><strong>Confidence Level:</strong> 87%</li>
+                                <li><strong>Bias:</strong> Data-driven, objective</li>
+                            </ul>
+                        </div>
+                        <div style="background: rgba(234, 88, 12, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-orange);">
+                            <h5 style="color: var(--warning-orange); margin-bottom: 1rem;">👤 Manual Approach</h5>
+                            <ul style="line-height: 1.8; padding-left: 1.5rem;">
+                                <li><strong>Speed:</strong> 2-4 hours analysis</li>
+                                <li><strong>Data Sources:</strong> 3-5 systems typically</li>
+                                <li><strong>Historical Analysis:</strong> 1-2 months focus</li>
+                                <li><strong>Variables Considered:</strong> 10-15 key factors</li>
+                                <li><strong>Confidence Level:</strong> 60-70%</li>
+                                <li><strong>Bias:</strong> Experience-based, subjective</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="background: rgba(139, 46, 139, 0.1); padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+                        <h5 style="color: var(--evonik-purple); margin-bottom: 1rem;">📊 Key Advantages of AI Approach</h5>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div style="text-align: center; padding: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
+                                <div style="font-weight: 600; color: var(--evonik-purple);">Speed</div>
+                                <div style="font-size: 0.9rem; color: var(--text-light);">40x faster analysis</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                                <div style="font-weight: 600; color: var(--evonik-purple);">Accuracy</div>
+                                <div style="font-size: 0.9rem; color: var(--text-light);">17% higher confidence</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                                <div style="font-weight: 600; color: var(--evonik-purple);">Coverage</div>
+                                <div style="font-size: 0.9rem; color: var(--text-light);">3x more variables</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('vizContent').innerHTML = content;
+        }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {

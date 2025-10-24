@@ -975,7 +975,20 @@
             navItems.forEach(item => {
                 const href = item.getAttribute('href');
                 if (href) {
-                    const dashboard = href.replace('-new.html', '').replace('.html', '');
+                    let dashboard = href.replace('-new.html', '').replace('.html', '');
+                    
+                    // Map specific dashboard names to permission names
+                    const dashboardMapping = {
+                        'global-supply-chain': 'global-sc',
+                        'local-supply-chain': 'local-sc',
+                        'optimizer': 'optimizer',
+                        'sales': 'sales',
+                        'production': 'production',
+                        'index-new': 'hub'
+                    };
+                    
+                    dashboard = dashboardMapping[dashboard] || dashboard;
+                    
                     if (!permissions.dashboards.includes(dashboard)) {
                         item.style.display = 'none';
                     }

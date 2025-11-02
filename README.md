@@ -7,13 +7,13 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ### Highlights
 - **Single-click demo scenarios**: Trigger realistic coordination flows (equipment failure, bulk order sync, supply chain adjustment, global capacity rebalancing).
 - **Multi-window sync**: Open stakeholder pages manually; updates propagate instantly using `localStorage` events.
-- **No build or backend required**: Pure HTML/CSS/JS, run locally by opening `index.html`.
+- **No build or backend required**: Pure HTML/CSS/JS, run locally by opening `index-new.html`.
 - **Visual charts**: Compact widgets and charts powered by Chart.js for price trends, shipments, production, and costs.
 
 ---
 
 ## Project Structure
-- `index.html`: Coordination Hub (home). Launch demo flows and view consolidated status, timeline, and notifications.
+- `index-new.html`: Coordination Hub (home). Launch demo flows and view consolidated status, timeline, and notifications.
 -   - Market Intelligence: Methionine spot price, production cost analysis, regional pricing
 -   - Regional Order Fulfillment: Priority cards per plant (APAC, Europe, Americas)
 -   - Global Shipping Status: Transit/next 48h/delivery performance + upcoming shipments table
@@ -38,7 +38,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 
 ## Getting Started
 1. Clone or download this repository to your machine.
-2. Open `index.html` in a modern browser (Chrome, Edge, or Firefox recommended).
+2. Open `index-new.html` in a modern browser (Chrome, Edge, or Firefox recommended).
 3. For the best demo, optionally open the other pages in separate tabs/windows.
 
 > Tip: You can also serve the folder via a simple static server, but it is not required.
@@ -47,7 +47,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 
 ## Running the Demo
 ### Option A: Quick tour from the Hub
-1. Open `index.html`.
+1. Open `index-new.html`.
 2. Use the buttons in "Live Demo Controls":
    - `⚙️ Equipment Failure Auto-Response`
    - `📊 Bulk Order SAP Sync`
@@ -75,7 +75,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ### Event Types (cross-page protocol)
 All events are emitted to `localStorage` as `{ type, data, timestamp, source }` under key `evonik_coordination_event`.
 
-- From Hub (index.html):
+- From Hub (index-new.html):
   - `equipment_failure` { unit, impact }
   - `bulk_order_sync` { orders, total_mt }
   - `supply_chain_adjustment` { delay_days, impact_mt }
@@ -108,7 +108,7 @@ python -m http.server 5500
 npx http-server -p 5500 --cors --silent
 ```
 
-Then open `http://localhost:5500/index.html`.
+Then open `http://localhost:5500/index-new.html`.
 
 - **Nothing updates after a while**: Click `🔄 Reset Demo` on the hub to restore initial state.
 - **Charts not rendering**: Ensure you are online (Chart.js CDN). If offline, add a local Chart.js script include.

@@ -1174,16 +1174,55 @@
         function processMessage(message) {
             const lowerMsg = message.toLowerCase();
 
+            // Check for scenario-specific questions first (if crisis is active)
+            if (crisisTriggered) {
+                if (lowerMsg.includes('how') && (lowerMsg.includes('estimate') || lowerMsg.includes('calculated') || lowerMsg.includes('downtime') || lowerMsg.includes('methodology'))) {
+                    showScenarioAMethodology();
+                    return;
+                }
+                if (lowerMsg.includes('update') || lowerMsg.includes('revise') || lowerMsg.includes('validate') || lowerMsg.includes('correction') || lowerMsg.includes('actual')) {
+                    showValidationForm();
+                    return;
+                }
+                if (lowerMsg.includes('equipment') || lowerMsg.includes('criticality') || lowerMsg.includes('status')) {
+                    showEquipmentStatus();
+                    return;
+                }
+                if (lowerMsg.includes('scenario b') || lowerMsg.includes('option b') || lowerMsg.includes('second option')) {
+                    showScenarioB();
+                    return;
+                }
+                if (lowerMsg.includes('scenario c') || lowerMsg.includes('option c') || lowerMsg.includes('third option') || lowerMsg.includes('other option')) {
+                    showScenarioC();
+                    return;
+                }
+                if (lowerMsg.includes('compare') || lowerMsg.includes('all scenario') || lowerMsg.includes('other option')) {
+                    if (!shownSections.scenarioB) showScenarioB();
+                    setTimeout(() => {
+                        if (!shownSections.scenarioC) showScenarioC();
+                    }, 1500);
+                    return;
+                }
+            }
+
             if (lowerMsg.includes('production') || lowerMsg.includes('status') || lowerMsg.includes('output')) {
                 showProductionStatus();
             } else if (lowerMsg.includes('tank') || lowerMsg.includes('inventory') || lowerMsg.includes('stock') || lowerMsg.includes('level')) {
                 showTankLevels();
             } else if (lowerMsg.includes('cost') || lowerMsg.includes('price') || lowerMsg.includes('expense')) {
                 showCostAnalysis();
-            } else if (lowerMsg.includes('option') || lowerMsg.includes('scenario') || lowerMsg.includes('what should') || lowerMsg.includes('recommend')) {
-                showScenarios();
+            } else if (lowerMsg.includes('option') || lowerMsg.includes('scenario') || lowerMsg.includes('what should') || lowerMsg.includes('recommend') || (lowerMsg === 'yes' && crisisTriggered) || lowerMsg.includes('show scenario') || lowerMsg.includes('recommendation')) {
+                if (crisisTriggered && !shownSections.scenarioA) {
+                    showScenarios();
+                } else if (crisisTriggered && shownSections.scenarioA) {
+                    addSystemMessage('I\'ve already shown you Scenario A. Would you like to see other options? Say "show scenario B" or "compare all scenarios".');
+                } else {
+                    showScenarios();
+                }
             } else if (lowerMsg.includes('why') || lowerMsg.includes('explain') || lowerMsg.includes('reason')) {
                 showExplainability();
+            } else if (crisisTriggered) {
+                addSystemMessage('I can provide more details about the recommendation. Ask me about: "How did you estimate the downtime?", "Show equipment status", "Update the estimate", or "Compare with other scenarios".');
             } else {
                 addSystemMessage('I can help you with: production status, tank levels, cost analysis, and optimization scenarios. What would you like to explore?');
             }
@@ -1627,25 +1666,42 @@
             });
             
             setTimeout(() => {
-                addSystemMessage('I have analyzed multiple response options. Would you like to see the recommended scenarios?');
+                addSystemMessage('I have analyzed multiple response options. Would you like to see the recommended scenarios? (Just say "yes", "show scenarios", or "recommendations")');
             }, 2000);
         }
+
+        // Track what has been shown to user
+        let shownSections = {
+            scenarioA: false,
+            methodology: false,
+            validation: false,
+            equipment: false,
+            scenarioB: false,
+            scenarioC: false,
+            explainability: false
+        };
 
         function showScenarios() {
             addSystemMessage('Analyzing optimization scenarios based on current constraints...');
             updateVizTitle(`Optimization Scenarios - ${scenarioData[currentScenarioType].name}`);
             
-            // Show scenarios one by one
+            // Show scenarios one by one - just the overview first
             setTimeout(() => {
-                showScenarioA();
+                showScenarioAOverview();
             }, 1000);
         }
 
-        function showScenarioA() {
+        function showScenarioAOverview() {
             const scenario = scenarioData[currentScenarioType].scenarios[0];
             const details = scenario.details;
             const costSign = scenario.costImpact < 0 ? '-' : '+';
             const costValue = Math.abs(scenario.costImpact);
+            
+            shownSections.scenarioA = true;
+            
+            // Clear previous content or append
+            const existingContent = document.getElementById('vizContent').innerHTML;
+            const hasContent = existingContent && !existingContent.includes('viz-placeholder');
             
             const content = `
                 <div class="scenario-card recommended">
@@ -1676,6 +1732,25 @@
                         • <strong>Net ${scenario.costImpact < 0 ? 'Savings' : 'Cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}</strong>
                     </div>
                 </div>
+            `;
+            
+            document.getElementById('vizContent').innerHTML = hasContent ? existingContent + content : content;
+            
+            setTimeout(() => {
+                addSystemMessage(`Scenario A: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
+                setTimeout(() => {
+                    addSystemMessage('I can provide more details about this recommendation. Would you like to know how I estimated the downtime, see equipment criticality analysis, update the estimate, or compare with other scenarios?');
+                }, 1500);
+            }, 1500);
+        }
+
+        function showScenarioAMethodology() {
+            if (shownSections.methodology) return; // Already shown
+            
+            shownSections.methodology = true;
+            const existingContent = document.getElementById('vizContent').innerHTML;
+            
+            const content = `
                 <!-- Downtime Estimation Methodology -->
                 <div class="estimation-methodology">
                     <div class="method-header">
@@ -1757,22 +1832,19 @@
                         </div>
                     </div>
                 </div>
+            `;
+            
+            document.getElementById('vizContent').innerHTML = existingContent + content;
+            addSystemMessage('Here\'s how I estimated the downtime. I analyzed 12 similar historical incidents, equipment criticality scores, maintenance team availability, and spare parts inventory to arrive at 3-5 days with 75% confidence.');
+        }
 
-                <!-- Manual Override & Validation UI -->
-                <div class="validation-panel">
-                    <h4>Validate AI Recommendation</h4>
-                    <div class="validation-form">
-                        <label>Override downtime estimate:</label>
-                        <input type="number" placeholder="AI: 8 hrs | Your estimate: ?" />
-                        <button>Recalculate with Your Input</button>
-                        <div class="feedback">
-                            <label>Was this recommendation accurate?</label>
-                            <button>👍 Yes</button>
-                            <button>👎 No - Why?</button>
-                        </div>
-                    </div>
-                </div>
-
+        function showValidationForm() {
+            if (shownSections.validation) return;
+            
+            shownSections.validation = true;
+            const existingContent = document.getElementById('vizContent').innerHTML;
+            
+            const content = `
                 <!-- User Validation & Feedback -->
                 <div class="user-validation-panel">
                     <div class="validation-header">
@@ -1846,7 +1918,19 @@
                         </ul>
                     </div>
                 </div>
+            `;
+            
+            document.getElementById('vizContent').innerHTML = existingContent + content;
+            addSystemMessage('You can update the downtime estimate here. As your team inspects the equipment, input the actual findings and I\'ll recalculate all scenarios accordingly.');
+        }
 
+        function showEquipmentStatus() {
+            if (shownSections.equipment) return;
+            
+            shownSections.equipment = true;
+            const existingContent = document.getElementById('vizContent').innerHTML;
+            
+            const content = `
                 <!-- Equipment Status with Criticality -->
                 <div class="equipment-status-section">
                     <h3>Equipment Status & Criticality</h3>
@@ -1888,15 +1972,14 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = content;
-            addSystemMessage(`Scenario A: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
-            
-            setTimeout(() => {
-                showScenarioB();
-            }, 3000);
+            document.getElementById('vizContent').innerHTML = existingContent + content;
+            addSystemMessage('Here\'s the equipment criticality analysis. MV-6 is critical with 9.5/10 score - any failure causes 100% production loss. Other equipment has redundancy options.');
         }
 
         function showScenarioB() {
+            if (shownSections.scenarioB) return;
+            
+            shownSections.scenarioB = true;
             const scenario = scenarioData[currentScenarioType].scenarios[1];
             const details = scenario.details;
             const costSign = scenario.costImpact < 0 ? '-' : '+';
@@ -1935,13 +2018,12 @@
             
             document.getElementById('vizContent').innerHTML = content;
             addSystemMessage(`Scenario B: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
-            
-            setTimeout(() => {
-                showScenarioC();
-            }, 3000);
         }
 
         function showScenarioC() {
+            if (shownSections.scenarioC) return;
+            
+            shownSections.scenarioC = true;
             const scenario = scenarioData[currentScenarioType].scenarios[2];
             const details = scenario.details;
             const costSign = scenario.costImpact < 0 ? '-' : '+';
@@ -1984,8 +2066,8 @@
             addSystemMessage(`Scenario C: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}. Note: ${scenario.riskLevel} risk level.`);
             
             setTimeout(() => {
-                addSystemMessage('Based on comprehensive analysis, I recommend Scenario A. Would you like to understand why?');
-            }, 2000);
+                addSystemMessage('Would you like to understand why Scenario A is recommended, or do you need more details on any of these options?');
+            }, 1500);
         }
 
         function showExplainability() {

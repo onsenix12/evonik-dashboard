@@ -365,7 +365,7 @@
             <div class="form-group">
                 <label>🔐 Select Your Role</label>
                 <div class="role-grid">
-                    <div class="role-card" onclick="selectRole('management')">
+                    <div class="role-card" data-role="management" onclick="selectRole('management', this)">
                         <div class="role-header">
                             <span class="role-icon">👔</span>
                             <span class="role-title">Management</span>
@@ -375,7 +375,7 @@
                         </div>
                     </div>
                     
-                    <div class="role-card" onclick="selectRole('plant_manager')">
+                    <div class="role-card" data-role="plant_manager" onclick="selectRole('plant_manager', this)">
                         <div class="role-header">
                             <span class="role-icon">⚙️</span>
                             <span class="role-title">Plant Manager</span>
@@ -385,7 +385,7 @@
                         </div>
                     </div>
                     
-                    <div class="role-card" onclick="selectRole('supply_chain')">
+                    <div class="role-card" data-role="supply_chain" onclick="selectRole('supply_chain', this)">
                         <div class="role-header">
                             <span class="role-icon">📦</span>
                             <span class="role-title">Supply Chain Manager</span>
@@ -395,7 +395,7 @@
                         </div>
                     </div>
                     
-                    <div class="role-card" onclick="selectRole('sales')">
+                    <div class="role-card" data-role="sales" onclick="selectRole('sales', this)">
                         <div class="role-header">
                             <span class="role-icon">📊</span>
                             <span class="role-title">Sales</span>
@@ -405,7 +405,7 @@
                         </div>
                     </div>
                     
-                    <div class="role-card" onclick="selectRole('operations')">
+                    <div class="role-card" data-role="operations" onclick="selectRole('operations', this)">
                         <div class="role-header">
                             <span class="role-icon">🔧</span>
                             <span class="role-title">Operations</span>
@@ -439,7 +439,7 @@
     <script>
         let selectedRole = null;
         
-        function selectRole(role) {
+        function selectRole(role, cardElement) {
             selectedRole = role;
             document.getElementById('selectedRole').value = role;
             
@@ -449,7 +449,15 @@
             });
             
             // Add selected class to clicked card
-            event.target.closest('.role-card').classList.add('selected');
+            if (cardElement) {
+                cardElement.classList.add('selected');
+            } else {
+                // Fallback: find card by data-role attribute
+                const card = document.querySelector(`.role-card[data-role="${role}"]`);
+                if (card) {
+                    card.classList.add('selected');
+                }
+            }
             
             // Enable login button
             document.getElementById('loginBtn').disabled = false;

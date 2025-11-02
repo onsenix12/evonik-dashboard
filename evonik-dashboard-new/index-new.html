@@ -1434,12 +1434,41 @@
             
             try {
                 const session = JSON.parse(userSession);
+                
+                // Check if user just logged in (redirect to role-specific dashboard)
+                // Redirect if login was within last 5 seconds (fresh login) and not management
+                const loginTime = new Date(session.loginTime);
+                const now = new Date();
+                const secondsSinceLogin = (now - loginTime) / 1000;
+                const isFreshLogin = secondsSinceLogin < 5;
+                
+                // Redirect to role-specific primary dashboard (except management)
+                if (isFreshLogin && session.role !== 'management') {
+                    redirectToRoleDashboard(session.role);
+                    return;
+                }
+                
                 updateUserDisplay(session);
                 applyRoleBasedAccess(session);
             } catch (error) {
                 console.error('Invalid session data:', error);
                 localStorage.removeItem('evonik_user_session');
                 window.location.href = 'login.html';
+            }
+        }
+        
+        function redirectToRoleDashboard(role) {
+            const roleDashboardMap = {
+                'supply_chain': 'local-supply-chain-new.html',
+                'plant_manager': 'production-new.html',
+                'sales': 'sales-new.html',
+                'operations': 'production-new.html',
+                'management': 'index-new.html' // Management stays on coordination hub
+            };
+            
+            const dashboard = roleDashboardMap[role];
+            if (dashboard && dashboard !== 'index-new.html') {
+                window.location.href = dashboard;
             }
         }
         

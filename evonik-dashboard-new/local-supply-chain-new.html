@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Local Supply Chain Dashboard - Jason Neo</title>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* Page-specific styles for local-supply-chain.html */
         .header {
@@ -137,6 +141,136 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Chart Container Styles */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-container.tall {
+            height: 350px;
+        }
+
+        .chart-container.small {
+            height: 250px;
+        }
+
+        .upload-section {
+            background: var(--bg-gray);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px dashed var(--border-gray);
+            margin-top: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: var(--supply-orange);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--supply-orange);
+            background: rgba(234, 88, 12, 0.05);
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .upload-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .upload-btn {
+            background: var(--supply-orange);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-btn:hover {
+            background: #C2410C;
+        }
+
+        .upload-info {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        .upload-status {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .upload-status.success {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            display: block;
+        }
+
+        .upload-status.error {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--alert-red);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            display: block;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            margin-top: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .benchmark-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -197,15 +331,30 @@
                 </div>
                 <div class="metric">
                     <div class="metric-label">Production Data</div>
-                    <div class="metric-value" style="font-size: 1rem;">2 min ago</div>
+                    <div class="metric-value" style="font-size: 1rem;" id="prodDataTime">2 min ago</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Inventory Data</div>
-                    <div class="metric-value" style="font-size: 1rem;">2 min ago</div>
+                    <div class="metric-value" style="font-size: 1rem;" id="invDataTime">2 min ago</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">PO Data</div>
-                    <div class="metric-value" style="font-size: 1rem;">5 min ago</div>
+                    <div class="metric-value" style="font-size: 1rem;" id="poDataTime">5 min ago</div>
+                </div>
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-header">
+                        <div class="upload-title">Update Data from File</div>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="dataFileInput" class="file-input" accept=".xlsx,.xls,.csv" />
+                            <label for="dataFileInput" class="upload-btn">
+                                📁 Upload Excel/CSV
+                            </label>
+                        </div>
+                    </div>
+                    <div class="upload-info">
+                        Upload updated data from Excel (.xlsx, .xls) or CSV files to refresh dashboard metrics
+                    </div>
+                    <div class="upload-status" id="uploadStatus"></div>
                 </div>
             </div>
 
@@ -236,7 +385,7 @@
                 </div>
                 <div class="metric">
                     <div class="metric-label">Total Value</div>
-                    <div class="metric-value">$2.8M</div>
+                    <div class="metric-value" id="totalPOValue">$2.8M</div>
                 </div>
                 <div class="metric">
                     <div class="metric-label">Urgent Items</div>
@@ -268,7 +417,7 @@
                 </div>
                 <div class="metric">
                     <div class="metric-label">On-Time Delivery Rate</div>
-                    <div class="metric-value">94%</div>
+                    <div class="metric-value" id="onTimeRate">94%</div>
                     <div class="metric-subtext">Last 30 days</div>
                 </div>
                 <div class="metric">
@@ -276,6 +425,26 @@
                     <div class="metric-value">0</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Procurement Value Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Procurement Value Trend (Last 12 Months)</div>
+            <div class="chart-subtitle">Monthly PO Value vs Budget Benchmark ($M)</div>
+            <div class="chart-container">
+                <canvas id="procurementTrendChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Benchmark: $2.5M monthly budget</div>
+        </div>
+
+        <!-- Supplier Performance Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Supplier On-Time Delivery Rate (Last 6 Months)</div>
+            <div class="chart-subtitle">Performance by Supplier (%)</div>
+            <div class="chart-container">
+                <canvas id="supplierPerformanceChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Benchmark: 95% target on-time delivery rate</div>
         </div>
 <!-- Products Shipped Out (OAS Weighing System) -->
 <h2 class="section-title">Products Shipped Out (OAS Tracking)</h2>
@@ -346,6 +515,26 @@
             <div class="metric-subtext">Auto-sync enabled</div>
         </div>
     </div>
+</div>
+
+<!-- Daily Shipments Trend Chart -->
+<div class="chart-wrapper">
+    <div class="chart-title">Daily Shipments Trend (Last 14 Days)</div>
+    <div class="chart-subtitle">Actual vs Target Daily Output (965 MT/day benchmark)</div>
+    <div class="chart-container">
+        <canvas id="dailyShipmentsChart"></canvas>
+    </div>
+    <div class="benchmark-label">🔵 Benchmark: 965 MT/day target</div>
+</div>
+
+<!-- Monthly Progress Chart -->
+<div class="chart-wrapper">
+    <div class="chart-title">Monthly Cumulative Progress</div>
+    <div class="chart-subtitle">Shipped vs Target by Week (MT)</div>
+    <div class="chart-container">
+        <canvas id="monthlyProgressChart"></canvas>
+    </div>
+    <div class="benchmark-label">🟢 Benchmark: 28,950 MT monthly target</div>
 </div>
 
 <!-- Recent Shipments Table -->
@@ -427,6 +616,9 @@
                             <div class="material-metric-value">14 days</div>
                         </div>
                     </div>
+                    <div class="chart-container small" style="margin-top: 1rem;">
+                        <canvas id="h2StockChart"></canvas>
+                    </div>
                 </div>
 
                 <div class="material-card">
@@ -451,6 +643,9 @@
                             <div class="material-metric-label">Lead Time</div>
                             <div class="material-metric-value">21 days</div>
                         </div>
+                    </div>
+                    <div class="chart-container small" style="margin-top: 1rem;">
+                        <canvas id="mmpStockChart"></canvas>
                     </div>
                 </div>
 
@@ -477,8 +672,21 @@
                             <div class="material-metric-value">18 days</div>
                         </div>
                     </div>
+                    <div class="chart-container small" style="margin-top: 1rem;">
+                        <canvas id="methanolStockChart"></canvas>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Raw Materials Inventory Trend -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Raw Materials Inventory Trend (Last 30 Days)</div>
+            <div class="chart-subtitle">Stock levels vs Reorder Points (MT)</div>
+            <div class="chart-container tall">
+                <canvas id="materialsInventoryChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔴 Reorder Point benchmarks: H2 (2,500 MT), MMP (1,200 MT), Methanol (800 MT)</div>
         </div>
 
         <!-- Active Purchase Orders -->
@@ -531,36 +739,643 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- SAP Module Sync Details -->
-        <div class="section-panel">
-            <h3 class="section-title">SAP Module Sync Details</h3>
-            <div class="sync-detail-grid">
-                <div class="sync-module">
-                    <div class="sync-module-name">MM (Materials Management)</div>
-                    <div class="sync-time">Last sync: 2 minutes ago</div>
-                    <div class="sync-time">Status: Active | No errors</div>
-                </div>
-                <div class="sync-module">
-                    <div class="sync-module-name">PP (Production Planning)</div>
-                    <div class="sync-time">Last sync: 2 minutes ago</div>
-                    <div class="sync-time">Status: Active | No errors</div>
-                </div>
-                <div class="sync-module">
-                    <div class="sync-module-name">IM (Inventory Management)</div>
-                    <div class="sync-time">Last sync: 2 minutes ago</div>
-                    <div class="sync-time">Status: Active | No errors</div>
-                </div>
-                <div class="sync-module">
-                    <div class="sync-module-name">PUR (Purchasing)</div>
-                    <div class="sync-time">Last sync: 5 minutes ago</div>
-                    <div class="sync-time">Status: Active | No errors</div>
-                </div>
-            </div>
-        </div>
     </main>
 
     <script>
+        // Dashboard Data Store
+        const dashboardData = {
+            dailyShipments: [820, 850, 790, 865, 910, 880, 782, 795, 810, 845, 870, 890, 825, 850],
+            monthlyProgress: [7240, 13420, 19580, 25740],
+            monthlyTarget: [7240, 14480, 21720, 28960],
+            procurementTrend: [2.1, 2.3, 2.0, 2.5, 2.7, 2.4, 2.6, 2.8, 2.3, 2.6, 2.5, 2.8],
+            supplierPerformance: {
+                'Supplier A': [96, 97, 95, 98, 96, 97],
+                'Supplier B': [92, 93, 94, 93, 95, 94],
+                'Supplier C': [90, 91, 92, 93, 94, 95]
+            },
+            materialsInventory: {
+                h2: Array.from({length: 30}, () => 4800 + Math.random() * 200),
+                mmp: Array.from({length: 30}, () => 1850 + Math.random() * 100),
+                methanol: Array.from({length: 30}, () => 980 - Math.random() * 50)
+            },
+            h2Stock: 4800,
+            mmpStock: 1850,
+            methanolStock: 980,
+            todayShipped: 782,
+            monthlyShipped: 13420,
+            totalPOValue: 2.8,
+            onTimeRate: 94
+        };
+
+        // Chart instances
+        let dailyShipmentsChart, monthlyProgressChart, procurementTrendChart, 
+            supplierPerformanceChart, materialsInventoryChart, h2StockChart, 
+            mmpStockChart, methanolStockChart;
+
+        // Initialize Charts
+        function initCharts() {
+            // Daily Shipments Trend Chart (Line Chart)
+            const dailyCtx = document.getElementById('dailyShipmentsChart');
+            if (dailyCtx) {
+                dailyShipmentsChart = new Chart(dailyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 14}, (_, i) => {
+                            const date = new Date();
+                            date.setDate(date.getDate() - (13 - i));
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }),
+                        datasets: [{
+                            label: 'Actual Shipped (MT)',
+                            data: dashboardData.dailyShipments,
+                            borderColor: '#EA580C',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Target Benchmark (965 MT/day)',
+                            data: Array(14).fill(965),
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: { mode: 'index', intersect: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'Metric Tons (MT)' } }
+                        }
+                    }
+                });
+            }
+
+            // Monthly Progress Chart (Bar Chart)
+            const monthlyCtx = document.getElementById('monthlyProgressChart');
+            if (monthlyCtx) {
+                monthlyProgressChart = new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'Shipped (MT)',
+                            data: dashboardData.monthlyProgress,
+                            backgroundColor: 'rgba(234, 88, 12, 0.8)',
+                            borderColor: '#EA580C',
+                            borderWidth: 1
+                        }, {
+                            label: 'Target (MT)',
+                            data: dashboardData.monthlyTarget,
+                            type: 'line',
+                            borderColor: '#16A34A',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#16A34A'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Metric Tons (MT)' } }
+                        }
+                    }
+                });
+            }
+
+            // Procurement Trend Chart (Area Chart)
+            const procCtx = document.getElementById('procurementTrendChart');
+            if (procCtx) {
+                procurementTrendChart = new Chart(procCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Monthly PO Value ($M)',
+                            data: dashboardData.procurementTrend,
+                            borderColor: '#EA580C',
+                            backgroundColor: 'rgba(234, 88, 12, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Budget Benchmark ($2.5M)',
+                            data: Array(12).fill(2.5),
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Value ($M)' } }
+                        }
+                    }
+                });
+            }
+
+            // Supplier Performance Chart (Line Chart)
+            const suppCtx = document.getElementById('supplierPerformanceChart');
+            if (suppCtx) {
+                const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+                supplierPerformanceChart = new Chart(suppCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Supplier A',
+                                data: dashboardData.supplierPerformance['Supplier A'],
+                                borderColor: '#16A34A',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Supplier B',
+                                data: dashboardData.supplierPerformance['Supplier B'],
+                                borderColor: '#EA580C',
+                                backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Supplier C',
+                                data: dashboardData.supplierPerformance['Supplier C'],
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Target Benchmark (95%)',
+                                data: Array(6).fill(95),
+                                borderColor: '#6366F1',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                fill: false,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: false,
+                                min: 85,
+                                max: 100,
+                                title: { display: true, text: 'On-Time Delivery Rate (%)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Materials Inventory Trend Chart
+            const matInvCtx = document.getElementById('materialsInventoryChart');
+            if (matInvCtx) {
+                const days = Array.from({length: 30}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (29 - i));
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                materialsInventoryChart = new Chart(matInvCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [
+                            {
+                                label: 'Hydrogen (H2)',
+                                data: dashboardData.materialsInventory.h2,
+                                borderColor: '#16A34A',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            },
+                            {
+                                label: 'MMP',
+                                data: dashboardData.materialsInventory.mmp,
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            },
+                            {
+                                label: 'Methanol',
+                                data: dashboardData.materialsInventory.methanol,
+                                borderColor: '#EA580C',
+                                backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            },
+                            {
+                                label: 'H2 Reorder Point',
+                                data: Array(30).fill(2500),
+                                borderColor: '#DC2626',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'MMP Reorder Point',
+                                data: Array(30).fill(1200),
+                                borderColor: '#DC2626',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Methanol Reorder Point',
+                                data: Array(30).fill(800),
+                                borderColor: '#DC2626',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'Stock (MT)' } }
+                        }
+                    }
+                });
+            }
+
+            // Material Stock Charts (Gauge-style Bar Charts)
+            initMaterialStockCharts();
+        }
+
+        function initMaterialStockCharts() {
+            // H2 Stock Chart
+            const h2Ctx = document.getElementById('h2StockChart');
+            if (h2Ctx) {
+                h2StockChart = new Chart(h2Ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Current', 'Reorder Point', 'Max Capacity'],
+                        datasets: [{
+                            label: 'Stock Level (MT)',
+                            data: [dashboardData.h2Stock, 2500, 6000],
+                            backgroundColor: [
+                                dashboardData.h2Stock > 2500 ? 'rgba(22, 163, 74, 0.8)' : 'rgba(234, 88, 12, 0.8)',
+                                'rgba(220, 38, 38, 0.8)',
+                                'rgba(107, 114, 128, 0.3)'
+                            ],
+                            borderColor: [
+                                dashboardData.h2Stock > 2500 ? '#16A34A' : '#EA580C',
+                                '#DC2626',
+                                '#6B7280'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.y.toLocaleString()} MT` } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'MT' } }
+                        }
+                    }
+                });
+            }
+
+            // MMP Stock Chart
+            const mmpCtx = document.getElementById('mmpStockChart');
+            if (mmpCtx) {
+                mmpStockChart = new Chart(mmpCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Current', 'Reorder Point', 'Max Capacity'],
+                        datasets: [{
+                            label: 'Stock Level (MT)',
+                            data: [dashboardData.mmpStock, 1200, 3000],
+                            backgroundColor: [
+                                dashboardData.mmpStock > 1200 ? 'rgba(22, 163, 74, 0.8)' : 'rgba(234, 88, 12, 0.8)',
+                                'rgba(220, 38, 38, 0.8)',
+                                'rgba(107, 114, 128, 0.3)'
+                            ],
+                            borderColor: [
+                                dashboardData.mmpStock > 1200 ? '#16A34A' : '#EA580C',
+                                '#DC2626',
+                                '#6B7280'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.y.toLocaleString()} MT` } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'MT' } }
+                        }
+                    }
+                });
+            }
+
+            // Methanol Stock Chart
+            const methCtx = document.getElementById('methanolStockChart');
+            if (methCtx) {
+                methanolStockChart = new Chart(methCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Current', 'Reorder Point', 'Max Capacity'],
+                        datasets: [{
+                            label: 'Stock Level (MT)',
+                            data: [dashboardData.methanolStock, 800, 2000],
+                            backgroundColor: [
+                                dashboardData.methanolStock > 800 ? 'rgba(234, 88, 12, 0.8)' : 'rgba(220, 38, 38, 0.8)',
+                                'rgba(220, 38, 38, 0.8)',
+                                'rgba(107, 114, 128, 0.3)'
+                            ],
+                            borderColor: [
+                                dashboardData.methanolStock > 800 ? '#EA580C' : '#DC2626',
+                                '#DC2626',
+                                '#6B7280'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.y.toLocaleString()} MT` } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'MT' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // File Upload Functionality
+        function setupFileUpload() {
+            const fileInput = document.getElementById('dataFileInput');
+            const uploadSection = document.getElementById('uploadSection');
+            const uploadStatus = document.getElementById('uploadStatus');
+
+            // Drag and drop
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.classList.add('dragover');
+            });
+
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.classList.remove('dragover');
+            });
+
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleFileUpload(file) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            const fileName = file.name.toLowerCase();
+
+            uploadStatus.className = 'upload-status';
+            uploadStatus.textContent = 'Processing file...';
+
+            if (fileName.endsWith('.csv')) {
+                parseCSV(file);
+            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                parseExcel(file);
+            } else {
+                showUploadStatus('error', 'Invalid file format. Please upload CSV or Excel files.');
+            }
+        }
+
+        function parseCSV(file) {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.errors.length > 0) {
+                        showUploadStatus('error', 'Error parsing CSV: ' + results.errors[0].message);
+                        return;
+                    }
+                    updateDataFromParsed(results.data);
+                    showUploadStatus('success', `Successfully updated data from ${file.name}`);
+                    updateDataFreshness();
+                },
+                error: function(error) {
+                    showUploadStatus('error', 'Error reading CSV file: ' + error.message);
+                }
+            });
+        }
+
+        function parseExcel(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    updateDataFromParsed(jsonData);
+                    showUploadStatus('success', `Successfully updated data from ${file.name}`);
+                    updateDataFreshness();
+                } catch (error) {
+                    showUploadStatus('error', 'Error parsing Excel file: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateDataFromParsed(data) {
+            // Example data structure expected:
+            // Can handle columns like: Date, ShippedMT, H2Stock, MMPStock, MethanolStock, POValue, OnTimeRate, etc.
+            if (!data || data.length === 0) return;
+
+            // Update based on detected columns
+            const firstRow = data[0];
+            const keys = Object.keys(firstRow);
+
+            data.forEach(row => {
+                // Update shipment data
+                if (hasColumn(keys, ['shipped', 'shipment', 'mt'])) {
+                    const shipped = parseFloat(row[findColumn(keys, ['shipped', 'shipment', 'mt'])]);
+                    if (!isNaN(shipped) && shipped > 0) {
+                        dashboardData.todayShipped = shipped;
+                        dashboardData.dailyShipments[dashboardData.dailyShipments.length - 1] = shipped;
+                    }
+                }
+
+                // Update material stocks
+                if (hasColumn(keys, ['h2', 'hydrogen'])) {
+                    const h2 = parseFloat(row[findColumn(keys, ['h2', 'hydrogen'])]);
+                    if (!isNaN(h2) && h2 > 0) {
+                        dashboardData.h2Stock = h2;
+                        dashboardData.materialsInventory.h2[dashboardData.materialsInventory.h2.length - 1] = h2;
+                    }
+                }
+
+                if (hasColumn(keys, ['mmp'])) {
+                    const mmp = parseFloat(row[findColumn(keys, ['mmp'])]);
+                    if (!isNaN(mmp) && mmp > 0) {
+                        dashboardData.mmpStock = mmp;
+                        dashboardData.materialsInventory.mmp[dashboardData.materialsInventory.mmp.length - 1] = mmp;
+                    }
+                }
+
+                if (hasColumn(keys, ['methanol', 'ch3oh'])) {
+                    const methanol = parseFloat(row[findColumn(keys, ['methanol', 'ch3oh'])]);
+                    if (!isNaN(methanol) && methanol > 0) {
+                        dashboardData.methanolStock = methanol;
+                        dashboardData.materialsInventory.methanol[dashboardData.materialsInventory.methanol.length - 1] = methanol;
+                    }
+                }
+
+                // Update PO value
+                if (hasColumn(keys, ['po', 'purchase', 'value'])) {
+                    const poValue = parseFloat(row[findColumn(keys, ['po', 'purchase', 'value'])]);
+                    if (!isNaN(poValue) && poValue > 0) {
+                        dashboardData.totalPOValue = poValue;
+                    }
+                }
+
+                // Update on-time rate
+                if (hasColumn(keys, ['ontime', 'delivery', 'rate'])) {
+                    const rate = parseFloat(row[findColumn(keys, ['ontime', 'delivery', 'rate'])]);
+                    if (!isNaN(rate) && rate >= 0 && rate <= 100) {
+                        dashboardData.onTimeRate = rate;
+                    }
+                }
+            });
+
+            // Refresh all UI elements and charts
+            updateDashboardUI();
+            refreshCharts();
+        }
+
+        function hasColumn(keys, patterns) {
+            return keys.some(key => 
+                patterns.some(pattern => key.toLowerCase().includes(pattern))
+            );
+        }
+
+        function findColumn(keys, patterns) {
+            return keys.find(key => 
+                patterns.some(pattern => key.toLowerCase().includes(pattern))
+            );
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('todayShipped').textContent = `${dashboardData.todayShipped.toLocaleString()} MT`;
+            document.getElementById('h2Stock').textContent = `${dashboardData.h2Stock.toLocaleString()} MT`;
+            document.getElementById('mmpStock').textContent = `${dashboardData.mmpStock.toLocaleString()} MT`;
+            document.getElementById('methanolStock').textContent = `${dashboardData.methanolStock.toLocaleString()} MT`;
+            document.getElementById('totalPOValue').textContent = `$${dashboardData.totalPOValue.toFixed(1)}M`;
+            document.getElementById('onTimeRate').textContent = `${dashboardData.onTimeRate}%`;
+        }
+
+        function refreshCharts() {
+            if (dailyShipmentsChart) {
+                dailyShipmentsChart.data.datasets[0].data = dashboardData.dailyShipments;
+                dailyShipmentsChart.update();
+            }
+            if (h2StockChart) {
+                h2StockChart.data.datasets[0].data[0] = dashboardData.h2Stock;
+                h2StockChart.data.datasets[0].backgroundColor[0] = dashboardData.h2Stock > 2500 ? 'rgba(22, 163, 74, 0.8)' : 'rgba(234, 88, 12, 0.8)';
+                h2StockChart.data.datasets[0].borderColor[0] = dashboardData.h2Stock > 2500 ? '#16A34A' : '#EA580C';
+                h2StockChart.update();
+            }
+            if (mmpStockChart) {
+                mmpStockChart.data.datasets[0].data[0] = dashboardData.mmpStock;
+                mmpStockChart.data.datasets[0].backgroundColor[0] = dashboardData.mmpStock > 1200 ? 'rgba(22, 163, 74, 0.8)' : 'rgba(234, 88, 12, 0.8)';
+                mmpStockChart.data.datasets[0].borderColor[0] = dashboardData.mmpStock > 1200 ? '#16A34A' : '#EA580C';
+                mmpStockChart.update();
+            }
+            if (methanolStockChart) {
+                methanolStockChart.data.datasets[0].data[0] = dashboardData.methanolStock;
+                methanolStockChart.data.datasets[0].backgroundColor[0] = dashboardData.methanolStock > 800 ? 'rgba(234, 88, 12, 0.8)' : 'rgba(220, 38, 38, 0.8)';
+                methanolStockChart.data.datasets[0].borderColor[0] = dashboardData.methanolStock > 800 ? '#EA580C' : '#DC2626';
+                methanolStockChart.update();
+            }
+            if (materialsInventoryChart) {
+                materialsInventoryChart.data.datasets[0].data = dashboardData.materialsInventory.h2;
+                materialsInventoryChart.data.datasets[1].data = dashboardData.materialsInventory.mmp;
+                materialsInventoryChart.data.datasets[2].data = dashboardData.materialsInventory.methanol;
+                materialsInventoryChart.update();
+            }
+            if (procurementTrendChart) {
+                procurementTrendChart.update();
+            }
+            if (supplierPerformanceChart) {
+                supplierPerformanceChart.update();
+            }
+        }
+
+        function showUploadStatus(type, message) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            uploadStatus.className = `upload-status ${type}`;
+            uploadStatus.textContent = message;
+            setTimeout(() => {
+                if (type === 'success') {
+                    uploadStatus.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        function updateDataFreshness() {
+            const now = new Date();
+            document.getElementById('prodDataTime').textContent = 'Just now';
+            document.getElementById('invDataTime').textContent = 'Just now';
+            document.getElementById('poDataTime').textContent = 'Just now';
+        }
+
         // Listen for coordination events
         window.addEventListener('storage', function(e) {
             if (e.key === 'evonik_coordination_event') {
@@ -573,7 +1388,6 @@
             switch(event.type) {
                 case 'equipment_failure':
                     showAlert('ME6 shutdown detected - Monitor tank depletion rate');
-                    // Shipment metrics can be re-evaluated here if needed
                     updateShipmentMetrics();
                     break;
                 case 'supply_chain_adjustment':
@@ -596,40 +1410,38 @@
         function updateMethanolDelay() {
             const methanolCard = document.getElementById('methanolCard');
             methanolCard.classList.add('critical');
+            dashboardData.methanolStock = 780;
             document.getElementById('methanolStock').textContent = '780 MT';
             document.getElementById('methanolStatus').className = 'material-status status-critical';
             document.getElementById('methanolStatus').textContent = 'Critical';
             document.getElementById('delayedDeliveries').textContent = '1';
             document.getElementById('urgentPOs').textContent = '3';
+            refreshCharts();
         }
 
         function resetDashboard() {
             document.getElementById('alertsBanner').classList.remove('show');
-            // Reset shipment tracking defaults
             document.getElementById('shipmentStatus').textContent = 'On Track';
             document.getElementById('lastWeighing').textContent = '3 min ago';
+            dashboardData.todayShipped = 782;
             document.getElementById('todayShipped').textContent = '782 MT';
             
             const methanolCard = document.getElementById('methanolCard');
             methanolCard.classList.remove('critical');
+            dashboardData.methanolStock = 980;
             document.getElementById('methanolStock').textContent = '980 MT';
             document.getElementById('methanolStatus').className = 'material-status status-monitor';
             document.getElementById('methanolStatus').textContent = 'Monitor';
             document.getElementById('delayedDeliveries').textContent = '1';
             document.getElementById('urgentPOs').textContent = '2';
+            refreshCharts();
         }
 
-        // Update shipment tracking
         function updateShipmentMetrics() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            // Example dynamic updates (extend as needed)
             document.getElementById('lastWeighing').textContent = '3 min ago';
-            document.getElementById('todayShipped').textContent = '782 MT';
-            // document.getElementById('monthlyShipped').textContent = '13,420 MT'; // optionally update
+            document.getElementById('todayShipped').textContent = `${dashboardData.todayShipped} MT`;
         }
 
-        // Auto-update sync time
         function updateSyncTime() {
             const now = new Date();
             const minutes = Math.floor(Math.random() * 5) + 1;
@@ -642,9 +1454,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Local Supply Chain Dashboard initialized');
             console.log('Jason Neo - SAP integration active');
-            if (typeof updateShipmentMetrics === 'function') {
-                updateShipmentMetrics();
-            }
+            initCharts();
+            setupFileUpload();
+            updateDashboardUI();
         });
     </script>
 </body>

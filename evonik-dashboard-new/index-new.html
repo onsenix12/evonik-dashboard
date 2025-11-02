@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Evonik Production Coordination Hub</title>
     <link rel="stylesheet" href="shared-styles-new.css">
     <style>
@@ -404,18 +405,293 @@
         }
 
         #plantWorldMap { 
-            height: 480px; 
+            height: 600px; 
             border-radius: 12px; 
             border: 1px solid var(--border-gray); 
             overflow: hidden;
             margin-bottom: 2rem;
+            position: relative;
         }
 
         .leaflet-interactive { 
             cursor: pointer; 
         }
+
+        /* Flow Lines Animation - Real-time shipment visualization */
+        @keyframes flowAnimation {
+            0% {
+                stroke-dashoffset: 100;
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: 0.4;
+            }
+        }
+
+        .flow-line {
+            fill: none;
+            stroke-dasharray: 15 10;
+            animation: flowAnimation 4s linear infinite;
+            cursor: pointer;
+        }
+
+        .flow-line.high-volume {
+            stroke-width: 6;
+        }
+
+        .flow-line.medium-volume {
+            stroke-width: 4;
+        }
+
+        .flow-line.low-volume {
+            stroke-width: 2;
+        }
+
+        /* Flow label styling */
+        .flow-label-badge {
+            background: rgba(139, 46, 139, 0.95);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            border: 2px solid white;
+        }
+
+        /* Plant markers - simple */
+        .plant-marker {
+            fill: var(--evonik-purple);
+            stroke: white;
+            stroke-width: 3;
+        }
+
+        /* Map Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            min-width: 220px;
+            font-size: 0.85rem;
+        }
+
+        .map-legend-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-gray);
+            padding-bottom: 0.5rem;
+        }
+
+        .map-legend-section {
+            margin-bottom: 0.75rem;
+        }
+
+        .map-legend-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .map-legend-section-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .map-legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .map-legend-line {
+            width: 40px;
+            height: 0;
+            border: none;
+            border-top: 3px solid;
+            flex-shrink: 0;
+        }
+
+        .map-legend-line.high {
+            border-top-width: 6px;
+            border-top-color: #8B2E8B;
+        }
+
+        .map-legend-line.medium {
+            border-top-width: 4px;
+            border-top-color: #A855F7;
+        }
+
+        .map-legend-line.low {
+            border-top-width: 2px;
+            border-top-color: #C084FC;
+        }
+
+        .map-legend-label {
+            color: var(--text-dark);
+            font-size: 0.8rem;
+        }
+
+        .map-legend-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .map-legend-status.in-transit {
+            background: rgba(139, 46, 139, 0.1);
+            color: #8B2E8B;
+        }
+
+        .map-legend-status.scheduled {
+            background: rgba(168, 85, 247, 0.1);
+            color: #A855F7;
+        }
+
+        /* Strategic Metrics - Comparison Styles */
+        .metric-comparison {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: var(--bg-gray);
+            border-radius: 8px;
+        }
+
+        .comparison-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comparison-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .comparison-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .metric-variance {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .metric-variance.positive {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--success-green);
+        }
+
+        .metric-variance.negative {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--warning-orange);
+        }
+
+        .metric-action {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(139, 46, 139, 0.05);
+            border-left: 3px solid var(--evonik-purple);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            text-align: left;
+        }
+
+        .metric-action strong {
+            color: var(--evonik-purple);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Fixed Alert Banner Styles */
+        .alerts-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+            background: var(--alert-red);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            animation: slideDown 0.5s ease;
+        }
+
+        .alerts-banner.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+            font-weight: 300;
+        }
+
+        .alert-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Alert overlays nav due to higher z-index (2000 vs 100) */
+        /* Nav remains functional underneath the fixed alert banner */
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <header class="header">
@@ -458,7 +734,12 @@
     </nav>
 
     <div class="alerts-banner" id="alertsBanner">
-        <strong>🚨 ALERT:</strong> <span id="alertMessage"></span>
+        <div style="display: flex; align-items: center; justify-content: space-between; max-width: 1400px; margin: 0 auto;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <strong>🚨 ALERT:</strong> <span id="alertMessage"></span>
+            </div>
+            <button class="alert-close-btn" id="alertCloseBtn" onclick="closeAlert()" aria-label="Close alert">×</button>
+        </div>
     </div>
 
     <main class="main-content">
@@ -466,7 +747,7 @@
         <div class="section-header">
             <h2 class="section-title">🎯 Strategic Metrics Dashboard</h2>
             <div style="color: var(--text-light); font-size: 0.9rem;">
-                Primary and secondary metrics for executive oversight • Last updated: <span id="lastUpdate">Just now</span>
+                Performance vs. targets • Decision-making indicators • Last updated: <span id="lastUpdate">Just now</span>
             </div>
         </div>
 
@@ -474,12 +755,40 @@
             <div class="metric-card highlighted">
                 <h4>Contribution Margin</h4>
                 <div class="value">$12.4M</div>
-                <div class="subtext">End-to-end: Sales - RM - Production</div>
+                <div class="subtext" style="margin-bottom: 0.75rem;">Monthly • End-to-end: Sales - RM - Production</div>
+                <div class="metric-comparison">
+                    <div class="comparison-item">
+                        <span class="comparison-label">Monthly Target:</span>
+                        <span class="comparison-value">$13.0M</span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Status:</span>
+                        <span class="status-badge status-warning" id="marginStatus">Below Target</span>
+                    </div>
+                </div>
+                <div class="metric-variance negative" id="marginVariance">-4.6% vs monthly target</div>
+                <div class="metric-action">
+                    <strong>Decision Focus:</strong> Review production efficiency and raw material costs. Production should optimize unit operations; Sales should prioritize higher-margin orders; Supply Chain should evaluate RM sourcing strategies.
+                </div>
             </div>
             <div class="metric-card">
                 <h4>Customer Intimacy Score</h4>
                 <div class="value">94%</div>
-                <div class="subtext">On-time delivery + quality</div>
+                <div class="subtext" style="margin-bottom: 0.75rem;">Monthly • On-time delivery + quality</div>
+                <div class="metric-comparison">
+                    <div class="comparison-item">
+                        <span class="comparison-label">Monthly Target:</span>
+                        <span class="comparison-value">95%</span>
+                    </div>
+                    <div class="comparison-item">
+                        <span class="comparison-label">Status:</span>
+                        <span class="status-badge status-warning" id="intimacyStatus">Slightly Below</span>
+                    </div>
+                </div>
+                <div class="metric-variance negative" id="intimacyVariance">-1.0% vs monthly target</div>
+                <div class="metric-action">
+                    <strong>Decision Focus:</strong> Monitor delivery schedules and quality metrics. Supply Chain should prioritize on-time shipments; Production should maintain quality standards; Sales should proactively communicate any delays.
+                </div>
             </div>
         </div>
 
@@ -593,7 +902,10 @@
                     <div class="card-title">Plant Operations</div>
                     <div class="card-status status-operational" id="plantStatus">Operational</div>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                <div style="position: relative; height: 280px; padding: 1rem;">
+                    <canvas id="plantOperationsChart"></canvas>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 0 1rem 1rem 1rem; border-top: 1px solid var(--border-gray); margin-top: 0.5rem; padding-top: 1rem;">
                     <div class="metric">
                         <div class="metric-label">ME5 Unit</div>
                         <div class="metric-value" id="me5Output">620 MT/day</div>
@@ -613,14 +925,14 @@
             </div>
         </div>
 
-        <!-- Impact Analysis Module -->
-        <div class="impact-analysis">
+        <!-- Impact Analysis Module - Only show when there's an active shutdown -->
+        <div class="impact-analysis" id="shutdownImpact" style="display: none;">
             <h4>⚠️ Unplanned Shutdown Impact</h4>
             <div class="impact-grid">
-                <div>📦 Raw Materials: 3 shipments affected</div>
-                <div>📊 Inventory: -2,400 MT shortfall</div>
-                <div>👥 Customers: 5 orders delayed</div>
-                <div>💰 Cost: $45K demurrage risk</div>
+                <div>📦 Raw Materials: <span id="impactRawMaterials">3 shipments affected</span></div>
+                <div>📊 Inventory: <span id="impactInventory">-2,400 MT shortfall</span></div>
+                <div>👥 Customers: <span id="impactCustomers">5 orders delayed</span></div>
+                <div>💰 Cost: <span id="impactCost">$45K demurrage risk</span></div>
             </div>
         </div>
 
@@ -827,12 +1139,57 @@
             </div>
         </div>
 
-        <!-- World Plants Map -->
-        <h2 class="section-title">🗺️ Global Plant Locations</h2>
+        <!-- Production Flow Map -->
+        <h2 class="section-title">🗺️ Production Flow Map</h2>
         <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1.5rem 0;">
-            Countries with Evonik methionine plants are highlighted • Click for plant details
+            Real-time shipment flows from plants to regions • Volume allocation visualization
         </p>
-        <div id="plantWorldMap"></div>
+        <div id="plantWorldMap" style="position: relative;">
+            <!-- Map Legend -->
+            <div class="map-legend">
+                <div class="map-legend-title">📊 Flow Legend</div>
+                
+                <div class="map-legend-section">
+                    <div class="map-legend-section-title">Volume (Line Thickness &amp; Color)</div>
+                    <div class="map-legend-item">
+                        <div class="map-legend-line high" style="border-top-color: #8B2E8B;"></div>
+                        <div class="map-legend-label"><strong>High Volume</strong> (&gt;10K MT)<br/><span style="color: var(--text-light); font-size: 0.75rem;">Primary shipments</span></div>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="map-legend-line medium" style="border-top-color: #A855F7;"></div>
+                        <div class="map-legend-label"><strong>Medium Volume</strong> (2K-10K MT)<br/><span style="color: var(--text-light); font-size: 0.75rem;">Secondary routes</span></div>
+                    </div>
+                    <div class="map-legend-item">
+                        <div class="map-legend-line low" style="border-top-color: #C084FC;"></div>
+                        <div class="map-legend-label"><strong>Low Volume</strong> (&lt;2K MT)<br/><span style="color: var(--text-light); font-size: 0.75rem;">Backup/overflow</span></div>
+                    </div>
+                </div>
+                
+                <div class="map-legend-section">
+                    <div class="map-legend-section-title">Status</div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div class="map-legend-status in-transit">
+                            <span>🔄</span> In Transit
+                        </div>
+                        <div class="map-legend-status scheduled">
+                            <span>📅</span> Scheduled
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="map-legend-section">
+                    <div class="map-legend-section-title">Symbols</div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #8B2E8B; border: 2px solid white;"></div>
+                        <div class="map-legend-label">Production Plant</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="padding: 0.25rem 0.5rem; background: rgba(139, 46, 139, 0.9); color: white; border-radius: 8px; font-size: 0.75rem; font-weight: 600;">MT</div>
+                        <div class="map-legend-label">Volume Badge</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Floating Demo Controls -->
@@ -896,15 +1253,29 @@
             };
             broadcastEvent(event);
             
+            // Show red alert banner
+            showAlert('🚨 CRITICAL: ME6 equipment failure detected - Production capacity reduced to 70%');
+            
             // Update UI
             document.getElementById('plantStatus').textContent = 'Issue Detected';
             document.getElementById('plantStatus').className = 'card-status';
             document.getElementById('plantStatus').style.background = 'rgba(234, 88, 12, 0.1)';
             document.getElementById('plantStatus').style.color = 'var(--warning-orange)';
             
+            // Update chart data
+            updatePlantOperationsChart(620, 240, 860);
+            
             document.getElementById('me6Output').textContent = '240 MT/day';
+            document.getElementById('totalOutput').textContent = '860 MT/day';
             document.getElementById('me6Status').textContent = 'Reduced Capacity';
             document.getElementById('me6Status').style.color = 'var(--warning-orange)';
+            
+            // Show shutdown impact section
+            document.getElementById('shutdownImpact').style.display = 'block';
+            document.getElementById('impactRawMaterials').textContent = '3 shipments affected';
+            document.getElementById('impactInventory').textContent = '-2,400 MT shortfall';
+            document.getElementById('impactCustomers').textContent = '5 orders delayed';
+            document.getElementById('impactCost').textContent = '$45K demurrage risk';
             
             addTimelineEvent('⚙️', 'Production', 'ME6 equipment failure - Auto-response initiated');
             addAlert('⚠️', 'Equipment Failure Detected', 'ME6 unit operating at reduced capacity - Backup systems activated');
@@ -920,6 +1291,9 @@
                 source: 'coordination_hub'
             };
             broadcastEvent(event);
+            
+            // Show alert banner
+            showAlert('📊 Bulk order sync: 15 new orders processed (4,200 MT total) - Review capacity planning');
             
             // Update UI
             const currentOrders = parseInt(document.getElementById('apacOrders').textContent);
@@ -938,6 +1312,9 @@
             };
             broadcastEvent(event);
             
+            // Show alert banner
+            showAlert('🔄 Supply chain adjustment: Shipment delayed 3 days - 850 MT impact - Alternative routing activated');
+            
             // Update UI
             document.getElementById('shippingStatusText').textContent = 'Adjusted';
             addTimelineEvent('🔄', 'Supply Chain', 'Shipment schedule adjusted - 3 day delay mitigated');
@@ -953,6 +1330,9 @@
                 source: 'coordination_hub'
             };
             broadcastEvent(event);
+            
+            // Show alert banner
+            showAlert('🌏 Global rebalancing: 1,200 MT capacity shifted from Singapore to Mobile plant');
             
             // Update UI
             const singaporeInv = parseFloat(document.getElementById('singaporeInventory').textContent);
@@ -974,6 +1354,8 @@
                 source: 'coordination_hub'
             };
             broadcastEvent(event);
+            // Hide shutdown impact on reset
+            document.getElementById('shutdownImpact').style.display = 'none';
             location.reload();
         }
 
@@ -1022,6 +1404,23 @@
             
             const currentCount = parseInt(alertCount.textContent);
             alertCount.textContent = (currentCount + 1) + ' Active';
+        }
+
+        function showAlert(message) {
+            const banner = document.getElementById('alertsBanner');
+            const alertMessage = document.getElementById('alertMessage');
+            if (banner && alertMessage) {
+                alertMessage.textContent = message;
+                banner.classList.add('show');
+                // No automatic timeout - user must close manually with X button
+            }
+        }
+
+        function closeAlert() {
+            const banner = document.getElementById('alertsBanner');
+            if (banner) {
+                banner.classList.remove('show');
+            }
         }
 
         // User session handling
@@ -1085,177 +1484,354 @@
             }
         }
         
+        // Plant Operations Chart
+        let plantOperationsChart = null;
+        
+        function initializePlantOperationsChart() {
+            const ctx = document.getElementById('plantOperationsChart');
+            if (!ctx) return;
+            
+            const me5Text = document.getElementById('me5Output').textContent;
+            const me6Text = document.getElementById('me6Output').textContent;
+            const me5Value = parseInt(me5Text.match(/\d+/)[0]);
+            const me6Value = parseInt(me6Text.match(/\d+/)[0]);
+            const totalValue = me5Value + me6Value;
+            
+            plantOperationsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['ME5 Unit', 'ME6 Unit', 'Total Output'],
+                    datasets: [{
+                        label: 'Production (MT/day)',
+                        data: [me5Value, me6Value, totalValue],
+                        backgroundColor: [
+                            'rgba(139, 46, 139, 0.7)',
+                            'rgba(139, 46, 139, 0.7)',
+                            'rgba(168, 85, 247, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(139, 46, 139, 1)',
+                            'rgba(139, 46, 139, 1)',
+                            'rgba(168, 85, 247, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 6
+                    }, {
+                        label: 'Target',
+                        data: [620, 345, 965],
+                        type: 'line',
+                        borderColor: 'rgba(234, 88, 12, 0.8)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y + ' MT/day';
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1200,
+                            title: {
+                                display: true,
+                                text: 'Production Output (MT/day)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                stepSize: 200
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updatePlantOperationsChart(me5Value, me6Value, totalValue) {
+            if (plantOperationsChart) {
+                plantOperationsChart.data.datasets[0].data = [me5Value, me6Value, totalValue];
+                plantOperationsChart.update();
+            }
+        }
+        
         // Initialize everything on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeUserSession();
+            initializePlantOperationsChart();
             
-            // World map initialization
+            // Production Flow Map - Simplified focus on shipment flows
+            // Wait a bit to ensure Leaflet is loaded
+            if (typeof L === 'undefined') {
+                console.error('Leaflet library not loaded');
+                return;
+            }
+
             const mapEl = document.getElementById('plantWorldMap');
             if (!mapEl) {
                 console.error('Map element #plantWorldMap not found');
                 return;
             }
 
-            const map = L.map('plantWorldMap', { 
-                zoomControl: true, 
-                worldCopyJump: true 
-            }).setView([20, 0], 2);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 8,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
-
-            const plantCountries = {
-                'Singapore': { 
-                    color: '#8B2E8B', 
-                    plants: [{ 
-                        name: 'Jurong Island (ME5/ME6)', 
-                        city: 'Singapore', 
-                        lat: 1.3009, 
-                        lon: 103.7876 
-                    }] 
-                },
-                'Belgium': { 
-                    color: '#8B2E8B', 
-                    plants: [{ 
-                        name: 'Antwerp Plant', 
-                        city: 'Antwerp', 
-                        lat: 51.2600, 
-                        lon: 4.4020 
-                    }] 
-                },
-                'United States of America': { 
-                    color: '#8B2E8B', 
-                    plants: [{ 
-                        name: 'Mobile Plant', 
-                        city: 'Mobile, Alabama', 
-                        lat: 30.6954, 
-                        lon: -88.0399 
-                    }] 
-                }
-            };
-
-            // Try multiple GeoJSON sources to avoid CORS issues
-            const geoJsonSources = [
-                'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson',
-                'https://unpkg.com/geojson-world@1.0.0/countries.geo.json',
-                'https://cdn.jsdelivr.net/npm/geojson-world@1.0.0/countries.geo.json'
-            ];
-            
-            let geoJsonPromise = Promise.reject(new Error('No sources available'));
-            
-            for (const source of geoJsonSources) {
-                geoJsonPromise = geoJsonPromise.catch(() => 
-                    fetch(source, { 
-                        mode: 'cors',
-                        cache: 'no-cache'
-                    }).then(r => {
-                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                        return r.json();
-                    })
-                );
+            // Ensure container has dimensions
+            if (mapEl.offsetHeight === 0) {
+                console.warn('Map container has no height, waiting...');
+                setTimeout(() => {
+                    // Retry initialization after a delay
+                    initializeMap();
+                }, 500);
+                return;
             }
-            
-            geoJsonPromise
-                .then(geo => {
-                    L.geoJSON(geo, {
-                        style: feature => {
-                            const name = feature.properties.name;
-                            if (plantCountries[name]) {
-                                return { 
-                                    color: '#8B2E8B', 
-                                    weight: 1, 
-                                    fillColor: plantCountries[name].color, 
-                                    fillOpacity: 0.25 
-                                };
-                            }
-                            return { 
-                                color: '#e5e7eb', 
-                                weight: 1, 
-                                fillColor: '#f8fafc', 
-                                fillOpacity: 0.6 
-                            };
-                        },
-                        onEachFeature: (feature, layer) => {
-                            const name = feature.properties.name;
-                            if (plantCountries[name]) {
-                                const plants = plantCountries[name].plants
-                                    .map(p => `<div><strong>${p.name}</strong><br/>📍 ${p.city}, ${name}</div>`)
-                                    .join('');
-                                layer.bindPopup(`<div style="min-width:220px"><strong>${name}</strong><br/>${plants}</div>`);
-                                layer.on('mouseover', () => layer.setStyle({ fillOpacity: 0.4 }));
-                                layer.on('mouseout', () => layer.setStyle({ fillOpacity: 0.25 }));
-                            }
-                        }
+
+            // Initialize map function
+            function initializeMap() {
+                // Declare map variable
+                let map;
+                
+                try {
+                    // Create map instance
+                    map = L.map('plantWorldMap', { 
+                        zoomControl: true, 
+                        worldCopyJump: true,
+                        preferCanvas: true
+                    }).setView([20, 0], 2);
+                    
+                    // Add tile layer
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 8,
+                        attribution: '&copy; OpenStreetMap contributors'
                     }).addTo(map);
-
-                    // Add plant markers
-                    const markers = [];
-                    Object.entries(plantCountries).forEach(([country, cfg]) => {
-                        cfg.plants.forEach(p => {
-                            const marker = L.circleMarker([p.lat, p.lon], {
-                                radius: 8,
-                                color: '#FFFFFF',
-                                weight: 2,
-                                fillColor: '#8B2E8B',
-                                fillOpacity: 0.95
-                            })
-                                .addTo(map)
-                                .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`)
-                                .bindTooltip(p.city, { permanent: false, direction: 'top' });
-                            markers.push(marker);
-                        });
-                    });
-
-                    // Fit map to show all markers
-                    if (markers.length) {
-                        const group = L.featureGroup(markers);
-                        map.fitBounds(group.getBounds().pad(0.5));
-                    }
-                })
-                .catch(err => {
-                    console.error('All GeoJSON sources failed to load:', err);
                     
-                    // Fallback: Create a simple map with just plant markers
-                    console.log('Creating fallback map with plant markers only...');
+                    // Force map to invalidate size after a short delay to ensure it renders
+                    setTimeout(() => {
+                        if (map) map.invalidateSize();
+                    }, 100);
                     
-                    const mapEl = document.getElementById('plantWorldMap');
-                    if (mapEl) {
-                        // Add plant markers directly
-                        const markers = [];
-                        Object.entries(plantCountries).forEach(([country, cfg]) => {
-                            cfg.plants.forEach(p => {
-                                const marker = L.circleMarker([p.lat, p.lon], {
-                                    radius: 12,
-                                    color: '#FFFFFF',
-                                    weight: 3,
-                                    fillColor: '#8B2E8B',
-                                    fillOpacity: 0.95
-                                })
-                                    .addTo(map)
-                                    .bindPopup(`<strong>${p.name}</strong><br/>${p.city}, ${country}`)
-                                    .bindTooltip(p.city, { permanent: false, direction: 'top' });
-                                markers.push(marker);
-                            });
-                        });
+                    // Plant locations
+                    const plants = {
+                        'Singapore': { 
+                            name: 'Jurong Island (ME5/ME6)',
+                            city: 'Singapore',
+                            lat: 1.3009, 
+                            lon: 103.7876
+                        },
+                        'Belgium': { 
+                            name: 'Antwerp Plant',
+                            city: 'Antwerp',
+                            lat: 51.2600, 
+                            lon: 4.4020
+                        },
+                        'United States': { 
+                            name: 'Mobile Plant',
+                            city: 'Mobile, Alabama',
+                            lat: 30.6954, 
+                            lon: -88.0399
+                        }
+                    };
 
-                        // Fit map to show all markers
-                        if (markers.length) {
-                            const group = L.featureGroup(markers);
-                            map.fitBounds(group.getBounds().pad(0.5));
+                    // Regional destination points
+                    const regions = {
+                        'APAC': { lat: 20, lon: 110 },
+                        'Europe': { lat: 50, lon: 10 },
+                        'Americas': { lat: 30, lon: -90 }
+                    };
+
+                    // Shipment flows - showing real-time allocation
+                    // Singapore serves multiple regions (to demonstrate coverage)
+                    const shipmentFlows = [
+                        // Singapore flows - covering multiple regions
+                        { 
+                            from: 'Singapore', 
+                            to: 'APAC', 
+                            volume: 'high', 
+                            mt: 28950, 
+                            color: '#8B2E8B',
+                            status: 'in-transit' // in-transit, scheduled, delivered
+                        },
+                        { 
+                            from: 'Singapore', 
+                            to: 'Europe', 
+                            volume: 'medium', 
+                            mt: 4200, 
+                            color: '#A855F7',
+                            status: 'in-transit'
+                        },
+                        { 
+                            from: 'Singapore', 
+                            to: 'Americas', 
+                            volume: 'low', 
+                            mt: 1800, 
+                            color: '#C084FC',
+                            status: 'scheduled'
+                        },
+                        // Antwerp flows
+                        { 
+                            from: 'Belgium', 
+                            to: 'Europe', 
+                            volume: 'high', 
+                            mt: 15600, 
+                            color: '#8B2E8B',
+                            status: 'in-transit'
+                        },
+                        // Mobile flows
+                        { 
+                            from: 'United States', 
+                            to: 'Americas', 
+                            volume: 'high', 
+                            mt: 13500, 
+                            color: '#8B2E8B',
+                            status: 'in-transit'
+                        }
+                    ];
+
+                    // Helper function to create animated curved flow line
+                    function createFlowLine(from, to, volume, color, mt) {
+                        const lat1 = from.lat, lon1 = from.lon;
+                        const lat2 = to.lat, lon2 = to.lon;
+                        
+                        // Create curved path for visual appeal
+                        const midLat = (lat1 + lat2) / 2;
+                        const midLon = (lon1 + lon2) / 2;
+                        const curve = 8; // curve intensity
+                        
+                        const controlLat = midLat + curve;
+                        const controlLon = midLon;
+                
+                        const points = [];
+                        for (let i = 0; i <= 50; i++) {
+                            const t = i / 50;
+                            const lat = (1-t)*(1-t)*lat1 + 2*(1-t)*t*controlLat + t*t*lat2;
+                            const lon = (1-t)*(1-t)*lon1 + 2*(1-t)*t*controlLon + t*t*lon2;
+                            points.push([lat, lon]);
                         }
                         
-                        // Add a notice about simplified map
-                        const notice = L.control({position: 'topright'});
-                        notice.onAdd = function(map) {
-                            const div = L.DomUtil.create('div', 'leaflet-control-attribution');
-                            div.innerHTML = '<div style="background: rgba(255,255,255,0.8); padding: 5px 8px; border-radius: 4px; font-size: 11px; color: #666;">⚠️ Simplified map (world data unavailable)</div>';
-                            return div;
-                        };
-                        notice.addTo(map);
+                        const lineWidth = volume === 'high' ? 6 : volume === 'medium' ? 4 : 2;
+                        
+                        const polyline = L.polyline(points, {
+                            color: color,
+                            weight: lineWidth,
+                            opacity: 0.8,
+                            dashArray: '15, 10',
+                            className: `flow-line ${volume}-volume`
+                        }).addTo(map);
+                        
+                        // Add volume label at midpoint
+                        const midPoint = points[Math.floor(points.length / 2)];
+                        L.marker(midPoint, {
+                            icon: L.divIcon({
+                                className: 'flow-label',
+                                html: `<div class="flow-label-badge">${mt.toLocaleString()} MT</div>`,
+                                iconSize: [null, null],
+                                iconAnchor: [0, 0]
+                            })
+                        }).addTo(map);
+                        
+                        return polyline;
                     }
-                });
+
+                    // Add plant markers
+                    const plantMarkers = [];
+                    Object.entries(plants).forEach(([country, plant]) => {
+                        const marker = L.circleMarker([plant.lat, plant.lon], {
+                            radius: 12,
+                            color: '#FFFFFF',
+                            weight: 3,
+                            fillColor: '#8B2E8B',
+                            fillOpacity: 0.95,
+                            className: 'plant-marker'
+                        }).addTo(map);
+                        
+                        marker.bindPopup(`
+                            <div style="min-width: 200px;">
+                                <strong>${plant.name}</strong><br/>
+                                📍 ${plant.city}, ${country}
+                            </div>
+                        `);
+                        
+                        marker.bindTooltip(plant.name, { permanent: false, direction: 'top' });
+                        plantMarkers.push(marker);
+                    });
+
+                    // Add shipment flow lines
+                    shipmentFlows.forEach(flow => {
+                        const plant = plants[flow.from];
+                        const region = regions[flow.to];
+                        
+                        if (plant && region) {
+                            createFlowLine(
+                                { lat: plant.lat, lon: plant.lon },
+                                { lat: region.lat, lon: region.lon },
+                                flow.volume,
+                                flow.color,
+                                flow.mt
+                            );
+                        }
+                    });
+
+                    // Add region labels
+                    Object.entries(regions).forEach(([regionName, coords]) => {
+                        L.marker([coords.lat, coords.lon], {
+                            icon: L.divIcon({
+                                className: 'region-label',
+                                html: `<div style="background: rgba(139, 46, 139, 0.9); color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${regionName}</div>`,
+                                iconSize: [null, null],
+                                iconAnchor: [0, 0]
+                            })
+                        }).addTo(map);
+                    });
+
+                    // Fit map to show all flows
+                    if (map && plantMarkers.length > 0) {
+                        const bounds = L.latLngBounds(plantMarkers.map(m => m.getLatLng()));
+                        Object.values(regions).forEach(region => bounds.extend([region.lat, region.lon]));
+                        map.fitBounds(bounds.pad(0.2));
+                    }
+                    
+                } catch (error) {
+                    console.error('Error initializing map:', error);
+                    const mapEl = document.getElementById('plantWorldMap');
+                    if (mapEl) {
+                        mapEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">⚠️ Map initialization error. Please check console for details.</div>';
+                    }
+                }
+            }
+            
+            // Call initialize map
+            initializeMap();
         });
 
         // Listen for events from other pages

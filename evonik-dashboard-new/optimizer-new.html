@@ -1619,7 +1619,12 @@
             const duringValue = beforeValue - impact.productionReduction;
             const recoveryValue = beforeValue - Math.round(impact.productionReduction * 0.3);
             
-            new Chart(ctx, {
+            // Destroy existing chart if it exists
+            if (impactChartInstance) {
+                impactChartInstance.destroy();
+            }
+            
+            impactChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Before Crisis', 'During Crisis', 'Recovery Period'],
@@ -1691,6 +1696,9 @@
             }, 1000);
         }
 
+        // Store chart instances to preserve them
+        let impactChartInstance = null;
+
         function showScenarioAOverview() {
             const scenario = scenarioData[currentScenarioType].scenarios[0];
             const details = scenario.details;
@@ -1699,12 +1707,9 @@
             
             shownSections.scenarioA = true;
             
-            // Clear previous content or append
-            const existingContent = document.getElementById('vizContent').innerHTML;
-            const hasContent = existingContent && !existingContent.includes('viz-placeholder');
-            
+            const vizContent = document.getElementById('vizContent');
             const content = `
-                <div class="scenario-card recommended">
+                <div class="scenario-card recommended" id="scenarioA">
                     <div class="scenario-header">
                         <div class="scenario-title">📈 Scenario A: ${scenario.title}</div>
                         <span class="scenario-badge badge-recommended">✓ RECOMMENDED</span>
@@ -1734,7 +1739,14 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = hasContent ? existingContent + content : content;
+            // Check if scenarioA already exists to avoid duplicates
+            const existingScenarioA = document.getElementById('scenarioA');
+            if (!existingScenarioA) {
+                // Create a wrapper div and append to it, preserving existing content
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = content;
+                vizContent.appendChild(wrapper.firstElementChild);
+            }
             
             setTimeout(() => {
                 addSystemMessage(`Scenario A: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
@@ -1748,11 +1760,14 @@
             if (shownSections.methodology) return; // Already shown
             
             shownSections.methodology = true;
-            const existingContent = document.getElementById('vizContent').innerHTML;
+            const vizContent = document.getElementById('vizContent');
+            const existingMethodology = document.getElementById('methodologySection');
+            
+            if (existingMethodology) return; // Already exists
             
             const content = `
                 <!-- Downtime Estimation Methodology -->
-                <div class="estimation-methodology">
+                <div class="estimation-methodology" id="methodologySection">
                     <div class="method-header">
                         <h4>🔍 How We Estimated This Downtime</h4>
                         <span class="confidence-badge">Confidence: 75%</span>
@@ -1834,7 +1849,11 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = existingContent + content;
+            // Append to existing content without replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
+            
             addSystemMessage('Here\'s how I estimated the downtime. I analyzed 12 similar historical incidents, equipment criticality scores, maintenance team availability, and spare parts inventory to arrive at 3-5 days with 75% confidence.');
         }
 
@@ -1842,11 +1861,14 @@
             if (shownSections.validation) return;
             
             shownSections.validation = true;
-            const existingContent = document.getElementById('vizContent').innerHTML;
+            const vizContent = document.getElementById('vizContent');
+            const existingValidation = document.getElementById('validationSection');
+            
+            if (existingValidation) return; // Already exists
             
             const content = `
                 <!-- User Validation & Feedback -->
-                <div class="user-validation-panel">
+                <div class="user-validation-panel" id="validationSection">
                     <div class="validation-header">
                         <h4>✏️ Update Estimate Based on Actual Findings</h4>
                         <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;">
@@ -1920,7 +1942,11 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = existingContent + content;
+            // Append to existing content without replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
+            
             addSystemMessage('You can update the downtime estimate here. As your team inspects the equipment, input the actual findings and I\'ll recalculate all scenarios accordingly.');
         }
 
@@ -1928,11 +1954,14 @@
             if (shownSections.equipment) return;
             
             shownSections.equipment = true;
-            const existingContent = document.getElementById('vizContent').innerHTML;
+            const vizContent = document.getElementById('vizContent');
+            const existingEquipment = document.getElementById('equipmentSection');
+            
+            if (existingEquipment) return; // Already exists
             
             const content = `
                 <!-- Equipment Status with Criticality -->
-                <div class="equipment-status-section">
+                <div class="equipment-status-section" id="equipmentSection">
                     <h3>Equipment Status & Criticality</h3>
                     
                     <div class="equipment-list">
@@ -1972,7 +2001,11 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = existingContent + content;
+            // Append to existing content without replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
+            
             addSystemMessage('Here\'s the equipment criticality analysis. MV-6 is critical with 9.5/10 score - any failure causes 100% production loss. Other equipment has redundancy options.');
         }
 
@@ -1985,9 +2018,9 @@
             const costSign = scenario.costImpact < 0 ? '-' : '+';
             const costValue = Math.abs(scenario.costImpact);
             
-            const existingContent = document.getElementById('vizContent').innerHTML;
-            const content = existingContent + `
-                <div class="scenario-card">
+            const vizContent = document.getElementById('vizContent');
+            const content = `
+                <div class="scenario-card" id="scenarioB">
                     <div class="scenario-header">
                         <div class="scenario-title">🌏 Scenario B: ${scenario.title}</div>
                     </div>
@@ -2016,7 +2049,11 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = content;
+            // Append to existing content without replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
+            
             addSystemMessage(`Scenario B: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}.`);
         }
 
@@ -2029,9 +2066,9 @@
             const costSign = scenario.costImpact < 0 ? '-' : '+';
             const costValue = Math.abs(scenario.costImpact);
             
-            const existingContent = document.getElementById('vizContent').innerHTML;
-            const content = existingContent + `
-                <div class="scenario-card">
+            const vizContent = document.getElementById('vizContent');
+            const content = `
+                <div class="scenario-card" id="scenarioC">
                     <div class="scenario-header">
                         <div class="scenario-title">📦 Scenario C: ${scenario.title}</div>
                     </div>
@@ -2062,7 +2099,11 @@
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = content;
+            // Append to existing content without replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
+            
             addSystemMessage(`Scenario C: ${scenario.title}. Net ${scenario.costImpact < 0 ? 'savings' : 'cost'}: $${Math.abs(scenario.costImpact).toLocaleString()}. Timeline: ${scenario.timeline}. Note: ${scenario.riskLevel} risk level.`);
             
             setTimeout(() => {
@@ -2071,10 +2112,19 @@
         }
 
         function showExplainability() {
+            if (shownSections.explainability && document.getElementById('explainabilitySection')) {
+                // Already shown, just scroll to it
+                document.getElementById('explainabilitySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+            
+            shownSections.explainability = true;
             addSystemMessage('Here is the detailed reasoning behind my recommendation for Scenario A:');
             updateVizTitle('AI Explainability - Why Scenario A?');
             
+            const vizContent = document.getElementById('vizContent');
             const content = `
+                <div id="explainabilitySection">
                 <div class="explainability-panel">
                     <div class="explainability-title">🧠 Decision Reasoning: Why Scenario A is Optimal</div>
                     <div class="explainability-reasons">
@@ -2232,68 +2282,76 @@
                     </div>
                 </div>
 
-                <!-- New Explainability Section -->
+                <!-- Calculation Summary -->
                 <div class="explainability-section">
                     <h4>🔍 How was this calculated?</h4>
                     <div class="decision-tree">
-                        <div class="step">1. Historical data analysis (last 6 months)</div>
-                        <div class="step">2. Current constraints considered: [list]</div>
-                        <div class="step">3. Cost optimization variables: [list]</div>
-                        <div class="step">4. Confidence level: 87%</div>
+                        <div class="step">1. Analyzed historical data: 12 similar incidents over past 3 years</div>
+                        <div class="step">2. Evaluated current constraints: ME5 capacity, tank inventory, customer commitments</div>
+                        <div class="step">3. Weighted factors: Customer impact (70%), Cost efficiency (25%), Speed (5%)</div>
+                        <div class="step">4. Confidence level: 92% based on data quality and scenario alignment</div>
                     </div>
-                    <button class="compare-button" onclick="showComparison()">Compare: AI vs Manual Approach</button>
+                </div>
                 </div>
             `;
             
-            document.getElementById('vizContent').innerHTML = content;
+            // Append explainability section instead of replacing
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = content;
+            vizContent.appendChild(wrapper.firstElementChild);
             
-            // Create comparison chart
-            const ctx = document.getElementById('comparisonChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Cost Efficiency', 'Speed', 'Risk Level', 'Customer Impact', 'Operational Ease', 'Success Probability'],
-                    datasets: [
-                        {
-                            label: 'Scenario A',
-                            data: [95, 100, 90, 100, 95, 95],
-                            borderColor: 'rgba(22, 163, 74, 1)',
-                            backgroundColor: 'rgba(22, 163, 74, 0.2)',
-                            borderWidth: 2
+            // Create comparison chart after content is appended
+            setTimeout(() => {
+                const chartCanvas = document.getElementById('comparisonChart');
+                if (chartCanvas) {
+                    const ctx = chartCanvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Cost Efficiency', 'Speed', 'Risk Level', 'Customer Impact', 'Operational Ease', 'Success Probability'],
+                            datasets: [
+                                {
+                                    label: 'Scenario A',
+                                    data: [95, 100, 90, 100, 95, 95],
+                                    borderColor: 'rgba(22, 163, 74, 1)',
+                                    backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Scenario B',
+                                    data: [60, 70, 75, 85, 60, 80],
+                                    borderColor: 'rgba(234, 88, 12, 1)',
+                                    backgroundColor: 'rgba(234, 88, 12, 0.2)',
+                                    borderWidth: 2
+                                },
+                                {
+                                    label: 'Scenario C',
+                                    data: [70, 60, 40, 30, 80, 65],
+                                    borderColor: 'rgba(220, 38, 38, 1)',
+                                    backgroundColor: 'rgba(220, 38, 38, 0.2)',
+                                    borderWidth: 2
+                                }
+                            ]
                         },
-                        {
-                            label: 'Scenario B',
-                            data: [60, 70, 75, 85, 60, 80],
-                            borderColor: 'rgba(234, 88, 12, 1)',
-                            backgroundColor: 'rgba(234, 88, 12, 0.2)',
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Scenario C',
-                            data: [70, 60, 40, 30, 80, 65],
-                            borderColor: 'rgba(220, 38, 38, 1)',
-                            backgroundColor: 'rgba(220, 38, 38, 0.2)',
-                            borderWidth: 2
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Multi-Factor Scenario Comparison (0-100 scale)'
+                                }
+                            },
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }
                         }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Multi-Factor Scenario Comparison (0-100 scale)'
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
+                    });
                 }
-            });
+            }, 100);
         }
 
         function switchRole() {
@@ -2439,63 +2497,6 @@
             }
         }, 500);
 
-        // Show comparison function for the new explainability section
-        function showComparison() {
-            addSystemMessage('Here is a comparison between AI and Manual approaches:');
-            updateVizTitle('AI vs Manual Approach Comparison');
-            
-            const content = `
-                <div class="explainability-section">
-                    <h4>🤖 AI vs 👤 Manual Approach Comparison</h4>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin: 2rem 0;">
-                        <div style="background: rgba(22, 163, 74, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-green);">
-                            <h5 style="color: var(--success-green); margin-bottom: 1rem;">🤖 AI Approach</h5>
-                            <ul style="line-height: 1.8; padding-left: 1.5rem;">
-                                <li><strong>Speed:</strong> 2-3 minutes analysis</li>
-                                <li><strong>Data Sources:</strong> 15+ systems integrated</li>
-                                <li><strong>Historical Analysis:</strong> 6 months of data</li>
-                                <li><strong>Variables Considered:</strong> 50+ factors</li>
-                                <li><strong>Confidence Level:</strong> 87%</li>
-                                <li><strong>Bias:</strong> Data-driven, objective</li>
-                            </ul>
-                        </div>
-                        <div style="background: rgba(234, 88, 12, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--warning-orange);">
-                            <h5 style="color: var(--warning-orange); margin-bottom: 1rem;">👤 Manual Approach</h5>
-                            <ul style="line-height: 1.8; padding-left: 1.5rem;">
-                                <li><strong>Speed:</strong> 2-4 hours analysis</li>
-                                <li><strong>Data Sources:</strong> 3-5 systems typically</li>
-                                <li><strong>Historical Analysis:</strong> 1-2 months focus</li>
-                                <li><strong>Variables Considered:</strong> 10-15 key factors</li>
-                                <li><strong>Confidence Level:</strong> 60-70%</li>
-                                <li><strong>Bias:</strong> Experience-based, subjective</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div style="background: rgba(139, 46, 139, 0.1); padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
-                        <h5 style="color: var(--evonik-purple); margin-bottom: 1rem;">📊 Key Advantages of AI Approach</h5>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
-                                <div style="font-weight: 600; color: var(--evonik-purple);">Speed</div>
-                                <div style="font-size: 0.9rem; color: var(--text-light);">40x faster analysis</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
-                                <div style="font-weight: 600; color: var(--evonik-purple);">Accuracy</div>
-                                <div style="font-size: 0.9rem; color: var(--text-light);">17% higher confidence</div>
-                            </div>
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
-                                <div style="font-weight: 600; color: var(--evonik-purple);">Coverage</div>
-                                <div style="font-size: 0.9rem; color: var(--text-light);">3x more variables</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('vizContent').innerHTML = content;
-        }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {

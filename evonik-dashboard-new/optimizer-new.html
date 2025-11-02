@@ -916,6 +916,7 @@
         let conversationState = 'initial';
         let messageCount = 0;
         let crisisTriggered = false;
+        let crisisAlreadyTriggered = false; // Prevent multiple crisis triggers
         let currentScenarioType = 'equipment_failure'; // 'equipment_failure' or 'supply_delay'
 
         // Role-specific contexts
@@ -1504,19 +1505,29 @@
         // Crisis trigger
         function triggerCrisis(scenarioType = null) {
             crisisTriggered = true;
+            crisisAlreadyTriggered = true; // Prevent multiple triggers
             conversationState = 'crisis';
             
             // Set scenario type if provided
             if (scenarioType) {
                 currentScenarioType = scenarioType;
-                document.getElementById('scenarioSelector').value = scenarioType;
+                const selector = document.getElementById('scenarioSelector');
+                if (selector) {
+                    selector.value = scenarioType;
+                }
             }
             
             // Hide quick actions during crisis
-            document.getElementById('quickActions').style.display = 'none';
+            const quickActions = document.getElementById('quickActions');
+            if (quickActions) {
+                quickActions.style.display = 'none';
+            }
             
             // Clear any existing messages
-            document.getElementById('chatMessages').innerHTML = '';
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = '';
+            }
             
             const scenario = scenarioData[currentScenarioType];
             addSystemMessage(`⚠️ ALERT: ${scenario.description}. Analyzing production impact...`, true);
@@ -2294,14 +2305,19 @@
         // Check for crisis parameter in URL
         function checkForCrisisParameter() {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('crisis') === 'true') {
+            const crisisType = urlParams.get('crisis');
+            if (crisisType && (crisisType === 'equipment_failure' || crisisType === 'supply_delay')) {
                 // Clear the URL parameter to prevent re-triggering on refresh
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, document.title, newUrl);
                 
-                // Trigger crisis immediately
+                // Set scenario type before triggering
+                currentScenarioType = crisisType;
+                document.getElementById('scenarioSelector').value = crisisType;
+                
+                // Trigger crisis immediately with the specific type
                 setTimeout(() => {
-                    triggerCrisis();
+                    triggerCrisis(crisisType);
                 }, 1000);
                 return true;
             }
@@ -2317,16 +2333,29 @@
                     // Clear the event to prevent re-triggering
                     localStorage.removeItem('evonik_coordination_event');
                     
+                    // Set scenario type before triggering
+                    currentScenarioType = event.type;
+                    document.getElementById('scenarioSelector').value = event.type;
+                    
                     // Trigger crisis with specific scenario type
                     setTimeout(() => {
                         triggerCrisis(event.type);
                     }, 1000);
+                    return true;
                 }
             }
+            return false;
         }
 
-        // Check for demo triggers every 500ms
-        setInterval(checkForDemoTrigger, 500);
+        // Check for demo triggers every 500ms (only if not already triggered)
+        setInterval(() => {
+            if (!crisisAlreadyTriggered) {
+                const triggered = checkForDemoTrigger();
+                if (triggered) {
+                    crisisAlreadyTriggered = true;
+                }
+            }
+        }, 500);
 
         // Show comparison function for the new explainability section
         function showComparison() {
@@ -2388,11 +2417,19 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for crisis parameter first
-            if (!checkForCrisisParameter()) {
-                initChat();
+            // Check for crisis parameter first (from URL link click)
+            const urlTriggered = checkForCrisisParameter();
+            
+            // If URL didn't trigger, check for localStorage event (from other pages)
+            if (!urlTriggered) {
+                // Check once immediately
+                const storageTriggered = checkForDemoTrigger();
+                
+                // Only initialize chat if neither triggered a crisis
+                if (!storageTriggered) {
+                    initChat();
+                }
             }
-            checkForDemoTrigger();
         });
     </script>
 </body>

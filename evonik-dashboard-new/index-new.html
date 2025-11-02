@@ -1206,7 +1206,7 @@
                 📊 Bulk Order Sync
             </div>
             <div class="demo-menu-item" onclick="triggerSupplyChainAdjustment()">
-                🔄 SC Adjustment
+                🚚 Supply Delay
             </div>
             <div class="demo-menu-item" onclick="triggerGlobalRebalancing()">
                 🌏 Global Rebalancing
@@ -1253,8 +1253,8 @@
             };
             broadcastEvent(event);
             
-            // Show red alert banner
-            showAlert('🚨 CRITICAL: ME6 equipment failure detected - Production capacity reduced to 70%');
+            // Show red alert banner with link to optimizer
+            showAlert('🚨 CRITICAL: ME6 equipment failure detected - Production capacity reduced to 70%', 'equipment_failure');
             
             // Update UI
             document.getElementById('plantStatus').textContent = 'Issue Detected';
@@ -1305,19 +1305,19 @@
 
         function triggerSupplyChainAdjustment() {
             const event = {
-                type: 'supply_chain_adjustment',
+                type: 'supply_delay',
                 data: { delay_days: 3, impact_mt: 850 },
                 timestamp: new Date().toISOString(),
                 source: 'coordination_hub'
             };
             broadcastEvent(event);
             
-            // Show alert banner
-            showAlert('🔄 Supply chain adjustment: Shipment delayed 3 days - 850 MT impact - Alternative routing activated');
+            // Show alert banner with link to optimizer
+            showAlert('🚚 CRITICAL: Supply delay detected - Raw material delivery delayed - Production at risk', 'supply_delay');
             
             // Update UI
-            document.getElementById('shippingStatusText').textContent = 'Adjusted';
-            addTimelineEvent('🔄', 'Supply Chain', 'Shipment schedule adjusted - 3 day delay mitigated');
+            document.getElementById('shippingStatusText').textContent = 'Delayed';
+            addTimelineEvent('🚚', 'Supply Chain', 'Raw material supply delay detected - Optimizer analysis recommended');
             
             toggleDemoMenu();
         }
@@ -1360,8 +1360,11 @@
         }
 
         function broadcastEvent(event) {
+            // Add demo_trigger flag for optimizer to detect
+            event.demo_trigger = true;
             localStorage.setItem('evonik_coordination_event', JSON.stringify(event));
-            setTimeout(() => localStorage.removeItem('evonik_coordination_event'), 100);
+            // Keep event longer so optimizer can pick it up
+            setTimeout(() => localStorage.removeItem('evonik_coordination_event'), 5000);
         }
 
         function addTimelineEvent(icon, source, text) {
@@ -1406,11 +1409,23 @@
             alertCount.textContent = (currentCount + 1) + ' Active';
         }
 
-        function showAlert(message) {
+        // Store current alert type for link generation
+        let currentAlertType = null;
+        
+        function showAlert(message, eventType = null) {
             const banner = document.getElementById('alertsBanner');
             const alertMessage = document.getElementById('alertMessage');
             if (banner && alertMessage) {
-                alertMessage.textContent = message;
+                currentAlertType = eventType;
+                
+                // Create message with link if event type is provided
+                if (eventType && (eventType === 'equipment_failure' || eventType === 'supply_delay')) {
+                    const optimizerLink = `optimizer-new.html?crisis=${eventType}`;
+                    alertMessage.innerHTML = `${message} <a href="${optimizerLink}" style="color: white; text-decoration: underline; font-weight: 600; margin-left: 1rem;">→ Analyze with AI Optimizer</a>`;
+                } else {
+                    alertMessage.textContent = message;
+                }
+                
                 banner.classList.add('show');
                 // No automatic timeout - user must close manually with X button
             }

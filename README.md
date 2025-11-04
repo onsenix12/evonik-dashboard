@@ -7,39 +7,46 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ### Highlights
 - **Single-click demo scenarios**: Trigger realistic coordination flows (equipment failure, bulk order sync, supply chain adjustment, global capacity rebalancing).
 - **Multi-window sync**: Open stakeholder pages manually; updates propagate instantly using `localStorage` events.
-- **No build or backend required**: Pure HTML/CSS/JS, run locally by opening `index-new.html`.
+- **Role-based entry (demo)**: Start from a login screen, choose role, and get right-sized access.
+- **No build or backend required**: Pure HTML/CSS/JS. Run locally by opening `index.html` (auto-redirects) or `evonik-dashboard-new/login.html`.
 - **Visual charts**: Compact widgets and charts powered by Chart.js for price trends, shipments, production, and costs.
 
 ---
 
 ## Project Structure
-- `index-new.html`: Coordination Hub (home). Launch demo flows and view consolidated status, timeline, and notifications.
--   - Market Intelligence: Methionine spot price, production cost analysis, regional pricing
--   - Regional Order Fulfillment: Priority cards per plant (APAC, Europe, Americas)
--   - Global Shipping Status: Transit/next 48h/delivery performance + upcoming shipments table
-- `sales.html`: Sales team view. Receives events like bulk order sync and new orders.
-- `global-supply-chain.html`: Global view. Simulates cross-site capacity rebalancing.
-- `local-supply-chain.html`: Local SC view. Simulates SAP/Excel-style procurement and inventory triggers.
+- `index.html` (root): Redirector to the demo login for best compatibility.
+- `evonik-dashboard-new/` (all pages below live here):
+  - `login.html`: Role selection and session bootstrap (stores `evonik_user_session`).
+  - `index-new.html`: Coordination Hub (home). Launch demo flows and view consolidated status, timeline, and notifications.
+    - Market Intelligence: Methionine spot price, production cost analysis, regional pricing
+    - Regional Order Fulfillment: Priority cards per plant (APAC, Europe, Americas)
+    - Global Shipping Status: Transit/next 48h/delivery performance + upcoming shipments table
+  - `global-supply-chain-new.html`: Global view. Simulates cross-site capacity rebalancing and network allocation.
+  - `local-supply-chain-new.html`: Local SC view. Simulates SAP/Excel-style procurement and inventory triggers.
     - Products Shipped Out (OAS Weighing System) retained (OAS is only for weighing)
-- `production.html`: Plant production view. Equipment status, OEE, maintenance, and predictive analytics.
+    - Upload Excel/CSV to refresh metrics (PapaParse/XLSX)
+  - `production-new.html`: Plant production view. Equipment status, OEE, maintenance, and predictive analytics.
     - Daily Production Performance (migrated from hourly)
     - Daily production trend chart (Chart.js)
-- `optimizer.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
+  - `sales-new.html`: Sales team view. Receives events like bulk order sync and new orders.
+  - `optimizer-new.html`: AI Decision Optimizer. Conversational UI that visualizes production status, tank levels, cost analysis, and recommends crisis scenarios with explainability.
     - Downtime Estimation Methodology (historical, criticality, maintenance, uncertainty)
     - Equipment Criticality flags (CRITICAL/IMPORTANT/NORMAL)
     - User validation inputs to correct AI downtime estimates
     - Updated optimization weights: Customer (70%), Cost (25%), Speed (5%)
     - "Why this recommendation?" explainability with comparison table
-- `shared-styles.css`: Common CSS styles and design system used across all pages for consistent branding and UI components.
+  - `shared-styles-new.css`: Common CSS styles and design system used across all pages for consistent branding and UI components.
 
-> Pages now use shared styles for consistency while maintaining portability. Each page includes its own inline styles for page-specific elements.
+> Pages use shared styles for consistency while maintaining portability. Each page includes inline styles for page-specific elements where needed.
 
 ---
 
 ## Getting Started
 1. Clone or download this repository to your machine.
-2. Open `index-new.html` in a modern browser (Chrome, Edge, or Firefox recommended).
-3. For the best demo, optionally open the other pages in separate tabs/windows.
+2. Open `index.html` (root). It immediately redirects to `evonik-dashboard-new/login.html`.
+   - Alternatively: open `evonik-dashboard-new/login.html` directly.
+3. Select a role and click "Login to Dashboard" to enter the Hub.
+4. For the best demo, optionally open other pages in separate tabs/windows.
 
 > Tip: You can also serve the folder via a simple static server, but it is not required.
 
@@ -47,7 +54,7 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 
 ## Running the Demo
 ### Option A: Quick tour from the Hub
-1. Open `index-new.html`.
+1. From the login, you’ll be redirected to `index-new.html` (Hub).
 2. Use the buttons in "Live Demo Controls":
    - `⚙️ Equipment Failure Auto-Response`
    - `📊 Bulk Order SAP Sync`
@@ -58,16 +65,17 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 
 ### Option B: Multi-window coordination
 1. Manually open these pages in separate tabs/windows:
-   - `sales.html`
-   - `global-supply-chain.html`
-   - `local-supply-chain.html`
-   - `production.html`
+   - `evonik-dashboard-new/sales-new.html`
+   - `evonik-dashboard-new/global-supply-chain-new.html`
+   - `evonik-dashboard-new/local-supply-chain-new.html`
+   - `evonik-dashboard-new/production-new.html`
 2. Trigger any scenario from the hub and observe synchronized updates across all open windows.
 
 ---
 
 ## Key Concepts
 - **Event bus via localStorage**: Pages broadcast coordination events by writing a JSON payload to the `localStorage` key `evonik_coordination_event`. Other pages listen for the browser `storage` event and react accordingly.
+- **Role-based session (demo)**: `login.html` stores `evonik_user_session` with `name`, `role`, `permissions`, and allowed dashboards.
 - **Stateless demo**: Events are transient (the key is cleared shortly after write). UI reflects the latest state; `Reset Demo` reinitializes visuals and metrics.
 - **Self-contained UI**: All pages include their own styles and scripts; Chart.js is loaded via CDN where charts are rendered.
 - **Terminology**: Plant/equipment data references use PIMS; OAS is retained for weighing machine tracking only in Local SC.
@@ -75,14 +83,14 @@ A lightweight, static multi-page demo that showcases real-time cross-system coor
 ### Event Types (cross-page protocol)
 All events are emitted to `localStorage` as `{ type, data, timestamp, source }` under key `evonik_coordination_event`.
 
-- From Hub (index-new.html):
+- From Hub (`index-new.html`):
   - `equipment_failure` { unit, impact }
   - `bulk_order_sync` { orders, total_mt }
   - `supply_chain_adjustment` { delay_days, impact_mt }
   - `global_capacity_rebalancing` { from, to, mt }
   - `reset` {}
 
-- From Global (`global-supply-chain.html`):
+- From Global (`global-supply-chain-new.html`):
   - `global_capacity_upload` { optimizations_count, efficiency_gain, file_name, processing_time }
   - `ai_optimization_complete` { affected_sites[], events_increment, processing_time }
   - `global_sync_complete` { status }
@@ -108,7 +116,7 @@ python -m http.server 5500
 npx http-server -p 5500 --cors --silent
 ```
 
-Then open `http://localhost:5500/index-new.html`.
+Then open `http://localhost:5500/evonik-dashboard-new/login.html` (or `index.html` which redirects).
 
 - **Nothing updates after a while**: Click `🔄 Reset Demo` on the hub to restore initial state.
 - **Charts not rendering**: Ensure you are online (Chart.js CDN). If offline, add a local Chart.js script include.
@@ -122,7 +130,7 @@ Tested on recent versions of Chrome and Edge. Firefox works for most features. S
 
 ## Extending the Demo
 - Add real data sources or APIs by replacing the simulated event broadcasters.
-- Customize the design system by modifying `shared-styles.css` for consistent branding across all pages.
+- Customize the design system by modifying `shared-styles-new.css` for consistent branding across all pages.
 - Persist event history by storing an array of events instead of transient keys.
 - Add more widgets and charts by using Chart.js (already included in pages where needed).
 

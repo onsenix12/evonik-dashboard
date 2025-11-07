@@ -284,8 +284,8 @@
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">Jason Neo</div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Local Supply Chain Manager</div>
+                <div id="userName" style="font-size: 1.1rem; font-weight: 600;">Jason Neo</div>
+                <div id="userTitle" style="font-size: 0.9rem; opacity: 0.9;">Local Supply Chain Manager</div>
             </div>
         </div>
     </header>
@@ -1453,10 +1453,40 @@
 
         setInterval(updateSyncTime, 60000);
 
+        // Update user display from localStorage
+        function updateUserDisplay() {
+            const userSession = localStorage.getItem('evonik_user_session');
+            if (userSession) {
+                try {
+                    const session = JSON.parse(userSession);
+                    const userNameEl = document.getElementById('userName');
+                    const userTitleEl = document.getElementById('userTitle');
+                    
+                    if (userNameEl) {
+                        userNameEl.textContent = session.name;
+                    }
+                    
+                    if (userTitleEl) {
+                        // Map role to title
+                        const roleTitles = {
+                            'supply_chain': 'Local Supply Chain Manager',
+                            'plant_manager': 'Production Manager',
+                            'sales': 'Regional Sales Manager',
+                            'operations': 'Production Manager',
+                            'management': 'Management'
+                        };
+                        userTitleEl.textContent = roleTitles[session.role] || 'User';
+                    }
+                } catch (error) {
+                    console.error('Error parsing user session:', error);
+                }
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            updateUserDisplay();
             console.log('Local Supply Chain Dashboard initialized');
-            console.log('Jason Neo - SAP integration active');
             initCharts();
             setupFileUpload();
             updateDashboardUI();

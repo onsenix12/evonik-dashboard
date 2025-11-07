@@ -358,8 +358,8 @@
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">Alex Rodriguez</div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Production Manager</div>
+                <div id="userName" style="font-size: 1.1rem; font-weight: 600;">Alex Rodriguez</div>
+                <div id="userTitle" style="font-size: 0.9rem; opacity: 0.9;">Production Manager</div>
             </div>
         </div>
     </header>
@@ -926,8 +926,39 @@
             document.getElementById('me6VibrationStatus').className = 'sensor-status';
         }
 
+        // Update user display from localStorage
+        function updateUserDisplay() {
+            const userSession = localStorage.getItem('evonik_user_session');
+            if (userSession) {
+                try {
+                    const session = JSON.parse(userSession);
+                    const userNameEl = document.getElementById('userName');
+                    const userTitleEl = document.getElementById('userTitle');
+                    
+                    if (userNameEl) {
+                        userNameEl.textContent = session.name;
+                    }
+                    
+                    if (userTitleEl) {
+                        // Map role to title
+                        const roleTitles = {
+                            'supply_chain': 'Local Supply Chain Manager',
+                            'plant_manager': 'Production Manager',
+                            'sales': 'Regional Sales Manager',
+                            'operations': 'Production Manager',
+                            'management': 'Management'
+                        };
+                        userTitleEl.textContent = roleTitles[session.role] || 'User';
+                    }
+                } catch (error) {
+                    console.error('Error parsing user session:', error);
+                }
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            updateUserDisplay();
             console.log('Production Operations Dashboard initialized');
             console.log('PIMS real-time monitoring active');
 

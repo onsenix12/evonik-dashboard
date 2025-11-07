@@ -184,8 +184,8 @@
                 </div>
             </div>
             <div class="user-info">
-                <div style="font-size: 1.1rem; font-weight: 600;">Sarah Chen</div>
-                <div style="font-size: 0.9rem; opacity: 0.9;">Regional Sales Manager</div>
+                <div id="userName" style="font-size: 1.1rem; font-weight: 600;">Sarah Chen</div>
+                <div id="userTitle" style="font-size: 0.9rem; opacity: 0.9;">Regional Sales Manager</div>
             </div>
         </div>
     </header>
@@ -566,8 +566,39 @@
             }, 1500);
         }
 
+        // Update user display from localStorage
+        function updateUserDisplay() {
+            const userSession = localStorage.getItem('evonik_user_session');
+            if (userSession) {
+                try {
+                    const session = JSON.parse(userSession);
+                    const userNameEl = document.getElementById('userName');
+                    const userTitleEl = document.getElementById('userTitle');
+                    
+                    if (userNameEl) {
+                        userNameEl.textContent = session.name;
+                    }
+                    
+                    if (userTitleEl) {
+                        // Map role to title
+                        const roleTitles = {
+                            'supply_chain': 'Local Supply Chain Manager',
+                            'plant_manager': 'Production Manager',
+                            'sales': 'Regional Sales Manager',
+                            'operations': 'Production Manager',
+                            'management': 'Management'
+                        };
+                        userTitleEl.textContent = roleTitles[session.role] || 'User';
+                    }
+                } catch (error) {
+                    console.error('Error parsing user session:', error);
+                }
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            updateUserDisplay();
             // Set initial sync time
             document.getElementById('lastIbpSync').textContent = '5 min ago';
             

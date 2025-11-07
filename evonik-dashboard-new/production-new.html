@@ -615,6 +615,16 @@
             </div>
         </div>
 
+        <!-- Hourly Production Performance Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Today's Hourly Production Performance</div>
+            <div class="chart-subtitle">Production Output by Hour vs Target (MT/hour)</div>
+            <div class="chart-container">
+                <canvas id="hourlyProductionChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Target: ~40.2 MT/hour (965 MT/day)</div>
+        </div>
+
         <!-- Shift Performance -->
         <div class="section-panel">
             <h3 class="section-title">Daily Production Performance</h3>
@@ -678,6 +688,16 @@
             <div class="benchmark-label">🔵 Industry Standard: 85% | Current: 94.2%</div>
         </div>
 
+        <!-- Quality Metrics Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Quality Metrics Trend (Last 30 Days)</div>
+            <div class="chart-subtitle">Quality Rate and Defect Rate (%)</div>
+            <div class="chart-container">
+                <canvas id="qualityTrendChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Target: Quality Rate >98%, Defect Rate <2%</div>
+        </div>
+
         <!-- Safety Metrics -->
         <h2 class="section-title">Safety Performance</h2>
         <div class="dashboard-grid">
@@ -716,12 +736,32 @@
             </div>
         </div>
 
+        <!-- Safety Metrics Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Safety Performance Trend (Last 12 Months)</div>
+            <div class="chart-subtitle">Days Since Last Incident and Near-Miss Reports</div>
+            <div class="chart-container">
+                <canvas id="safetyTrendChart"></canvas>
+            </div>
+            <div class="benchmark-label">🟢 Current: 287 days without incident</div>
+        </div>
+
         <!-- 2-Week Forecast Visibility -->
         <div class="section-panel">
             <h3 class="section-title">📅 2-Week Forecast Visibility</h3>
             <p style="color: var(--text-light); font-size: 0.9rem; margin: -0.5rem 0 1.5rem 0;">
                 Forward-looking visibility for plant shutdowns and maintenance planning
             </p>
+            
+            <!-- Production Forecast Chart -->
+            <div class="chart-wrapper" style="margin-bottom: 1.5rem;">
+                <div class="chart-title">2-Week Production Forecast</div>
+                <div class="chart-subtitle">Expected Daily Capacity vs Target (MT/day)</div>
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+                <div class="benchmark-label">⚠️ Week 2 shows reduced capacity due to ME6 maintenance (Nov 5-7)</div>
+            </div>
             
             <div class="forecast-grid">
                 <div class="forecast-week">
@@ -911,11 +951,44 @@
                 vibration: Array.from({length: 24}, () => 1.8 + Math.random() * 0.4 - 0.2)
             },
             dailyProduction: [945, 972, 958, 961, 967, 955, 970, 968, 960, 964, 959, 961, 966, 969, 974],
-            oeeTrend: Array.from({length: 30}, () => 94.2 + Math.random() * 2 - 1)
+            oeeTrend: Array.from({length: 30}, () => 94.2 + Math.random() * 2 - 1),
+            hourlyProduction: Array.from({length: 24}, (_, i) => {
+                // Simulate production throughout the day with some variation
+                const baseHourly = 40.2; // 965 MT / 24 hours
+                const hour = i;
+                // Lower production during night hours (0-6), peak during day (8-18)
+                if (hour >= 0 && hour < 6) return baseHourly * 0.85 + Math.random() * 3;
+                if (hour >= 8 && hour < 18) return baseHourly * 1.05 + Math.random() * 4;
+                return baseHourly + Math.random() * 3;
+            }),
+            qualityTrend: {
+                qualityRate: Array.from({length: 30}, () => 98.5 + Math.random() * 0.8 - 0.4),
+                defectRate: Array.from({length: 30}, () => 0.8 + Math.random() * 0.4 - 0.2)
+            },
+            safetyTrend: {
+                daysSinceIncident: [250, 255, 260, 265, 270, 275, 280, 285, 287, 287, 287, 287],
+                nearMissReports: [2, 1, 3, 2, 1, 2, 3, 2, 3, 3, 3, 3]
+            },
+            forecastData: {
+                days: Array.from({length: 14}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() + i);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }),
+                capacity: Array.from({length: 14}, (_, i) => {
+                    // Week 1: full capacity, Week 2: reduced capacity during maintenance
+                    if (i < 7) return 965;
+                    // Nov 5-7 (days 8-10) maintenance period
+                    if (i >= 7 && i <= 9) return 620; // Only ME5 running
+                    return 965;
+                }),
+                target: Array(14).fill(965)
+            }
         };
 
         // Chart instances
-        let equipmentUtilizationChart, sensorTrendsChart, dailyTrendChart, oeeTrendChart;
+        let equipmentUtilizationChart, sensorTrendsChart, dailyTrendChart, oeeTrendChart,
+            hourlyProductionChart, qualityTrendChart, safetyTrendChart, forecastChart;
 
         // Initialize Charts
         function initProductionCharts() {
@@ -1087,6 +1160,220 @@
                         },
                         scales: {
                             y: { beginAtZero: false, min: 80, max: 100, title: { display: true, text: 'OEE (%)' } }
+                        }
+                    }
+                });
+            }
+
+            // Hourly Production Chart
+            const hourlyCtx = document.getElementById('hourlyProductionChart');
+            if (hourlyCtx) {
+                const hours = Array.from({length: 24}, (_, i) => {
+                    const hour = i.toString().padStart(2, '0');
+                    return `${hour}:00`;
+                });
+                hourlyProductionChart = new Chart(hourlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Production (MT/hour)',
+                            data: productionDashboardData.hourlyProduction,
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: '#6366F1',
+                            borderWidth: 1
+                        }, {
+                            label: 'Target (40.2 MT/hour)',
+                            data: Array(24).fill(40.2),
+                            type: 'line',
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'MT/hour' } }
+                        }
+                    }
+                });
+            }
+
+            // Quality Trend Chart
+            const qualityCtx = document.getElementById('qualityTrendChart');
+            if (qualityCtx) {
+                const days = Array.from({length: 30}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (29 - i));
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                qualityTrendChart = new Chart(qualityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'Quality Rate (%)',
+                            data: productionDashboardData.qualityTrend.qualityRate,
+                            borderColor: '#16A34A',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Defect Rate (%)',
+                            data: productionDashboardData.qualityTrend.defectRate,
+                            borderColor: '#EA580C',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }, {
+                            label: 'Quality Target (98%)',
+                            data: Array(30).fill(98),
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Defect Limit (2%)',
+                            data: Array(30).fill(2),
+                            borderColor: '#DC2626',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                min: 96,
+                                max: 100,
+                                title: { display: true, text: 'Quality Rate (%)' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                min: 0,
+                                max: 3,
+                                title: { display: true, text: 'Defect Rate (%)' },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Safety Trend Chart
+            const safetyCtx = document.getElementById('safetyTrendChart');
+            if (safetyCtx) {
+                const months = ['Nov 2024', 'Dec 2024', 'Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025', 'May 2025', 'Jun 2025', 'Jul 2025', 'Aug 2025', 'Sep 2025', 'Oct 2025'];
+                safetyTrendChart = new Chart(safetyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Days Since Last Incident',
+                            data: productionDashboardData.safetyTrend.daysSinceIncident,
+                            borderColor: '#16A34A',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Near-Miss Reports',
+                            data: productionDashboardData.safetyTrend.nearMissReports,
+                            borderColor: '#EA580C',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                title: { display: true, text: 'Days Since Last Incident' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                title: { display: true, text: 'Near-Miss Reports' },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Forecast Chart
+            const forecastCtx = document.getElementById('forecastChart');
+            if (forecastCtx) {
+                forecastChart = new Chart(forecastCtx, {
+                    type: 'line',
+                    data: {
+                        labels: productionDashboardData.forecastData.days,
+                        datasets: [{
+                            label: 'Forecast Capacity (MT/day)',
+                            data: productionDashboardData.forecastData.capacity,
+                            borderColor: '#6366F1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4
+                        }, {
+                            label: 'Target Capacity (MT/day)',
+                            data: productionDashboardData.forecastData.target,
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, min: 500, max: 1000, title: { display: true, text: 'MT/day' } }
                         }
                     }
                 });

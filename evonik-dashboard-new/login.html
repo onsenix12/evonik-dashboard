@@ -404,16 +404,6 @@
                             Customer data & pricing • Order pipeline • Sales analytics
                         </div>
                     </div>
-                    
-                    <div class="role-card" data-role="operations" onclick="selectRole('operations', this)">
-                        <div class="role-header">
-                            <span class="role-icon">🔧</span>
-                            <span class="role-title">Operations</span>
-                        </div>
-                        <div class="role-access">
-                            Production metrics • Equipment status • Efficiency
-                        </div>
-                    </div>
                 </div>
                 
                 <input type="hidden" id="selectedRole" required>
@@ -540,17 +530,6 @@
                     viewFinancials: false,
                     fullAccess: false,
                     dashboards: ['hub', 'sales', 'optimizer']
-                },
-                operations: {
-                    viewCosts: false,
-                    viewMargins: false,
-                    viewPricing: false,
-                    viewCustomers: false,
-                    viewProduction: true,
-                    viewInventory: false,
-                    viewFinancials: false,
-                    fullAccess: false,
-                    dashboards: ['hub', 'production']
                 }
             };
             

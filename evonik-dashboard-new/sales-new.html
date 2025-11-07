@@ -517,28 +517,6 @@
             </div>
             <div class="benchmark-label">📊 Current accuracy: 94%</div>
         </div>
-
-
-        <!-- Order Input Methods -->
-        <div class="section-panel">
-            <h3 class="section-title">Order Input Methods</h3>
-            <div class="upload-section">
-                <div class="upload-option" onclick="document.getElementById('bulkFileInput').click()">
-                    <div class="upload-icon">📊</div>
-                    <div class="upload-title">Bulk Order Upload</div>
-                    <div class="upload-description">Upload Excel/CSV files with multiple orders</div>
-                    <button class="upload-btn">Upload File</button>
-                    <input type="file" id="bulkFileInput" class="file-input" accept=".xlsx,.xls,.csv" onchange="handleBulkUpload(event)">
-                </div>
-                <div class="upload-option">
-                    <div class="upload-icon">🔄</div>
-                    <div class="upload-title">IBP System Sync</div>
-                    <div class="upload-description">Sync directly with IBP forecasting system</div>
-                    <button class="sync-btn" onclick="syncWithIBP()">Sync with IBP</button>
-                    <button class="sync-btn" onclick="syncWithSAP()">Sync with SAP</button>
-                </div>
-            </div>
-        </div>
     </main>
 
     <script>
@@ -792,34 +770,6 @@
             rows[1].querySelector('.order-status').textContent = 'Confirmed';
             rows[3].querySelector('.order-status').className = 'order-status status-pending';
             rows[3].querySelector('.order-status').textContent = 'Pending Allocation';
-        }
-
-        function handleBulkUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                showAlert(`Bulk upload initiated: ${file.name}`);
-                // Simulate processing
-                setTimeout(() => {
-                    updateOrderCounts();
-                    showAlert('Bulk orders processed successfully');
-                }, 2000);
-            }
-        }
-
-        function syncWithIBP() {
-            showAlert('Syncing with IBP system...');
-            setTimeout(() => {
-                document.getElementById('lastIbpSync').textContent = 'Just now';
-                showAlert('IBP sync completed successfully');
-            }, 1500);
-        }
-
-        function syncWithSAP() {
-            showAlert('Syncing with SAP system...');
-            setTimeout(() => {
-                document.getElementById('lastIbpSync').textContent = 'Just now';
-                showAlert('SAP sync completed successfully');
-            }, 1500);
         }
 
         // Update user display from localStorage

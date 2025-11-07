@@ -417,6 +417,71 @@
     </div>
 
     <main class="main-content">
+        <!-- PIMS Integration Status -->
+        <h2 class="section-title">PIMS Integration Status</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">PIMS Connection</div>
+                    <div class="card-status status-operational" id="oasStatus">Connected</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Active Sensors</div>
+                    <div class="metric-value">247/247</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Refresh Rate</div>
+                    <div class="metric-value" style="font-size: 1rem;">1 minute</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Data Quality</div>
+                    <div class="card-status status-operational">Excellent</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Signal Quality</div>
+                    <div class="metric-value">99.8%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Loss</div>
+                    <div class="metric-value">0.2%</div>
+                    <div class="metric-subtext">Within acceptable range</div>
+                </div>
+                <div class="upload-section" id="pimsUploadSection" style="background: var(--bg-gray); padding: 1.5rem; border-radius: 8px; border: 2px dashed var(--border-gray); margin-top: 1rem; transition: border-color 0.3s;">
+                    <div class="upload-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="upload-title" style="font-weight: 600; color: var(--text-dark);">Update Data from File</div>
+                        <div class="file-input-wrapper" style="position: relative; display: inline-block;">
+                            <input type="file" id="pimsDataFileInput" class="file-input" accept=".xlsx,.xls,.csv" style="position: absolute; opacity: 0; width: 0; height: 0;" />
+                            <label for="pimsDataFileInput" class="upload-btn" style="background: var(--production-indigo); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                📁 Upload Excel/CSV
+                            </label>
+                        </div>
+                    </div>
+                    <div class="upload-info" style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
+                        Upload updated data from Excel (.xlsx, .xls) or CSV files to refresh PIMS sensor data
+                    </div>
+                    <div class="upload-status" id="pimsUploadStatus" style="margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; display: none;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">System Health</div>
+                    <div class="card-status status-operational">Stable</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Sync</div>
+                    <div class="metric-value" style="font-size: 1rem;" id="pimsLastSync">48 sec ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Sync Errors (24h)</div>
+                    <div class="metric-value">0</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Production Overview -->
         <h2 class="section-title">Production Overview</h2>
         <div class="dashboard-grid">
@@ -884,55 +949,6 @@
             </div>
         </div>
 
-        <!-- PIMS Integration Status -->
-        <h2 class="section-title">PIMS Integration Status</h2>
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">PIMS Connection</div>
-                    <div class="card-status status-operational" id="oasStatus">Connected</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Active Sensors</div>
-                    <div class="metric-value">247/247</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Data Refresh Rate</div>
-                    <div class="metric-value" style="font-size: 1rem;">1 minute</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Data Quality</div>
-                    <div class="card-status status-operational">Excellent</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Signal Quality</div>
-                    <div class="metric-value">99.8%</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Data Loss</div>
-                    <div class="metric-value">0.2%</div>
-                    <div class="metric-subtext">Within acceptable range</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">System Health</div>
-                    <div class="card-status status-operational">Stable</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Last Sync</div>
-                    <div class="metric-value" style="font-size: 1rem;">48 sec ago</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Sync Errors (24h)</div>
-                    <div class="metric-value">0</div>
-                </div>
-            </div>
-        </div>
     </main>
 
     <script>
@@ -1513,9 +1529,73 @@
             }
         }
 
+        // File Upload Functionality
+        function setupPIMSFileUpload() {
+            const fileInput = document.getElementById('pimsDataFileInput');
+            const uploadSection = document.getElementById('pimsUploadSection');
+            const uploadStatus = document.getElementById('pimsUploadStatus');
+
+            if (!fileInput || !uploadSection) return;
+
+            // Drag and drop
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.style.borderColor = 'var(--production-indigo)';
+                uploadSection.style.background = 'rgba(99, 102, 241, 0.05)';
+            });
+
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.style.borderColor = 'var(--border-gray)';
+                uploadSection.style.background = 'var(--bg-gray)';
+            });
+
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.style.borderColor = 'var(--border-gray)';
+                uploadSection.style.background = 'var(--bg-gray)';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handlePIMSFileUpload(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handlePIMSFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function handlePIMSFileUpload(file) {
+            const uploadStatus = document.getElementById('pimsUploadStatus');
+            const fileName = file.name.toLowerCase();
+
+            uploadStatus.style.display = 'block';
+            uploadStatus.className = 'upload-status';
+            uploadStatus.textContent = 'Processing file...';
+
+            // Simulate file processing
+            setTimeout(() => {
+                uploadStatus.className = 'upload-status success';
+                uploadStatus.style.background = 'rgba(22, 163, 74, 0.1)';
+                uploadStatus.style.color = 'var(--success-green)';
+                uploadStatus.style.border = '1px solid rgba(22, 163, 74, 0.2)';
+                uploadStatus.textContent = `Successfully updated data from ${file.name}`;
+                
+                // Update data freshness
+                document.getElementById('pimsLastSync').textContent = 'Just now';
+                
+                setTimeout(() => {
+                    uploadStatus.style.display = 'none';
+                }, 5000);
+            }, 1500);
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateUserDisplay();
+            setupPIMSFileUpload();
             console.log('Production Operations Dashboard initialized');
             console.log('PIMS real-time monitoring active');
 

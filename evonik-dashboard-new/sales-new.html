@@ -243,6 +243,74 @@
     </div>
 
     <main class="main-content">
+        <!-- IBP Integration Status -->
+        <h2 class="section-title">IBP Integration Status</h2>
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sync Status</div>
+                    <div class="card-status status-operational" id="ibpStatus">Active</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Sync</div>
+                    <div class="metric-value" id="lastIbpSync">5 min ago</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Data Quality</div>
+                    <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Excellent</div>
+                    <div class="metric-subtext">No validation errors</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Forecast Accuracy</div>
+                    <div class="card-status status-operational">Good</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">This Month</div>
+                    <div class="metric-value" style="color: var(--success-green);">94%</div>
+                    <div class="metric-subtext">▲ +2% vs last month</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Forecast vs Actual</div>
+                    <div class="metric-value" style="font-size: 1rem;">28,400 MT</div>
+                    <div class="metric-subtext">Forecast: 29,000 MT</div>
+                </div>
+                <div class="upload-section" id="ibpUploadSection" style="background: var(--bg-gray); padding: 1.5rem; border-radius: 8px; border: 2px dashed var(--border-gray); margin-top: 1rem; transition: border-color 0.3s;">
+                    <div class="upload-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="upload-title" style="font-weight: 600; color: var(--text-dark);">Update Data from File</div>
+                        <div class="file-input-wrapper" style="position: relative; display: inline-block;">
+                            <input type="file" id="ibpDataFileInput" class="file-input" accept=".xlsx,.xls,.csv" style="position: absolute; opacity: 0; width: 0; height: 0;" />
+                            <label for="ibpDataFileInput" class="upload-btn" style="background: var(--sales-blue); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                📁 Upload Excel/CSV
+                            </label>
+                        </div>
+                    </div>
+                    <div class="upload-info" style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.5rem;">
+                        Upload updated data from Excel (.xlsx, .xls) or CSV files to refresh IBP forecast data
+                    </div>
+                    <div class="upload-status" id="ibpUploadStatus" style="margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; display: none;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Sync Errors</div>
+                    <div class="card-status status-operational">None</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last 24 Hours</div>
+                    <div class="metric-value">0</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Failed Sync</div>
+                    <div class="metric-value" style="font-size: 1rem;">Oct 12</div>
+                    <div class="metric-subtext">API timeout (resolved)</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Fulfillment Dashboard -->
         <h2 class="section-title">Order Fulfillment Overview</h2>
         <div class="dashboard-grid">
@@ -450,51 +518,6 @@
             <div class="benchmark-label">📊 Current accuracy: 94%</div>
         </div>
 
-        <!-- IBP Integration Status -->
-        <div class="section-panel">
-            <h3 class="section-title">IBP Demand Forecast Integration</h3>
-            <div class="dashboard-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Sync Status</div>
-                        <div class="card-status status-operational" id="ibpStatus">Active</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Last Sync</div>
-                        <div class="metric-value" id="lastIbpSync">5 min ago</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Data Quality</div>
-                        <div class="metric-value" style="font-size: 1rem; color: var(--success-green);">Excellent</div>
-                        <div class="metric-subtext">No validation errors</div>
-                    </div>
-                </div>
-
-                <div class="card" style="grid-column: span 2;">
-                    <div class="card-header">
-                        <div class="card-title">Forecast Accuracy</div>
-                        <div class="card-status status-operational">Good</div>
-                    </div>
-                    <div class="forecast-accuracy">
-                        <div class="accuracy-card">
-                            <div class="accuracy-label">This Month</div>
-                            <div class="accuracy-value" style="color: var(--success-green);">94%</div>
-                            <div class="accuracy-trend" style="color: var(--success-green);">▲ +2% vs last month</div>
-                        </div>
-                        <div class="accuracy-card">
-                            <div class="accuracy-label">Forecast vs Actual</div>
-                            <div class="accuracy-value">28,400 MT</div>
-                            <div class="accuracy-trend">Forecast: 29,000 MT</div>
-                        </div>
-                        <div class="accuracy-card">
-                            <div class="accuracy-label">Variance</div>
-                            <div class="accuracy-value" style="color: var(--warning-orange);">-2.1%</div>
-                            <div class="accuracy-trend">Within acceptable range</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Order Input Methods -->
         <div class="section-panel">
@@ -829,10 +852,74 @@
             }
         }
 
+        // File Upload Functionality
+        function setupIBPFileUpload() {
+            const fileInput = document.getElementById('ibpDataFileInput');
+            const uploadSection = document.getElementById('ibpUploadSection');
+            const uploadStatus = document.getElementById('ibpUploadStatus');
+
+            if (!fileInput || !uploadSection) return;
+
+            // Drag and drop
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.style.borderColor = 'var(--sales-blue)';
+                uploadSection.style.background = 'rgba(37, 99, 235, 0.05)';
+            });
+
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.style.borderColor = 'var(--border-gray)';
+                uploadSection.style.background = 'var(--bg-gray)';
+            });
+
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.style.borderColor = 'var(--border-gray)';
+                uploadSection.style.background = 'var(--bg-gray)';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleIBPFileUpload(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleIBPFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleIBPFileUpload(file) {
+            const uploadStatus = document.getElementById('ibpUploadStatus');
+            const fileName = file.name.toLowerCase();
+
+            uploadStatus.style.display = 'block';
+            uploadStatus.className = 'upload-status';
+            uploadStatus.textContent = 'Processing file...';
+
+            // Simulate file processing
+            setTimeout(() => {
+                uploadStatus.className = 'upload-status success';
+                uploadStatus.style.background = 'rgba(22, 163, 74, 0.1)';
+                uploadStatus.style.color = 'var(--success-green)';
+                uploadStatus.style.border = '1px solid rgba(22, 163, 74, 0.2)';
+                uploadStatus.textContent = `Successfully updated data from ${file.name}`;
+                
+                // Update data freshness
+                document.getElementById('lastIbpSync').textContent = 'Just now';
+                
+                setTimeout(() => {
+                    uploadStatus.style.display = 'none';
+                }, 5000);
+            }, 1500);
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             updateUserDisplay();
             initSalesCharts();
+            setupIBPFileUpload();
             // Set initial sync time
             document.getElementById('lastIbpSync').textContent = '5 min ago';
             

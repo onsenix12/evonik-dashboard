@@ -6,6 +6,7 @@
     <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Plant Production Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* Page-specific styles for production.html */
         .header {
@@ -345,6 +346,44 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
+        /* Chart Container Styles */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-container.tall {
+            height: 350px;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            margin-top: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .benchmark-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -437,6 +476,16 @@
             </div>
         </div>
 
+        <!-- Equipment Utilization Comparison Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Production Unit Utilization Comparison</div>
+            <div class="chart-subtitle">ME5 vs ME6 Output and Capacity (MT/day)</div>
+            <div class="chart-container">
+                <canvas id="equipmentUtilizationChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Target: ME5 (620 MT/day), ME6 (345 MT/day)</div>
+        </div>
+
         <!-- Equipment Status -->
         <div class="section-panel">
             <h3 class="section-title">Equipment Status - Real-Time Monitoring</h3>
@@ -507,6 +556,16 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Sensor Data Trends Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">ME6 Sensor Data Trends (Last 24 Hours)</div>
+            <div class="chart-subtitle">Temperature, Pressure, Flow Rate, and Vibration</div>
+            <div class="chart-container tall">
+                <canvas id="sensorTrendsChart"></canvas>
+            </div>
+            <div class="benchmark-label">📊 Real-time PIMS integration - 1 minute refresh rate</div>
         </div>
 
         <!-- Equipment Health Monitoring -->
@@ -599,9 +658,24 @@
         <!-- Production Trend (Daily) -->
         <div class="section-panel">
             <h3 class="section-title">Production Trend (Daily)</h3>
-            <div style="background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-gray);">
-                <canvas id="dailyTrendChart" height="120"></canvas>
+            <div class="chart-wrapper">
+                <div class="chart-title">Daily Production Output (Last 15 Days)</div>
+                <div class="chart-subtitle">Actual Production vs Target (965 MT/day)</div>
+                <div class="chart-container">
+                    <canvas id="dailyTrendChart"></canvas>
+                </div>
+                <div class="benchmark-label">🔵 Target: 965 MT/day</div>
             </div>
+        </div>
+
+        <!-- OEE Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Overall Equipment Effectiveness (OEE) Trend</div>
+            <div class="chart-subtitle">OEE Performance Over Last 30 Days (%)</div>
+            <div class="chart-container">
+                <canvas id="oeeTrendChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Industry Standard: 85% | Current: 94.2%</div>
         </div>
 
         <!-- Safety Metrics -->
@@ -822,6 +896,203 @@
     </main>
 
     <script>
+        // Dashboard Data Store
+        const productionDashboardData = {
+            equipmentOutput: {
+                me5: 620,
+                me6: 345,
+                me5Capacity: 620,
+                me6Capacity: 345
+            },
+            sensorData: {
+                temperature: Array.from({length: 24}, () => 138 + Math.random() * 4 - 2),
+                pressure: Array.from({length: 24}, () => 2.1 + Math.random() * 0.2 - 0.1),
+                flowRate: Array.from({length: 24}, () => 42 + Math.random() * 4 - 2),
+                vibration: Array.from({length: 24}, () => 1.8 + Math.random() * 0.4 - 0.2)
+            },
+            dailyProduction: [945, 972, 958, 961, 967, 955, 970, 968, 960, 964, 959, 961, 966, 969, 974],
+            oeeTrend: Array.from({length: 30}, () => 94.2 + Math.random() * 2 - 1)
+        };
+
+        // Chart instances
+        let equipmentUtilizationChart, sensorTrendsChart, dailyTrendChart, oeeTrendChart;
+
+        // Initialize Charts
+        function initProductionCharts() {
+            // Equipment Utilization Chart
+            const equipCtx = document.getElementById('equipmentUtilizationChart');
+            if (equipCtx) {
+                equipmentUtilizationChart = new Chart(equipCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['ME5 Unit', 'ME6 Unit'],
+                        datasets: [
+                            {
+                                label: 'Current Output (MT/day)',
+                                data: [
+                                    productionDashboardData.equipmentOutput.me5,
+                                    productionDashboardData.equipmentOutput.me6
+                                ],
+                                backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                                borderColor: '#6366F1',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Capacity (MT/day)',
+                                data: [
+                                    productionDashboardData.equipmentOutput.me5Capacity,
+                                    productionDashboardData.equipmentOutput.me6Capacity
+                                ],
+                                backgroundColor: 'rgba(234, 88, 12, 0.6)',
+                                borderColor: '#EA580C',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'MT/day' } }
+                        }
+                    }
+                });
+            }
+
+            // Sensor Trends Chart
+            const sensorCtx = document.getElementById('sensorTrendsChart');
+            if (sensorCtx) {
+                const hours = Array.from({length: 24}, (_, i) => {
+                    const hour = i.toString().padStart(2, '0');
+                    return `${hour}:00`;
+                });
+                sensorTrendsChart = new Chart(sensorCtx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [
+                            {
+                                label: 'Temperature (°C)',
+                                data: productionDashboardData.sensorData.temperature,
+                                borderColor: '#DC2626',
+                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                borderWidth: 2,
+                                yAxisID: 'y',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Pressure (bar)',
+                                data: productionDashboardData.sensorData.pressure,
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                borderWidth: 2,
+                                yAxisID: 'y1',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Flow Rate (m³/h)',
+                                data: productionDashboardData.sensorData.flowRate,
+                                borderColor: '#16A34A',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 2,
+                                yAxisID: 'y2',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Vibration (mm/s)',
+                                data: productionDashboardData.sensorData.vibration,
+                                borderColor: '#EA580C',
+                                backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                                borderWidth: 2,
+                                yAxisID: 'y3',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Temperature (°C)' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'Pressure (bar)' },
+                                grid: { drawOnChartArea: false }
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: false
+                            },
+                            y3: {
+                                type: 'linear',
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            // OEE Trend Chart
+            const oeeCtx = document.getElementById('oeeTrendChart');
+            if (oeeCtx) {
+                const days = Array.from({length: 30}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (29 - i));
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                oeeTrendChart = new Chart(oeeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'OEE (%)',
+                            data: productionDashboardData.oeeTrend,
+                            borderColor: '#6366F1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Industry Standard (85%)',
+                            data: Array(30).fill(85),
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, min: 80, max: 100, title: { display: true, text: 'OEE (%)' } }
+                        }
+                    }
+                });
+            }
+        }
+
         // Listen for coordination events
         window.addEventListener('storage', function(e) {
             if (e.key === 'evonik_coordination_event') {
@@ -961,46 +1232,56 @@
             console.log('Production Operations Dashboard initialized');
             console.log('PIMS real-time monitoring active');
 
-            // Render Daily Trend Chart (Chart.js)
+            // Render Daily Trend Chart
             if (window.Chart && document.getElementById('dailyTrendChart')) {
                 const ctx = document.getElementById('dailyTrendChart').getContext('2d');
                 const labels = ['Oct 1', 'Oct 2', 'Oct 3', 'Oct 4', 'Oct 5', 'Oct 6', 'Oct 7', 'Oct 8', 'Oct 9', 'Oct 10', 'Oct 11', 'Oct 12', 'Oct 13', 'Oct 14', 'Oct 15'];
-                const data = [945, 972, 958, 961, 967, 955, 970, 968, 960, 964, 959, 961, 966, 969, 974];
-                new Chart(ctx, {
+                dailyTrendChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels,
                         datasets: [{
                             label: 'Daily Production (MT/day)',
-                            data,
-                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--production-indigo').trim() || '#6366F1',
+                            data: productionDashboardData.dailyProduction,
+                            borderColor: '#6366F1',
                             backgroundColor: 'rgba(99, 102, 241, 0.1)',
                             borderWidth: 2,
-                            tension: 0.25,
-                            pointRadius: 2
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        }, {
+                            label: 'Target (965 MT/day)',
+                            data: Array(15).fill(965),
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
                         scales: {
                             y: {
+                                beginAtZero: false,
                                 title: { display: true, text: 'MT/day' },
                                 grid: { color: 'rgba(0,0,0,0.05)' }
                             },
                             x: {
                                 grid: { display: false }
                             }
-                        },
-                        plugins: {
-                            legend: { display: true },
-                            tooltip: { enabled: true }
                         }
                     }
                 });
             }
+            
+            // Initialize other production charts
+            initProductionCharts();
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

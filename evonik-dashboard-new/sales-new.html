@@ -6,6 +6,7 @@
     <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Sales Team Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* Page-specific styles for sales.html */
         .header {
@@ -171,6 +172,44 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Chart Container Styles */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-container.tall {
+            height: 350px;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            margin-top: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .benchmark-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -256,6 +295,16 @@
             </div>
         </div>
 
+        <!-- Order Pipeline Volume Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Order Pipeline Volume by Stage</div>
+            <div class="chart-subtitle">Order Count and Volume (MT) by Pipeline Stage</div>
+            <div class="chart-container">
+                <canvas id="pipelineVolumeChart"></canvas>
+            </div>
+            <div class="benchmark-label">📊 Total pipeline: 66 orders, 16,200 MT</div>
+        </div>
+
         <!-- Order Pipeline -->
         <div class="section-panel">
             <h3 class="section-title">Order Pipeline Status</h3>
@@ -286,6 +335,16 @@
                     <div class="stage-volume">4,210 MT</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Fulfillment Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Order Fulfillment Trend (Last 12 Months)</div>
+            <div class="chart-subtitle">Monthly Committed Orders vs Capacity (MT)</div>
+            <div class="chart-container">
+                <canvas id="fulfillmentTrendChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Monthly Capacity: 29,000 MT</div>
         </div>
 
         <!-- Customer Impact Tracking -->
@@ -381,6 +440,16 @@
             </table>
         </div>
 
+        <!-- Forecast Accuracy Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">IBP Forecast Accuracy Trend (Last 6 Months)</div>
+            <div class="chart-subtitle">Forecast vs Actual Order Volume (MT)</div>
+            <div class="chart-container">
+                <canvas id="forecastAccuracyChart"></canvas>
+            </div>
+            <div class="benchmark-label">📊 Current accuracy: 94%</div>
+        </div>
+
         <!-- IBP Integration Status -->
         <div class="section-panel">
             <h3 class="section-title">IBP Demand Forecast Integration</h3>
@@ -450,6 +519,171 @@
     </main>
 
     <script>
+        // Dashboard Data Store
+        const salesDashboardData = {
+            pipelineStages: {
+                new: { count: 8, volume: 1240 },
+                confirmed: { count: 23, volume: 5180 },
+                allocated: { count: 12, volume: 3420 },
+                inProduction: { count: 8, volume: 2150 },
+                shipped: { count: 15, volume: 4210 }
+            },
+            fulfillmentTrend: {
+                committed: [28200, 28500, 28100, 28800, 28400, 28700, 28500, 28900, 28200, 28600, 28400, 28200],
+                capacity: Array(12).fill(29000)
+            },
+            forecastAccuracy: {
+                forecast: [29000, 29200, 28800, 29100, 28900, 29000],
+                actual: [28400, 28800, 28500, 29000, 28700, 28200],
+                months: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct']
+            }
+        };
+
+        // Chart instances
+        let pipelineVolumeChart, fulfillmentTrendChart, forecastAccuracyChart;
+
+        // Initialize Charts
+        function initSalesCharts() {
+            // Pipeline Volume Chart
+            const pipelineCtx = document.getElementById('pipelineVolumeChart');
+            if (pipelineCtx) {
+                pipelineVolumeChart = new Chart(pipelineCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['New', 'Confirmed', 'Allocated', 'In Production', 'Shipped'],
+                        datasets: [
+                            {
+                                label: 'Order Count',
+                                data: [
+                                    salesDashboardData.pipelineStages.new.count,
+                                    salesDashboardData.pipelineStages.confirmed.count,
+                                    salesDashboardData.pipelineStages.allocated.count,
+                                    salesDashboardData.pipelineStages.inProduction.count,
+                                    salesDashboardData.pipelineStages.shipped.count
+                                ],
+                                backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                                borderColor: '#2563EB',
+                                borderWidth: 2,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Volume (MT)',
+                                data: [
+                                    salesDashboardData.pipelineStages.new.volume,
+                                    salesDashboardData.pipelineStages.confirmed.volume,
+                                    salesDashboardData.pipelineStages.allocated.volume,
+                                    salesDashboardData.pipelineStages.inProduction.volume,
+                                    salesDashboardData.pipelineStages.shipped.volume
+                                ],
+                                backgroundColor: 'rgba(22, 163, 74, 0.6)',
+                                borderColor: '#16A34A',
+                                borderWidth: 2,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: 'Order Count' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: 'Volume (MT)' },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Fulfillment Trend Chart
+            const fulfillCtx = document.getElementById('fulfillmentTrendChart');
+            if (fulfillCtx) {
+                fulfillmentTrendChart = new Chart(fulfillCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Committed Orders (MT)',
+                            data: salesDashboardData.fulfillmentTrend.committed,
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Monthly Capacity (MT)',
+                            data: salesDashboardData.fulfillmentTrend.capacity,
+                            borderColor: '#16A34A',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'Volume (MT)' } }
+                        }
+                    }
+                });
+            }
+
+            // Forecast Accuracy Chart
+            const forecastCtx = document.getElementById('forecastAccuracyChart');
+            if (forecastCtx) {
+                forecastAccuracyChart = new Chart(forecastCtx, {
+                    type: 'line',
+                    data: {
+                        labels: salesDashboardData.forecastAccuracy.months,
+                        datasets: [{
+                            label: 'Forecast (MT)',
+                            data: salesDashboardData.forecastAccuracy.forecast,
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Actual (MT)',
+                            data: salesDashboardData.forecastAccuracy.actual,
+                            borderColor: '#16A34A',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'Volume (MT)' } }
+                        }
+                    }
+                });
+            }
+        }
+
         // Listen for coordination events
         window.addEventListener('storage', function(e) {
             if (e.key === 'evonik_coordination_event') {
@@ -598,6 +832,7 @@
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             updateUserDisplay();
+            initSalesCharts();
             // Set initial sync time
             document.getElementById('lastIbpSync').textContent = '5 min ago';
             

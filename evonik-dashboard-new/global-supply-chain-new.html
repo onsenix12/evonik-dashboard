@@ -6,6 +6,7 @@
     <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Global Supply Chain Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* Page-specific styles for global-supply-chain.html */
         .header {
@@ -140,6 +141,44 @@
             .sites-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Chart Container Styles */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-container.tall {
+            height: 350px;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            margin-top: 1rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .benchmark-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -477,6 +516,46 @@
             </table>
         </div>
 
+        <!-- Network Capacity Trend Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Global Network Capacity Trend (Last 12 Months)</div>
+            <div class="chart-subtitle">Total Network Output vs Capacity (MT/day)</div>
+            <div class="chart-container">
+                <canvas id="networkCapacityChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Target: 1,747 MT/day network capacity</div>
+        </div>
+
+        <!-- Site Utilization Comparison Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Production Site Utilization Comparison</div>
+            <div class="chart-subtitle">Current Utilization by Site (%)</div>
+            <div class="chart-container">
+                <canvas id="siteUtilizationChart"></canvas>
+            </div>
+            <div class="benchmark-label">🔵 Target: 100% utilization across all sites</div>
+        </div>
+
+        <!-- Inventory Levels Across Sites Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Finished Product Inventory by Site (Last 30 Days)</div>
+            <div class="chart-subtitle">Inventory Levels (MT)</div>
+            <div class="chart-container tall">
+                <canvas id="inventoryBySiteChart"></canvas>
+            </div>
+            <div class="benchmark-label">📦 Managed by Katoen Natie (3PL partner)</div>
+        </div>
+
+        <!-- Regional Demand vs Supply Chart -->
+        <div class="chart-wrapper">
+            <div class="chart-title">Regional Demand vs Supply Coverage</div>
+            <div class="chart-subtitle">Monthly Volume by Region (MT)</div>
+            <div class="chart-container">
+                <canvas id="regionalDemandChart"></canvas>
+            </div>
+            <div class="benchmark-label">🟢 All regions covered by local production</div>
+        </div>
+
         <!-- Regional Demand Coverage -->
         <h2 class="section-title">Regional Demand Coverage</h2>
         <div class="dashboard-grid">
@@ -650,6 +729,222 @@
     </main>
 
     <script>
+        // Dashboard Data Store
+        const globalDashboardData = {
+            networkCapacity: [1747, 1747, 1747, 1747, 1747, 1747, 1747, 1747, 1747, 1747, 1747, 1747],
+            networkOutput: [1720, 1735, 1740, 1745, 1742, 1747, 1745, 1747, 1740, 1745, 1747, 1747],
+            siteUtilization: {
+                singapore: 100,
+                antwerp: 100,
+                mobile: 100
+            },
+            inventoryBySite: {
+                singapore: Array.from({length: 30}, () => 4200 + Math.random() * 200 - 100),
+                antwerp: Array.from({length: 30}, () => 8500 + Math.random() * 300 - 150),
+                mobile: Array.from({length: 30}, () => 5950 + Math.random() * 250 - 125)
+            },
+            regionalDemand: {
+                apac: 28950,
+                europe: 15600,
+                americas: 11400
+            },
+            regionalSupply: {
+                apac: 28950,
+                europe: 15600,
+                americas: 11400
+            }
+        };
+
+        // Chart instances
+        let networkCapacityChart, siteUtilizationChart, inventoryBySiteChart, regionalDemandChart;
+
+        // Initialize Charts
+        function initGlobalCharts() {
+            // Network Capacity Trend Chart
+            const networkCtx = document.getElementById('networkCapacityChart');
+            if (networkCtx) {
+                networkCapacityChart = new Chart(networkCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Network Output (MT/day)',
+                            data: globalDashboardData.networkOutput,
+                            borderColor: '#8B2E8B',
+                            backgroundColor: 'rgba(139, 46, 139, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Network Capacity (MT/day)',
+                            data: globalDashboardData.networkCapacity,
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'MT/day' } }
+                        }
+                    }
+                });
+            }
+
+            // Site Utilization Comparison Chart
+            const utilCtx = document.getElementById('siteUtilizationChart');
+            if (utilCtx) {
+                siteUtilizationChart = new Chart(utilCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Singapore', 'Antwerp', 'Mobile'],
+                        datasets: [{
+                            label: 'Utilization (%)',
+                            data: [
+                                globalDashboardData.siteUtilization.singapore,
+                                globalDashboardData.siteUtilization.antwerp,
+                                globalDashboardData.siteUtilization.mobile
+                            ],
+                            backgroundColor: [
+                                'rgba(139, 46, 139, 0.8)',
+                                'rgba(139, 46, 139, 0.8)',
+                                'rgba(139, 46, 139, 0.8)'
+                            ],
+                            borderColor: [
+                                '#8B2E8B',
+                                '#8B2E8B',
+                                '#8B2E8B'
+                            ],
+                            borderWidth: 2
+                        }, {
+                            label: 'Target (100%)',
+                            data: [100, 100, 100],
+                            type: 'line',
+                            borderColor: '#2563EB',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Utilization (%)' } }
+                        }
+                    }
+                });
+            }
+
+            // Inventory by Site Chart
+            const invCtx = document.getElementById('inventoryBySiteChart');
+            if (invCtx) {
+                const days = Array.from({length: 30}, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (29 - i));
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                inventoryBySiteChart = new Chart(invCtx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [
+                            {
+                                label: 'Singapore',
+                                data: globalDashboardData.inventoryBySite.singapore,
+                                borderColor: '#16A34A',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            },
+                            {
+                                label: 'Antwerp',
+                                data: globalDashboardData.inventoryBySite.antwerp,
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            },
+                            {
+                                label: 'Mobile',
+                                data: globalDashboardData.inventoryBySite.mobile,
+                                borderColor: '#EA580C',
+                                backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                                borderWidth: 2,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: false, title: { display: true, text: 'Inventory (MT)' } }
+                        }
+                    }
+                });
+            }
+
+            // Regional Demand vs Supply Chart
+            const regCtx = document.getElementById('regionalDemandChart');
+            if (regCtx) {
+                regionalDemandChart = new Chart(regCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['APAC', 'Europe', 'Americas'],
+                        datasets: [
+                            {
+                                label: 'Demand (MT)',
+                                data: [
+                                    globalDashboardData.regionalDemand.apac,
+                                    globalDashboardData.regionalDemand.europe,
+                                    globalDashboardData.regionalDemand.americas
+                                ],
+                                backgroundColor: 'rgba(139, 46, 139, 0.6)',
+                                borderColor: '#8B2E8B',
+                                borderWidth: 2
+                            },
+                            {
+                                label: 'Supply (MT)',
+                                data: [
+                                    globalDashboardData.regionalSupply.apac,
+                                    globalDashboardData.regionalSupply.europe,
+                                    globalDashboardData.regionalSupply.americas
+                                ],
+                                backgroundColor: 'rgba(22, 163, 74, 0.6)',
+                                borderColor: '#16A34A',
+                                borderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Volume (MT)' } }
+                        }
+                    }
+                });
+            }
+        }
+
         // Listen for coordination events
         window.addEventListener('storage', function(e) {
             if (e.key === 'evonik_coordination_event') {
@@ -790,6 +1085,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateUserDisplay();
+            initGlobalCharts();
             console.log('Global Supply Chain Dashboard initialized');
             console.log('Multi-site coordination active');
         });

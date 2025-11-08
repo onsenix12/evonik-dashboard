@@ -7,6 +7,8 @@
     <title>AI Decision Optimizer - Evonik Methionine Production</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="shared-utils.js"></script>
+    <script src="message-processor.js"></script>
     <style>
         /* Page-specific styles for optimizer.html */
         .header {
@@ -1170,64 +1172,47 @@
             }
         }
 
-        // Process messages with keyword matching
-        function processMessage(message) {
-            const lowerMsg = message.toLowerCase();
+        // Store reference to module function before defining wrapper
+        const processMessageModule = typeof window !== 'undefined' && window.processMessageModule ? window.processMessageModule : null;
 
-            // Check for scenario-specific questions first (if crisis is active)
-            if (crisisTriggered) {
-                if (lowerMsg.includes('how') && (lowerMsg.includes('estimate') || lowerMsg.includes('calculated') || lowerMsg.includes('downtime') || lowerMsg.includes('methodology'))) {
-                    showScenarioAMethodology();
-                    return;
-                }
-                if (lowerMsg.includes('update') || lowerMsg.includes('revise') || lowerMsg.includes('validate') || lowerMsg.includes('correction') || lowerMsg.includes('actual')) {
-                    showValidationForm();
-                    return;
-                }
-                if (lowerMsg.includes('equipment') || lowerMsg.includes('criticality') || lowerMsg.includes('status')) {
-                    showEquipmentStatus();
-                    return;
-                }
-                if (lowerMsg.includes('scenario b') || lowerMsg.includes('option b') || lowerMsg.includes('second option')) {
-                    showScenarioB();
-                    return;
-                }
-                if (lowerMsg.includes('scenario c') || lowerMsg.includes('option c') || lowerMsg.includes('third option') || lowerMsg.includes('other option')) {
-                    showScenarioC();
-                    return;
-                }
-                if (lowerMsg.includes('compare') || lowerMsg.includes('all scenario') || lowerMsg.includes('other option')) {
-                    if (!shownSections.scenarioB) showScenarioB();
-                    setTimeout(() => {
-                        if (!shownSections.scenarioC) showScenarioC();
-                    }, 1500);
-                    return;
-                }
+        // Process messages using message-processor.js module
+        function processMessage(message) {
+            // Set up handlers object
+            const handlers = {
+                showScenarioAMethodology,
+                showValidationForm,
+                showEquipmentStatus,
+                showScenarioB,
+                showScenarioC,
+                showProductionStatus,
+                showTankLevels,
+                showCostAnalysis,
+                showScenarios,
+                showExplainability,
+                addSystemMessage
+            };
+
+            // Set up state object
+            const state = {
+                crisisTriggered,
+                shownSections
+            };
+
+            // Use module function if available
+            if (processMessageModule && typeof processMessageModule === 'function') {
+                processMessageModule(message, handlers, state);
+                return;
             }
 
+            // Fallback: Simple message routing
+            const lowerMsg = message.toLowerCase();
             if (lowerMsg.includes('production') || lowerMsg.includes('status') || lowerMsg.includes('output')) {
                 showProductionStatus();
             } else if (lowerMsg.includes('tank') || lowerMsg.includes('inventory') || lowerMsg.includes('stock') || lowerMsg.includes('level')) {
                 showTankLevels();
-            } else if (lowerMsg.includes('cost') || lowerMsg.includes('price') || lowerMsg.includes('expense')) {
-                showCostAnalysis();
-            } else if (lowerMsg.includes('option') || lowerMsg.includes('scenario') || lowerMsg.includes('what should') || lowerMsg.includes('recommend') || (lowerMsg === 'yes' && crisisTriggered) || lowerMsg.includes('show scenario') || lowerMsg.includes('recommendation')) {
-                if (crisisTriggered && !shownSections.scenarioA) {
-                    showScenarios();
-                } else if (crisisTriggered && shownSections.scenarioA) {
-                    addSystemMessage('I\'ve already shown you Scenario A. Would you like to see other options? Say "show scenario B" or "compare all scenarios".');
-                } else {
-                    showScenarios();
-                }
-            } else if (lowerMsg.includes('why') || lowerMsg.includes('explain') || lowerMsg.includes('reason')) {
-                showExplainability();
-            } else if (crisisTriggered) {
-                addSystemMessage('I can provide more details about the recommendation. Ask me about: "How did you estimate the downtime?", "Show equipment status", "Update the estimate", or "Compare with other scenarios".');
             } else {
                 addSystemMessage('I can help you with: production status, tank levels, cost analysis, and optimization scenarios. What would you like to explore?');
             }
-
-            // Crisis will be triggered by demo events from index-new.html
         }
 
         // UPDATED: Optimization weights based on Michael's feedback
@@ -2466,12 +2451,11 @@
 
         // Demo trigger detection
         function checkForDemoTrigger() {
-            const eventData = localStorage.getItem('evonik_coordination_event');
-            if (eventData) {
-                const event = JSON.parse(eventData);
+            const event = safeParseLocalStorage(CONSTANTS.COORDINATION_EVENT_KEY);
+            if (event) {
                 if (event.demo_trigger && (event.type === 'equipment_failure' || event.type === 'supply_delay')) {
                     // Clear the event to prevent re-triggering
-                    localStorage.removeItem('evonik_coordination_event');
+                    localStorage.removeItem(CONSTANTS.COORDINATION_EVENT_KEY);
                     
                     // Set scenario type before triggering
                     currentScenarioType = event.type;

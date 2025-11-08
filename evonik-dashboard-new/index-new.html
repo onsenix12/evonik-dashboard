@@ -1364,9 +1364,9 @@
         function broadcastEvent(event) {
             // Add demo_trigger flag for optimizer to detect
             event.demo_trigger = true;
-            localStorage.setItem('evonik_coordination_event', JSON.stringify(event));
+            localStorage.setItem(CONSTANTS.COORDINATION_EVENT_KEY, JSON.stringify(event));
             // Keep event longer so optimizer can pick it up
-            setTimeout(() => localStorage.removeItem('evonik_coordination_event'), 5000);
+            setTimeout(() => localStorage.removeItem(CONSTANTS.COORDINATION_EVENT_KEY), CONSTANTS.EVENT_CLEANUP_DELAY);
         }
 
         function addTimelineEvent(icon, source, text) {

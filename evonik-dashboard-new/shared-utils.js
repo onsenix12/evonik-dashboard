@@ -325,6 +325,50 @@ function setElementClassName(id, className) {
     updateElementClass(id, className, null);
 }
 
+/**
+ * Safely parse JSON from localStorage
+ * @param {string} key - localStorage key
+ * @param {*} defaultValue - Default value to return if parsing fails
+ * @returns {*} - Parsed value or default value
+ */
+function safeParseLocalStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        if (!item) {
+            return defaultValue;
+        }
+        return JSON.parse(item);
+    } catch (error) {
+        console.error(`Error parsing localStorage key "${key}":`, error);
+        // Remove corrupted data
+        try {
+            localStorage.removeItem(key);
+        } catch (removeError) {
+            console.error(`Error removing corrupted localStorage key "${key}":`, removeError);
+        }
+        return defaultValue;
+    }
+}
+
+/**
+ * Safely parse JSON string
+ * @param {string} jsonString - JSON string to parse
+ * @param {*} defaultValue - Default value to return if parsing fails
+ * @returns {*} - Parsed value or default value
+ */
+function safeParseJSON(jsonString, defaultValue = null) {
+    if (!jsonString || typeof jsonString !== 'string') {
+        return defaultValue;
+    }
+    
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
+        return defaultValue;
+    }
+}
+
 // Export functions for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
@@ -342,6 +386,8 @@ if (typeof module !== 'undefined' && module.exports) {
         updateElementText,
         updateElementClass,
         setElementClassName,
+        safeParseLocalStorage,
+        safeParseJSON,
         CONSTANTS,
         ROLE_TITLES
     };

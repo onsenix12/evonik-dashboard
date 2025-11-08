@@ -1037,16 +1037,26 @@
             }
         };
 
-        // Current operational data (aligned with other dashboards)
+        // Current operational data (aligned with other dashboards) - November 2025
         const operationalData = {
             production: {
                 monthlyTarget: 29000,
-                currentProduction: 22620,
+                currentProduction: 24150, // Updated for November
                 dailyOutput: 965,
                 me5Output: 620,
                 me6Output: 345,
                 me5MaxCapacity: 775,
-                me6MaxCapacity: 430
+                me6MaxCapacity: 430,
+                dailyProduction: [945, 972, 958, 961, 967, 955, 970, 968, 960, 964, 959, 961, 966, 969, 974], // Last 15 days
+                oeeTrend: Array.from({length: 30}, () => 94.2 + Math.random() * 2 - 1),
+                hourlyProduction: Array.from({length: 24}, (_, i) => {
+                    const baseHourly = 40.2;
+                    const hour = i;
+                    if (hour >= 0 && hour < 6) return baseHourly * 0.85 + Math.random() * 3;
+                    if (hour >= 8 && hour < 18) return baseHourly * 1.05 + Math.random() * 4;
+                    return baseHourly + Math.random() * 3;
+                }),
+                qualityRate: Array.from({length: 30}, () => 98.5 + Math.random() * 0.8 - 0.4)
             },
             inventory: {
                 tankLevel: 4200,
@@ -1054,18 +1064,46 @@
                 safeRange: { min: 3000, max: 6000 },
                 mitsuiAllocation: 600,
                 akemaAllocation: 0,
-                heelStock: 836
+                heelStock: 836,
+                dailyShipments: [820, 850, 790, 865, 910, 880, 782, 795, 810, 845, 870, 890, 825, 850],
+                monthlyShipped: 24150
             },
             costs: {
                 dailyCost: 78.5,
-                monthlyActual: 2.3,
+                monthlyActual: 2.35, // Updated for November
                 monthlyBudget: 2.4,
-                costPerMT: 102
+                costPerMT: 102,
+                weeklyCosts: [562, 548, 595, 520], // Last 4 weeks
+                costBreakdown: {
+                    rawMaterials: 45,
+                    utilities: 28,
+                    labor: 15,
+                    maintenance: 8,
+                    other: 4
+                }
             },
             rawMaterials: {
-                h2: { stock: 4800, consumption: 85, leadTime: 14 },
-                mmp: { stock: 1850, consumption: 42, leadTime: 21 },
-                methanol: { stock: 980, consumption: 38, leadTime: 18 }
+                h2: { stock: 4800, consumption: 85, leadTime: 14, trend: Array.from({length: 30}, () => 4800 + Math.random() * 200) },
+                mmp: { stock: 1850, consumption: 42, leadTime: 21, trend: Array.from({length: 30}, () => 1850 + Math.random() * 100) },
+                methanol: { stock: 980, consumption: 38, leadTime: 18, trend: Array.from({length: 30}, () => 980 - Math.random() * 50) }
+            },
+            equipment: {
+                me5: {
+                    utilization: 80,
+                    oee: 94.5,
+                    temperature: 138,
+                    pressure: 2.1,
+                    flowRate: 42,
+                    vibration: 1.8
+                },
+                me6: {
+                    utilization: 80,
+                    oee: 93.8,
+                    temperature: 139,
+                    pressure: 2.15,
+                    flowRate: 38,
+                    vibration: 1.9
+                }
             }
         };
 
@@ -1268,11 +1306,21 @@
 
         // Visualization functions
         function showProductionStatus() {
-            addSystemMessage('Here is your current production status for October 2025:');
+            addSystemMessage('Here is your current production status for November 2025:');
             updateVizTitle('Production Status - ME5 & ME6 Units');
             
             const data = operationalData.production;
             const progress = Math.round((data.currentProduction / data.monthlyTarget) * 100);
+            const daysElapsed = Math.floor(data.currentProduction / data.dailyOutput);
+            const daysRemaining = 30 - daysElapsed;
+            const projectedEnd = data.currentProduction + (daysRemaining * data.dailyOutput);
+            
+            // Generate daily labels for last 15 days
+            const dailyLabels = Array.from({length: 15}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (14 - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
             
             const content = `
                 <div class="metrics-grid">
@@ -1291,17 +1339,65 @@
                         <div class="metric-value">${data.dailyOutput} MT/day</div>
                         <div class="metric-change positive">▲ Above baseline</div>
                     </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Projected Month End</div>
+                        <div class="metric-value">${Math.round(projectedEnd).toLocaleString()} MT</div>
+                        <div class="metric-change ${projectedEnd >= data.monthlyTarget ? 'positive' : 'negative'}">${projectedEnd >= data.monthlyTarget ? '▲' : '▼'} ${Math.round((projectedEnd / data.monthlyTarget) * 100)}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">ME5 Output</div>
+                        <div class="metric-value">${data.me5Output} MT/day</div>
+                        <div class="metric-change positive">▲ ${Math.round((data.me5Output / data.me5MaxCapacity) * 100)}% capacity</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">ME6 Output</div>
+                        <div class="metric-value">${data.me6Output} MT/day</div>
+                        <div class="metric-change positive">▲ ${Math.round((data.me6Output / data.me6MaxCapacity) * 100)}% capacity</div>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="productionChart"></canvas>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📊 Weekly Production Performance</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="weeklyProductionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📈 Daily Production Trend (Last 15 Days)</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="dailyProductionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">⚙️ Equipment Performance</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="equipmentChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📉 OEE Trend (Last 30 Days)</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="oeeChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="padding: 1rem; background: rgba(139, 46, 139, 0.05); border-left: 4px solid var(--evonik-purple); border-radius: 8px; margin-top: 1rem;">
+                    <strong>Key Insights:</strong><br>
+                    • Production is ${progress}% complete with ${daysRemaining} days remaining<br>
+                    • Average OEE: ${Math.round(operationalData.production.oeeTrend.slice(-7).reduce((a,b) => a+b, 0) / 7)}% (last 7 days)<br>
+                    • Quality rate: ${Math.round(operationalData.production.qualityRate.slice(-7).reduce((a,b) => a+b, 0) / 7)}%<br>
+                    • Both ME5 and ME6 operating within optimal capacity ranges
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Create production chart
-            const ctx = document.getElementById('productionChart').getContext('2d');
-            new Chart(ctx, {
+            // Weekly Production Chart
+            const weeklyCtx = document.getElementById('weeklyProductionChart').getContext('2d');
+            new Chart(weeklyCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4 (Projected)'],
@@ -1315,7 +1411,7 @@
                         },
                         {
                             label: 'Actual',
-                            data: [7340, 7180, 8100, 0],
+                            data: [7340, 7180, 8100, Math.round((projectedEnd - 24150) / 4)],
                             backgroundColor: 'rgba(22, 163, 74, 0.6)',
                             borderColor: 'rgba(22, 163, 74, 1)',
                             borderWidth: 2
@@ -1326,21 +1422,135 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Monthly Production Performance (MT)'
-                        }
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Monthly Production Performance (MT)' }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Metric Tons (MT)'
-                            }
+                            title: { display: true, text: 'Metric Tons (MT)' }
+                        }
+                    }
+                }
+            });
+            
+            // Daily Production Trend
+            const dailyCtx = document.getElementById('dailyProductionChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'line',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [
+                        {
+                            label: 'Daily Production (MT)',
+                            data: data.dailyProduction,
+                            borderColor: 'rgba(139, 46, 139, 1)',
+                            backgroundColor: 'rgba(139, 46, 139, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Target (965 MT/day)',
+                            data: Array(15).fill(965),
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 920,
+                            max: 1000,
+                            title: { display: true, text: 'Production (MT/day)' }
+                        }
+                    }
+                }
+            });
+            
+            // Equipment Performance
+            const equipCtx = document.getElementById('equipmentChart').getContext('2d');
+            new Chart(equipCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['ME5', 'ME6'],
+                    datasets: [
+                        {
+                            label: 'Current Output (MT/day)',
+                            data: [data.me5Output, data.me6Output],
+                            backgroundColor: 'rgba(139, 46, 139, 0.6)',
+                            borderColor: 'rgba(139, 46, 139, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Max Capacity (MT/day)',
+                            data: [data.me5MaxCapacity, data.me6MaxCapacity],
+                            backgroundColor: 'rgba(168, 85, 247, 0.3)',
+                            borderColor: 'rgba(168, 85, 247, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Output (MT/day)' }
+                        }
+                    }
+                }
+            });
+            
+            // OEE Trend
+            const oeeCtx = document.getElementById('oeeChart').getContext('2d');
+            const oeeLabels = Array.from({length: 30}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            new Chart(oeeCtx, {
+                type: 'line',
+                data: {
+                    labels: oeeLabels,
+                    datasets: [{
+                        label: 'OEE (%)',
+                        data: data.oeeTrend,
+                        borderColor: 'rgba(22, 163, 74, 1)',
+                        backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 90,
+                            max: 98,
+                            title: { display: true, text: 'OEE (%)' }
                         }
                     }
                 }
@@ -1354,6 +1564,21 @@
             const data = operationalData.inventory;
             const utilization = Math.round((data.tankLevel / data.tankCapacity) * 100);
             const availableSpace = data.tankCapacity - data.tankLevel;
+            const daysCoverage = Math.round(data.tankLevel / operationalData.production.dailyOutput);
+            const freeStock = data.tankLevel - data.mitsuiAllocation - data.heelStock;
+            
+            // Generate trend data for last 30 days
+            const trendLabels = Array.from({length: 30}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const inventoryTrend = Array.from({length: 30}, (_, i) => {
+                // Simulate realistic inventory trend
+                const base = 4200;
+                const variation = Math.sin(i / 5) * 200 + Math.random() * 100 - 50;
+                return Math.max(3000, Math.min(6000, base + variation));
+            });
             
             const content = `
                 <div class="metrics-grid">
@@ -1372,37 +1597,81 @@
                         <div class="metric-value">${availableSpace.toLocaleString()} MT</div>
                         <div class="metric-change positive">▲ ${Math.round((availableSpace / data.tankCapacity) * 100)}% buffer</div>
                     </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Days Coverage</div>
+                        <div class="metric-value">${daysCoverage} days</div>
+                        <div class="metric-change positive">▲ At current production rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Free Stock</div>
+                        <div class="metric-value">${freeStock.toLocaleString()} MT</div>
+                        <div class="metric-change neutral">Available for allocation</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Monthly Shipped</div>
+                        <div class="metric-value">${data.monthlyShipped.toLocaleString()} MT</div>
+                        <div class="metric-change positive">▲ November 2025</div>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="tankChart"></canvas>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">🛢️ Tank Distribution</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="tankChart"></canvas>
+                    </div>
                 </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📈 Inventory Trend (Last 30 Days)</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="inventoryTrendChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📦 Daily Shipments vs Production</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="shipmentChart"></canvas>
+                    </div>
+                </div>
+                
                 <div style="margin-top: 2rem; padding: 1rem; background: rgba(22, 163, 74, 0.1); border-left: 4px solid #16A34A; border-radius: 8px;">
-                    <strong>Co-mingled Inventory:</strong><br>
-                    • Mitsui: ${data.mitsuiAllocation} MT<br>
-                    • Akema: ${data.akemaAllocation} MT<br>
+                    <strong>Co-mingled Inventory Details:</strong><br>
+                    • Mitsui Allocation: ${data.mitsuiAllocation} MT<br>
+                    • Akema Allocation: ${data.akemaAllocation} MT<br>
                     • Working Capacity Max: ${data.tankCapacity.toLocaleString()} MT<br>
-                    • Combined Heel Stock: ${data.heelStock} MT
+                    • Combined Heel Stock: ${data.heelStock} MT<br>
+                    • Free Stock Available: ${freeStock.toLocaleString()} MT
+                </div>
+                
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(139, 46, 139, 0.05); border-left: 4px solid var(--evonik-purple); border-radius: 8px;">
+                    <strong>Inventory Health:</strong><br>
+                    • Current level: ${utilization}% of capacity (${utilization >= 50 && utilization <= 90 ? 'Optimal' : utilization < 50 ? 'Low - Consider increasing' : 'High - Monitor closely'})<br>
+                    • Coverage: ${daysCoverage} days at current production rate (${daysCoverage >= 5 ? 'Sufficient buffer' : 'Low buffer - monitor'})<br>
+                    • Safe range: ${data.safeRange.min.toLocaleString()} - ${data.safeRange.max.toLocaleString()} MT
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Create tank chart
+            // Tank Distribution Chart
             const ctx = document.getElementById('tankChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Current Stock', 'Mitsui Allocation', 'Available Capacity'],
+                    labels: ['Free Stock', 'Mitsui Allocation', 'Heel Stock', 'Available Capacity'],
                     datasets: [{
-                        data: [3600, 600, 2100],
+                        data: [freeStock, data.mitsuiAllocation, data.heelStock, availableSpace],
                         backgroundColor: [
                             'rgba(139, 46, 139, 0.8)',
                             'rgba(168, 85, 247, 0.6)',
+                            'rgba(234, 88, 12, 0.6)',
                             'rgba(229, 231, 235, 0.5)'
                         ],
                         borderColor: [
                             'rgba(139, 46, 139, 1)',
                             'rgba(168, 85, 247, 1)',
+                            'rgba(234, 88, 12, 1)',
                             'rgba(229, 231, 235, 1)'
                         ],
                         borderWidth: 2
@@ -1412,12 +1681,119 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom'
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Tank Distribution (Total: 6,300 MT)' }
+                    }
+                }
+            });
+            
+            // Inventory Trend Chart
+            const trendCtx = document.getElementById('inventoryTrendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [
+                        {
+                            label: 'Inventory Level (MT)',
+                            data: inventoryTrend,
+                            borderColor: 'rgba(139, 46, 139, 1)',
+                            backgroundColor: 'rgba(139, 46, 139, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2
                         },
-                        title: {
-                            display: true,
-                            text: 'Tank Distribution (Total: 6,300 MT)'
+                        {
+                            label: 'Safe Range Min',
+                            data: Array(30).fill(data.safeRange.min),
+                            borderColor: 'rgba(234, 88, 12, 1)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Safe Range Max',
+                            data: Array(30).fill(data.safeRange.max),
+                            borderColor: 'rgba(234, 88, 12, 1)',
+                            borderWidth: 1,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 2500,
+                            max: 6500,
+                            title: { display: true, text: 'Inventory (MT)' }
+                        }
+                    }
+                }
+            });
+            
+            // Shipments vs Production Chart
+            const shipmentCtx = document.getElementById('shipmentChart').getContext('2d');
+            const shipmentLabels = Array.from({length: 14}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (13 - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            new Chart(shipmentCtx, {
+                type: 'line',
+                data: {
+                    labels: shipmentLabels,
+                    datasets: [
+                        {
+                            label: 'Daily Shipments (MT)',
+                            data: data.dailyShipments,
+                            borderColor: 'rgba(234, 88, 12, 1)',
+                            backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Daily Production (MT)',
+                            data: data.dailyShipments.map((_, i) => operationalData.production.dailyProduction[Math.min(i, operationalData.production.dailyProduction.length - 1)]),
+                            borderColor: 'rgba(22, 163, 74, 1)',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Target (965 MT/day)',
+                            data: Array(14).fill(965),
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 700,
+                            max: 1000,
+                            title: { display: true, text: 'Volume (MT)' }
                         }
                     }
                 }
@@ -1425,12 +1801,14 @@
         }
 
         function showCostAnalysis() {
-            addSystemMessage('Here is your production cost analysis for October:');
+            addSystemMessage('Here is your production cost analysis for November 2025:');
             updateVizTitle('Production Cost Analysis');
             
             const data = operationalData.costs;
             const savings = data.monthlyBudget - data.monthlyActual;
             const savingsPercent = Math.round((savings / data.monthlyBudget) * 100);
+            const costBreakdown = data.costBreakdown;
+            const totalBreakdown = Object.values(costBreakdown).reduce((a, b) => a + b, 0);
             
             const content = `
                 <div class="metrics-grid">
@@ -1449,15 +1827,67 @@
                         <div class="metric-value">$${data.dailyCost}K</div>
                         <div class="metric-change positive">▲ Within budget</div>
                     </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Budget Variance</div>
+                        <div class="metric-value">$${Math.abs(savings).toFixed(2)}M</div>
+                        <div class="metric-change positive">▼ Under budget</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Monthly Budget</div>
+                        <div class="metric-value">$${data.monthlyBudget}M</div>
+                        <div class="metric-change neutral">Target</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Cost Efficiency</div>
+                        <div class="metric-value">${Math.round((data.monthlyBudget / data.monthlyActual) * 100)}%</div>
+                        <div class="metric-change positive">▲ Above target</div>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="costChart"></canvas>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">💰 Weekly Cost Trends</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📊 Cost Breakdown by Category</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="costBreakdownChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-dark);">📈 Cost per MT Trend</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="costPerMTChart"></canvas>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 2rem;">
+                    <div style="padding: 1rem; background: rgba(139, 46, 139, 0.05); border-left: 4px solid var(--evonik-purple); border-radius: 8px;">
+                        <strong>Cost Breakdown (per $100):</strong><br>
+                        • Raw Materials: $${costBreakdown.rawMaterials} (${Math.round((costBreakdown.rawMaterials / totalBreakdown) * 100)}%)<br>
+                        • Utilities: $${costBreakdown.utilities} (${Math.round((costBreakdown.utilities / totalBreakdown) * 100)}%)<br>
+                        • Labor: $${costBreakdown.labor} (${Math.round((costBreakdown.labor / totalBreakdown) * 100)}%)<br>
+                        • Maintenance: $${costBreakdown.maintenance} (${Math.round((costBreakdown.maintenance / totalBreakdown) * 100)}%)<br>
+                        • Other: $${costBreakdown.other} (${Math.round((costBreakdown.other / totalBreakdown) * 100)}%)
+                    </div>
+                    <div style="padding: 1rem; background: rgba(22, 163, 74, 0.1); border-left: 4px solid #16A34A; border-radius: 8px;">
+                        <strong>Cost Performance:</strong><br>
+                        • Budget utilization: ${Math.round((data.monthlyActual / data.monthlyBudget) * 100)}%<br>
+                        • Savings achieved: $${savings.toFixed(2)}M (${savingsPercent}%)<br>
+                        • Cost per MT: $${data.costPerMT} (target: $105)<br>
+                        • Daily average: $${data.dailyCost}K/day<br>
+                        • Status: ${savings > 0 ? 'Under budget ✓' : 'Over budget'}
+                    </div>
                 </div>
             `;
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Create cost chart
+            // Weekly Cost Chart
             const ctx = document.getElementById('costChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
@@ -1470,15 +1900,25 @@
                             borderColor: 'rgba(234, 88, 12, 1)',
                             backgroundColor: 'rgba(234, 88, 12, 0.1)',
                             borderWidth: 2,
-                            tension: 0.4
+                            tension: 0.4,
+                            borderDash: [5, 5]
                         },
                         {
                             label: 'Actual Cost',
-                            data: [562, 548, 595, 520],
+                            data: data.weeklyCosts,
                             borderColor: 'rgba(22, 163, 74, 1)',
                             backgroundColor: 'rgba(22, 163, 74, 0.1)',
                             borderWidth: 2,
-                            tension: 0.4
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Budget Target',
+                            data: [600, 600, 600, 600],
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 2,
+                            borderDash: [3, 3],
+                            pointRadius: 0
                         }
                     ]
                 },
@@ -1486,21 +1926,119 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        title: {
-                            display: true,
-                            text: 'Weekly Production Cost Trends ($K)'
-                        }
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Weekly Production Cost Trends ($K)' }
                     },
                     scales: {
                         y: {
                             beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: 'Cost ($K)'
-                            }
+                            min: 500,
+                            max: 650,
+                            title: { display: true, text: 'Cost ($K)' }
+                        }
+                    }
+                }
+            });
+            
+            // Cost Breakdown Chart
+            const breakdownCtx = document.getElementById('costBreakdownChart').getContext('2d');
+            new Chart(breakdownCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Raw Materials', 'Utilities', 'Labor', 'Maintenance', 'Other'],
+                    datasets: [{
+                        data: [
+                            costBreakdown.rawMaterials,
+                            costBreakdown.utilities,
+                            costBreakdown.labor,
+                            costBreakdown.maintenance,
+                            costBreakdown.other
+                        ],
+                        backgroundColor: [
+                            'rgba(139, 46, 139, 0.8)',
+                            'rgba(234, 88, 12, 0.8)',
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(22, 163, 74, 0.8)',
+                            'rgba(168, 85, 247, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(139, 46, 139, 1)',
+                            'rgba(234, 88, 12, 1)',
+                            'rgba(37, 99, 235, 1)',
+                            'rgba(22, 163, 74, 1)',
+                            'rgba(168, 85, 247, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Cost Distribution (%)' }
+                    }
+                }
+            });
+            
+            // Cost per MT Trend
+            const costPerMTCtx = document.getElementById('costPerMTChart').getContext('2d');
+            const costPerMTLabels = Array.from({length: 30}, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - (29 - i));
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const costPerMTData = Array.from({length: 30}, () => {
+                // Simulate cost per MT trend (target: $102, range: $98-$106)
+                return 102 + Math.random() * 4 - 2;
+            });
+            new Chart(costPerMTCtx, {
+                type: 'line',
+                data: {
+                    labels: costPerMTLabels,
+                    datasets: [
+                        {
+                            label: 'Cost per MT ($)',
+                            data: costPerMTData,
+                            borderColor: 'rgba(139, 46, 139, 1)',
+                            backgroundColor: 'rgba(139, 46, 139, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Target ($102)',
+                            data: Array(30).fill(102),
+                            borderColor: 'rgba(37, 99, 235, 1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Budget Limit ($105)',
+                            data: Array(30).fill(105),
+                            borderColor: 'rgba(234, 88, 12, 1)',
+                            borderWidth: 1,
+                            borderDash: [3, 3],
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 95,
+                            max: 110,
+                            title: { display: true, text: 'Cost per MT ($)' }
                         }
                     }
                 }

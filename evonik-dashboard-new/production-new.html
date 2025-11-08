@@ -7,6 +7,8 @@
     <title>Plant Production Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="shared-file-upload.js"></script>
     <style>
         /* Page-specific styles for production.html */
         .header {
@@ -1396,15 +1398,8 @@
             }
         }
 
-        // Listen for coordination events
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'evonik_coordination_event') {
-                const eventData = JSON.parse(e.newValue);
-                handleCoordinationEvent(eventData);
-            }
-        });
-
-        function handleCoordinationEvent(event) {
+        // Listen for coordination events using shared utility
+        initCoordinationEventListener(function(event) {
             switch(event.type) {
                 case 'equipment_failure':
                     showAlert('ME6 Unit Shutdown Detected');
@@ -1414,190 +1409,106 @@
                     resetDashboard();
                     break;
             }
-        }
-
-        function showAlert(message) {
-            const banner = document.getElementById('alertsBanner');
-            document.getElementById('alertMessage').textContent = message;
-            banner.classList.add('show');
-            setTimeout(() => banner.classList.remove('show'), 8000);
-        }
+        });
 
         function simulateME6Failure() {
             // Update ME6 unit card
-            const me6Card = document.getElementById('me6Card');
-            me6Card.classList.add('offline');
-            document.getElementById('me6Status').className = 'unit-status-badge badge-offline';
-            document.getElementById('me6Status').textContent = 'Offline';
-            document.getElementById('me6Output').textContent = '0 MT/day';
-            document.getElementById('me6Utilization').textContent = '0%';
-            document.getElementById('me6Runtime').textContent = '0 hrs';
+            const me6Card = getElementSafely('me6Card');
+            if (me6Card) me6Card.classList.add('offline');
+            
+            setElementClassName('me6Status', 'unit-status-badge badge-offline');
+            updateElementText('me6Status', 'Offline');
+            updateElementText('me6Output', '0 MT/day');
+            updateElementText('me6Utilization', '0%');
+            updateElementText('me6Runtime', '0 hrs');
             
             // Update overall status
-            document.getElementById('totalOutput').textContent = '620 MT/day';
-            document.getElementById('overallStatus').className = 'card-status status-critical';
-            document.getElementById('overallStatus').textContent = 'Degraded';
+            updateElementText('totalOutput', '620 MT/day');
+            setElementClassName('overallStatus', 'card-status status-critical');
+            updateElementText('overallStatus', 'Degraded');
             
             // Update sensor readings to show failure
-            document.getElementById('me6Temp').textContent = '-- °C';
-            document.getElementById('me6TempCard').classList.add('critical');
-            document.getElementById('me6TempStatus').textContent = 'No signal';
-            document.getElementById('me6TempStatus').className = 'sensor-status critical';
+            updateElementText('me6Temp', '-- °C');
+            updateElementClass('me6TempCard', 'critical', true);
+            updateElementText('me6TempStatus', 'No signal');
+            setElementClassName('me6TempStatus', 'sensor-status critical');
             
-            document.getElementById('me6Pressure').textContent = '-- bar';
-            document.getElementById('me6PressureCard').classList.add('critical');
-            document.getElementById('me6PressureStatus').textContent = 'No signal';
-            document.getElementById('me6PressureStatus').className = 'sensor-status critical';
+            updateElementText('me6Pressure', '-- bar');
+            updateElementClass('me6PressureCard', 'critical', true);
+            updateElementText('me6PressureStatus', 'No signal');
+            setElementClassName('me6PressureStatus', 'sensor-status critical');
             
-            document.getElementById('me6Flow').textContent = '0 m³/h';
-            document.getElementById('me6FlowCard').classList.add('critical');
-            document.getElementById('me6FlowStatus').textContent = 'Unit offline';
-            document.getElementById('me6FlowStatus').className = 'sensor-status critical';
+            updateElementText('me6Flow', '0 m³/h');
+            updateElementClass('me6FlowCard', 'critical', true);
+            updateElementText('me6FlowStatus', 'Unit offline');
+            setElementClassName('me6FlowStatus', 'sensor-status critical');
             
-            document.getElementById('me6Vibration').textContent = '-- mm/s';
-            document.getElementById('me6VibrationCard').classList.add('critical');
-            document.getElementById('me6VibrationStatus').textContent = 'No signal';
-            document.getElementById('me6VibrationStatus').className = 'sensor-status critical';
+            updateElementText('me6Vibration', '-- mm/s');
+            updateElementClass('me6VibrationCard', 'critical', true);
+            updateElementText('me6VibrationStatus', 'No signal');
+            setElementClassName('me6VibrationStatus', 'sensor-status critical');
         }
 
         function resetDashboard() {
-            document.getElementById('alertsBanner').classList.remove('show');
+            closeAlert();
             
             // Reset ME6
-            const me6Card = document.getElementById('me6Card');
-            me6Card.classList.remove('offline');
-            document.getElementById('me6Status').className = 'unit-status-badge badge-online';
-            document.getElementById('me6Status').textContent = 'Online';
-            document.getElementById('me6Output').textContent = '345 MT/day';
-            document.getElementById('me6Utilization').textContent = '100%';
-            document.getElementById('me6Runtime').textContent = '14.2 hrs';
+            const me6Card = getElementSafely('me6Card');
+            if (me6Card) me6Card.classList.remove('offline');
+            
+            setElementClassName('me6Status', 'unit-status-badge badge-online');
+            updateElementText('me6Status', 'Online');
+            updateElementText('me6Output', '345 MT/day');
+            updateElementText('me6Utilization', '100%');
+            updateElementText('me6Runtime', '14.2 hrs');
             
             // Reset overall status
-            document.getElementById('totalOutput').textContent = '965 MT/day';
-            document.getElementById('overallStatus').className = 'card-status status-operational';
-            document.getElementById('overallStatus').textContent = 'Operational';
+            updateElementText('totalOutput', '965 MT/day');
+            setElementClassName('overallStatus', 'card-status status-operational');
+            updateElementText('overallStatus', 'Operational');
             
             // Reset sensors
-            document.getElementById('me6Temp').textContent = '138°C';
-            document.getElementById('me6TempCard').classList.remove('critical');
-            document.getElementById('me6TempStatus').textContent = 'Normal (135-142°C)';
-            document.getElementById('me6TempStatus').className = 'sensor-status';
+            updateElementText('me6Temp', '138°C');
+            updateElementClass('me6TempCard', 'critical', false);
+            updateElementText('me6TempStatus', 'Normal (135-142°C)');
+            setElementClassName('me6TempStatus', 'sensor-status');
             
-            document.getElementById('me6Pressure').textContent = '2.1 bar';
-            document.getElementById('me6PressureCard').classList.remove('critical');
-            document.getElementById('me6PressureStatus').textContent = 'Normal (1.8-2.3 bar)';
-            document.getElementById('me6PressureStatus').className = 'sensor-status';
+            updateElementText('me6Pressure', '2.1 bar');
+            updateElementClass('me6PressureCard', 'critical', false);
+            updateElementText('me6PressureStatus', 'Normal (1.8-2.3 bar)');
+            setElementClassName('me6PressureStatus', 'sensor-status');
             
-            document.getElementById('me6Flow').textContent = '42 m³/h';
-            document.getElementById('me6FlowCard').classList.remove('critical');
-            document.getElementById('me6FlowStatus').textContent = 'Normal';
-            document.getElementById('me6FlowStatus').className = 'sensor-status';
+            updateElementText('me6Flow', '42 m³/h');
+            updateElementClass('me6FlowCard', 'critical', false);
+            updateElementText('me6FlowStatus', 'Normal');
+            setElementClassName('me6FlowStatus', 'sensor-status');
             
-            document.getElementById('me6Vibration').textContent = '1.8 mm/s';
-            document.getElementById('me6VibrationCard').classList.remove('critical');
-            document.getElementById('me6VibrationStatus').textContent = 'Normal (<3.0 mm/s)';
-            document.getElementById('me6VibrationStatus').className = 'sensor-status';
+            updateElementText('me6Vibration', '1.8 mm/s');
+            updateElementClass('me6VibrationCard', 'critical', false);
+            updateElementText('me6VibrationStatus', 'Normal (<3.0 mm/s)');
+            setElementClassName('me6VibrationStatus', 'sensor-status');
         }
 
-        // Update user display from localStorage
-        function updateUserDisplay() {
-            const userSession = localStorage.getItem('evonik_user_session');
-            if (userSession) {
-                try {
-                    const session = JSON.parse(userSession);
-                    const userNameEl = document.getElementById('userName');
-                    const userTitleEl = document.getElementById('userTitle');
-                    
-                    if (userNameEl) {
-                        userNameEl.textContent = session.name;
-                    }
-                    
-                    if (userTitleEl) {
-                        // Map role to title
-                        const roleTitles = {
-                            'supply_chain': 'Local Supply Chain Manager',
-                            'plant_manager': 'Production Manager',
-                            'sales': 'Regional Sales Manager',
-                            'operations': 'Production Manager',
-                            'management': 'Management'
-                        };
-                        userTitleEl.textContent = roleTitles[session.role] || 'User';
-                    }
-                } catch (error) {
-                    console.error('Error parsing user session:', error);
-                }
-            }
-        }
-
-        // File Upload Functionality
+        // File Upload Functionality using shared utility
         function setupPIMSFileUpload() {
-            const fileInput = document.getElementById('pimsDataFileInput');
-            const uploadSection = document.getElementById('pimsUploadSection');
-            const uploadStatus = document.getElementById('pimsUploadStatus');
-
-            if (!fileInput || !uploadSection) return;
-
-            // Drag and drop
-            uploadSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--production-indigo)';
-                uploadSection.style.background = 'rgba(99, 102, 241, 0.05)';
-            });
-
-            uploadSection.addEventListener('dragleave', () => {
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-            });
-
-            uploadSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handlePIMSFileUpload(files[0]);
+            setupFileUpload({
+                fileInputId: 'pimsDataFileInput',
+                uploadSectionId: 'pimsUploadSection',
+                uploadStatusId: 'pimsUploadStatus',
+                onFileSelected: function(file, uploadStatus) {
+                    // Simulate file processing
+                    setTimeout(() => {
+                        showUploadStatus(uploadStatus, 'success', `Successfully updated data from ${file.name}`);
+                        updateElementText('pimsLastSync', 'Just now');
+                    }, 1500);
                 }
             });
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handlePIMSFileUpload(e.target.files[0]);
-                }
-            });
-        }
-
-        function handlePIMSFileUpload(file) {
-            const uploadStatus = document.getElementById('pimsUploadStatus');
-            const fileName = file.name.toLowerCase();
-
-            uploadStatus.style.display = 'block';
-            uploadStatus.className = 'upload-status';
-            uploadStatus.textContent = 'Processing file...';
-
-            // Simulate file processing
-            setTimeout(() => {
-                uploadStatus.className = 'upload-status success';
-                uploadStatus.style.background = 'rgba(22, 163, 74, 0.1)';
-                uploadStatus.style.color = 'var(--success-green)';
-                uploadStatus.style.border = '1px solid rgba(22, 163, 74, 0.2)';
-                uploadStatus.textContent = `Successfully updated data from ${file.name}`;
-                
-                // Update data freshness
-                document.getElementById('pimsLastSync').textContent = 'Just now';
-                
-                setTimeout(() => {
-                    uploadStatus.style.display = 'none';
-                }, 5000);
-            }, 1500);
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateUserDisplay();
+            updateUserDisplay({ roleContext: null });
             setupPIMSFileUpload();
-            console.log('Production Operations Dashboard initialized');
-            console.log('PIMS real-time monitoring active');
 
             // Render Daily Trend Chart
             if (window.Chart && document.getElementById('dailyTrendChart')) {

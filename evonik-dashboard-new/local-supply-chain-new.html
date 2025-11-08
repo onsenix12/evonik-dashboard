@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="shared-file-upload.js"></script>
     <style>
         /* Page-specific styles for local-supply-chain.html */
         .header {
@@ -1150,156 +1152,99 @@
             }
         }
 
-        // File Upload Functionality
-        function setupFileUpload() {
-            const fileInput = document.getElementById('dataFileInput');
-            const uploadSection = document.getElementById('uploadSection');
-            const uploadStatus = document.getElementById('uploadStatus');
-
-            // Drag and drop
-            uploadSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadSection.classList.add('dragover');
-            });
-
-            uploadSection.addEventListener('dragleave', () => {
-                uploadSection.classList.remove('dragover');
-            });
-
-            uploadSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadSection.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileUpload(files[0]);
-                }
-            });
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileUpload(e.target.files[0]);
+        // File Upload Functionality using shared utility
+        function setupLocalFileUpload() {
+            setupFileUpload({
+                fileInputId: 'dataFileInput',
+                uploadSectionId: 'uploadSection',
+                uploadStatusId: 'uploadStatus',
+                onFileSelected: function(file, uploadStatus) {
+                    parseFile(file, 
+                        function(data) {
+                            updateDataFromParsed(data);
+                            showUploadStatus(uploadStatus, 'success', `Successfully updated data from ${file.name}`);
+                            updateDataFreshness();
+                        },
+                        function(error) {
+                            showUploadStatus(uploadStatus, 'error', error.message);
+                        }
+                    );
                 }
             });
         }
 
-        function handleFileUpload(file) {
-            const uploadStatus = document.getElementById('uploadStatus');
-            const fileName = file.name.toLowerCase();
-
-            uploadStatus.className = 'upload-status';
-            uploadStatus.textContent = 'Processing file...';
-
-            if (fileName.endsWith('.csv')) {
-                parseCSV(file);
-            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-                parseExcel(file);
-            } else {
-                showUploadStatus('error', 'Invalid file format. Please upload CSV or Excel files.');
-            }
-        }
-
-        function parseCSV(file) {
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (results.errors.length > 0) {
-                        showUploadStatus('error', 'Error parsing CSV: ' + results.errors[0].message);
-                        return;
-                    }
-                    updateDataFromParsed(results.data);
-                    showUploadStatus('success', `Successfully updated data from ${file.name}`);
-                    updateDataFreshness();
-                },
-                error: function(error) {
-                    showUploadStatus('error', 'Error reading CSV file: ' + error.message);
-                }
-            });
-        }
-
-        function parseExcel(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                    updateDataFromParsed(jsonData);
-                    showUploadStatus('success', `Successfully updated data from ${file.name}`);
-                    updateDataFreshness();
-                } catch (error) {
-                    showUploadStatus('error', 'Error parsing Excel file: ' + error.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
+        // Break down large function into smaller, focused functions
         function updateDataFromParsed(data) {
-            // Example data structure expected:
-            // Can handle columns like: Date, ShippedMT, H2Stock, MMPStock, MethanolStock, POValue, OnTimeRate, etc.
             if (!data || data.length === 0) return;
 
-            // Update based on detected columns
             const firstRow = data[0];
             const keys = Object.keys(firstRow);
 
             data.forEach(row => {
-                // Update shipment data
-                if (hasColumn(keys, ['shipped', 'shipment', 'mt'])) {
-                    const shipped = parseFloat(row[findColumn(keys, ['shipped', 'shipment', 'mt'])]);
-                    if (!isNaN(shipped) && shipped > 0) {
-                        dashboardData.todayShipped = shipped;
-                        dashboardData.dailyShipments[dashboardData.dailyShipments.length - 1] = shipped;
-                    }
-                }
-
-                // Update material stocks
-                if (hasColumn(keys, ['h2', 'hydrogen'])) {
-                    const h2 = parseFloat(row[findColumn(keys, ['h2', 'hydrogen'])]);
-                    if (!isNaN(h2) && h2 > 0) {
-                        dashboardData.h2Stock = h2;
-                        dashboardData.materialsInventory.h2[dashboardData.materialsInventory.h2.length - 1] = h2;
-                    }
-                }
-
-                if (hasColumn(keys, ['mmp'])) {
-                    const mmp = parseFloat(row[findColumn(keys, ['mmp'])]);
-                    if (!isNaN(mmp) && mmp > 0) {
-                        dashboardData.mmpStock = mmp;
-                        dashboardData.materialsInventory.mmp[dashboardData.materialsInventory.mmp.length - 1] = mmp;
-                    }
-                }
-
-                if (hasColumn(keys, ['methanol', 'ch3oh'])) {
-                    const methanol = parseFloat(row[findColumn(keys, ['methanol', 'ch3oh'])]);
-                    if (!isNaN(methanol) && methanol > 0) {
-                        dashboardData.methanolStock = methanol;
-                        dashboardData.materialsInventory.methanol[dashboardData.materialsInventory.methanol.length - 1] = methanol;
-                    }
-                }
-
-                // Update PO value
-                if (hasColumn(keys, ['po', 'purchase', 'value'])) {
-                    const poValue = parseFloat(row[findColumn(keys, ['po', 'purchase', 'value'])]);
-                    if (!isNaN(poValue) && poValue > 0) {
-                        dashboardData.totalPOValue = poValue;
-                    }
-                }
-
-                // Update on-time rate
-                if (hasColumn(keys, ['ontime', 'delivery', 'rate'])) {
-                    const rate = parseFloat(row[findColumn(keys, ['ontime', 'delivery', 'rate'])]);
-                    if (!isNaN(rate) && rate >= 0 && rate <= 100) {
-                        dashboardData.onTimeRate = rate;
-                    }
-                }
+                updateShipmentData(row, keys);
+                updateMaterialStocks(row, keys);
+                updatePOData(row, keys);
             });
 
-            // Refresh all UI elements and charts
             updateDashboardUI();
             refreshCharts();
+        }
+
+        function updateShipmentData(row, keys) {
+            if (hasColumn(keys, ['shipped', 'shipment', 'mt'])) {
+                const shipped = parseFloat(row[findColumn(keys, ['shipped', 'shipment', 'mt'])]);
+                if (!isNaN(shipped) && shipped > 0) {
+                    dashboardData.todayShipped = shipped;
+                    dashboardData.dailyShipments[dashboardData.dailyShipments.length - 1] = shipped;
+                }
+            }
+        }
+
+        function updateMaterialStocks(row, keys) {
+            // Update H2 stock
+            if (hasColumn(keys, ['h2', 'hydrogen'])) {
+                const h2 = parseFloat(row[findColumn(keys, ['h2', 'hydrogen'])]);
+                if (!isNaN(h2) && h2 > 0) {
+                    dashboardData.h2Stock = h2;
+                    dashboardData.materialsInventory.h2[dashboardData.materialsInventory.h2.length - 1] = h2;
+                }
+            }
+
+            // Update MMP stock
+            if (hasColumn(keys, ['mmp'])) {
+                const mmp = parseFloat(row[findColumn(keys, ['mmp'])]);
+                if (!isNaN(mmp) && mmp > 0) {
+                    dashboardData.mmpStock = mmp;
+                    dashboardData.materialsInventory.mmp[dashboardData.materialsInventory.mmp.length - 1] = mmp;
+                }
+            }
+
+            // Update Methanol stock
+            if (hasColumn(keys, ['methanol', 'ch3oh'])) {
+                const methanol = parseFloat(row[findColumn(keys, ['methanol', 'ch3oh'])]);
+                if (!isNaN(methanol) && methanol > 0) {
+                    dashboardData.methanolStock = methanol;
+                    dashboardData.materialsInventory.methanol[dashboardData.materialsInventory.methanol.length - 1] = methanol;
+                }
+            }
+        }
+
+        function updatePOData(row, keys) {
+            // Update PO value
+            if (hasColumn(keys, ['po', 'purchase', 'value'])) {
+                const poValue = parseFloat(row[findColumn(keys, ['po', 'purchase', 'value'])]);
+                if (!isNaN(poValue) && poValue > 0) {
+                    dashboardData.totalPOValue = poValue;
+                }
+            }
+
+            // Update on-time rate
+            if (hasColumn(keys, ['ontime', 'delivery', 'rate'])) {
+                const rate = parseFloat(row[findColumn(keys, ['ontime', 'delivery', 'rate'])]);
+                if (!isNaN(rate) && rate >= 0 && rate <= 100) {
+                    dashboardData.onTimeRate = rate;
+                }
+            }
         }
 
         function hasColumn(keys, patterns) {
@@ -1315,12 +1260,12 @@
         }
 
         function updateDashboardUI() {
-            document.getElementById('todayShipped').textContent = `${dashboardData.todayShipped.toLocaleString()} MT`;
-            document.getElementById('h2Stock').textContent = `${dashboardData.h2Stock.toLocaleString()} MT`;
-            document.getElementById('mmpStock').textContent = `${dashboardData.mmpStock.toLocaleString()} MT`;
-            document.getElementById('methanolStock').textContent = `${dashboardData.methanolStock.toLocaleString()} MT`;
-            document.getElementById('totalPOValue').textContent = `$${dashboardData.totalPOValue.toFixed(1)}M`;
-            document.getElementById('onTimeRate').textContent = `${dashboardData.onTimeRate}%`;
+            updateElementText('todayShipped', `${dashboardData.todayShipped.toLocaleString()} MT`);
+            updateElementText('h2Stock', `${dashboardData.h2Stock.toLocaleString()} MT`);
+            updateElementText('mmpStock', `${dashboardData.mmpStock.toLocaleString()} MT`);
+            updateElementText('methanolStock', `${dashboardData.methanolStock.toLocaleString()} MT`);
+            updateElementText('totalPOValue', `$${dashboardData.totalPOValue.toFixed(1)}M`);
+            updateElementText('onTimeRate', `${dashboardData.onTimeRate}%`);
         }
 
         function refreshCharts() {
@@ -1360,33 +1305,14 @@
             }
         }
 
-        function showUploadStatus(type, message) {
-            const uploadStatus = document.getElementById('uploadStatus');
-            uploadStatus.className = `upload-status ${type}`;
-            uploadStatus.textContent = message;
-            setTimeout(() => {
-                if (type === 'success') {
-                    uploadStatus.style.display = 'none';
-                }
-            }, 5000);
-        }
-
         function updateDataFreshness() {
-            const now = new Date();
-            document.getElementById('prodDataTime').textContent = 'Just now';
-            document.getElementById('invDataTime').textContent = 'Just now';
-            document.getElementById('poDataTime').textContent = 'Just now';
+            updateElementText('prodDataTime', 'Just now');
+            updateElementText('invDataTime', 'Just now');
+            updateElementText('poDataTime', 'Just now');
         }
 
-        // Listen for coordination events
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'evonik_coordination_event') {
-                const eventData = JSON.parse(e.newValue);
-                handleCoordinationEvent(eventData);
-            }
-        });
-
-        function handleCoordinationEvent(event) {
+        // Listen for coordination events using shared utility
+        initCoordinationEventListener(function(event) {
             switch(event.type) {
                 case 'equipment_failure':
                     showAlert('ME6 shutdown detected - Monitor tank depletion rate');
@@ -1400,94 +1326,57 @@
                     resetDashboard();
                     break;
             }
-        }
-
-        function showAlert(message) {
-            const banner = document.getElementById('alertsBanner');
-            document.getElementById('alertMessage').textContent = message;
-            banner.classList.add('show');
-            setTimeout(() => banner.classList.remove('show'), 8000);
-        }
+        });
 
         function updateMethanolDelay() {
-            const methanolCard = document.getElementById('methanolCard');
-            methanolCard.classList.add('critical');
+            const methanolCard = getElementSafely('methanolCard');
+            if (methanolCard) methanolCard.classList.add('critical');
+            
             dashboardData.methanolStock = 780;
-            document.getElementById('methanolStock').textContent = '780 MT';
-            document.getElementById('methanolStatus').className = 'material-status status-critical';
-            document.getElementById('methanolStatus').textContent = 'Critical';
-            document.getElementById('delayedDeliveries').textContent = '1';
-            document.getElementById('urgentPOs').textContent = '3';
+            updateElementText('methanolStock', '780 MT');
+            setElementClassName('methanolStatus', 'material-status status-critical');
+            updateElementText('methanolStatus', 'Critical');
+            updateElementText('delayedDeliveries', '1');
+            updateElementText('urgentPOs', '3');
             refreshCharts();
         }
 
         function resetDashboard() {
-            document.getElementById('alertsBanner').classList.remove('show');
-            document.getElementById('shipmentStatus').textContent = 'On Track';
-            document.getElementById('lastWeighing').textContent = '3 min ago';
+            closeAlert();
+            updateElementText('shipmentStatus', 'On Track');
+            updateElementText('lastWeighing', '3 min ago');
             dashboardData.todayShipped = 782;
-            document.getElementById('todayShipped').textContent = '782 MT';
+            updateElementText('todayShipped', '782 MT');
             
-            const methanolCard = document.getElementById('methanolCard');
-            methanolCard.classList.remove('critical');
+            const methanolCard = getElementSafely('methanolCard');
+            if (methanolCard) methanolCard.classList.remove('critical');
+            
             dashboardData.methanolStock = 980;
-            document.getElementById('methanolStock').textContent = '980 MT';
-            document.getElementById('methanolStatus').className = 'material-status status-monitor';
-            document.getElementById('methanolStatus').textContent = 'Monitor';
-            document.getElementById('delayedDeliveries').textContent = '1';
-            document.getElementById('urgentPOs').textContent = '2';
+            updateElementText('methanolStock', '980 MT');
+            setElementClassName('methanolStatus', 'material-status status-monitor');
+            updateElementText('methanolStatus', 'Monitor');
+            updateElementText('delayedDeliveries', '1');
+            updateElementText('urgentPOs', '2');
             refreshCharts();
         }
 
         function updateShipmentMetrics() {
-            document.getElementById('lastWeighing').textContent = '3 min ago';
-            document.getElementById('todayShipped').textContent = `${dashboardData.todayShipped} MT`;
+            updateElementText('lastWeighing', '3 min ago');
+            updateElementText('todayShipped', `${dashboardData.todayShipped} MT`);
         }
 
         function updateSyncTime() {
-            const now = new Date();
             const minutes = Math.floor(Math.random() * 5) + 1;
-            document.getElementById('lastSync').textContent = `${minutes} min ago`;
+            updateElementText('lastSync', `${minutes} min ago`);
         }
 
         setInterval(updateSyncTime, 60000);
 
-        // Update user display from localStorage
-        function updateUserDisplay() {
-            const userSession = localStorage.getItem('evonik_user_session');
-            if (userSession) {
-                try {
-                    const session = JSON.parse(userSession);
-                    const userNameEl = document.getElementById('userName');
-                    const userTitleEl = document.getElementById('userTitle');
-                    
-                    if (userNameEl) {
-                        userNameEl.textContent = session.name;
-                    }
-                    
-                    if (userTitleEl) {
-                        // Map role to title
-                        const roleTitles = {
-                            'supply_chain': 'Local Supply Chain Manager',
-                            'plant_manager': 'Production Manager',
-                            'sales': 'Regional Sales Manager',
-                            'operations': 'Production Manager',
-                            'management': 'Management'
-                        };
-                        userTitleEl.textContent = roleTitles[session.role] || 'User';
-                    }
-                } catch (error) {
-                    console.error('Error parsing user session:', error);
-                }
-            }
-        }
-
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateUserDisplay();
-            console.log('Local Supply Chain Dashboard initialized');
+            updateUserDisplay({ roleContext: 'local' });
             initCharts();
-            setupFileUpload();
+            setupLocalFileUpload();
             updateDashboardUI();
         });
     </script>

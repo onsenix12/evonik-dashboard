@@ -7,6 +7,8 @@
     <title>Sales Team Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="shared-file-upload.js"></script>
     <style>
         /* Page-specific styles for sales.html */
         .header {
@@ -685,15 +687,8 @@
             }
         }
 
-        // Listen for coordination events
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'evonik_coordination_event') {
-                const eventData = JSON.parse(e.newValue);
-                handleCoordinationEvent(eventData);
-            }
-        });
-
-        function handleCoordinationEvent(event) {
+        // Listen for coordination events using shared utility
+        initCoordinationEventListener(function(event) {
             switch(event.type) {
                 case 'equipment_failure':
                     showAlert('Production disruption detected - 3 customer orders may be impacted');
@@ -707,174 +702,97 @@
                     resetDashboard();
                     break;
             }
-        }
-
-        function showAlert(message) {
-            const banner = document.getElementById('alertsBanner');
-            document.getElementById('alertMessage').textContent = message;
-            banner.classList.add('show');
-            setTimeout(() => banner.classList.remove('show'), 8000);
-        }
+        });
 
         function updateCustomerImpact() {
             // Production issue affects fulfillment
-            document.getElementById('currentOutput').textContent = '620 MT/day';
-            document.getElementById('availableCapacity').textContent = '0 MT';
-            document.getElementById('capacityStatus').className = 'card-status status-warning';
-            document.getElementById('capacityStatus').textContent = 'Limited';
+            updateElementText('currentOutput', '620 MT/day');
+            updateElementText('availableCapacity', '0 MT');
+            setElementClassName('capacityStatus', 'card-status status-warning');
+            updateElementText('capacityStatus', 'Limited');
             
-            document.getElementById('fulfillmentStatus').className = 'card-status status-warning';
-            document.getElementById('fulfillmentStatus').textContent = 'At Risk';
+            setElementClassName('fulfillmentStatus', 'card-status status-warning');
+            updateElementText('fulfillmentStatus', 'At Risk');
             
-            document.getElementById('atRiskCount').textContent = '3';
-            document.getElementById('atRiskStatus').className = 'card-status status-warning';
-            document.getElementById('atRiskStatus').textContent = '3 Orders';
-            document.getElementById('atRiskDetail').textContent = 'ME6 shutdown impacting 3 customer commitments';
+            updateElementText('atRiskCount', '3');
+            setElementClassName('atRiskStatus', 'card-status status-warning');
+            updateElementText('atRiskStatus', '3 Orders');
+            updateElementText('atRiskDetail', 'ME6 shutdown impacting 3 customer commitments');
             
             // Mark affected orders
             const tbody = document.getElementById('ordersTableBody');
             const rows = tbody.querySelectorAll('tr');
-            rows[1].querySelector('.order-status').className = 'order-status status-at-risk';
-            rows[1].querySelector('.order-status').textContent = 'At Risk';
-            rows[3].querySelector('.order-status').className = 'order-status status-at-risk';
-            rows[3].querySelector('.order-status').textContent = 'At Risk';
+            if (rows[1]) {
+                rows[1].querySelector('.order-status').className = 'order-status status-at-risk';
+                rows[1].querySelector('.order-status').textContent = 'At Risk';
+            }
+            if (rows[3]) {
+                rows[3].querySelector('.order-status').className = 'order-status status-at-risk';
+                rows[3].querySelector('.order-status').textContent = 'At Risk';
+            }
         }
 
         function updateOrderCounts() {
-            document.getElementById('newOrders').textContent = '13';
-            document.getElementById('confirmedOrders').textContent = '28';
+            updateElementText('newOrders', '13');
+            updateElementText('confirmedOrders', '28');
         }
 
         function resetDashboard() {
-            document.getElementById('alertsBanner').classList.remove('show');
-            document.getElementById('currentOutput').textContent = '965 MT/day';
-            document.getElementById('availableCapacity').textContent = '800 MT';
-            document.getElementById('capacityStatus').className = 'card-status status-operational';
-            document.getElementById('capacityStatus').textContent = 'Available';
+            closeAlert();
+            updateElementText('currentOutput', '965 MT/day');
+            updateElementText('availableCapacity', '800 MT');
+            setElementClassName('capacityStatus', 'card-status status-operational');
+            updateElementText('capacityStatus', 'Available');
             
-            document.getElementById('fulfillmentStatus').className = 'card-status status-operational';
-            document.getElementById('fulfillmentStatus').textContent = 'On Track';
+            setElementClassName('fulfillmentStatus', 'card-status status-operational');
+            updateElementText('fulfillmentStatus', 'On Track');
             
-            document.getElementById('atRiskCount').textContent = '0';
-            document.getElementById('atRiskStatus').className = 'card-status status-operational';
-            document.getElementById('atRiskStatus').textContent = 'None';
-            document.getElementById('atRiskDetail').textContent = 'No active production disruptions';
+            updateElementText('atRiskCount', '0');
+            setElementClassName('atRiskStatus', 'card-status status-operational');
+            updateElementText('atRiskStatus', 'None');
+            updateElementText('atRiskDetail', 'No active production disruptions');
             
-            document.getElementById('newOrders').textContent = '8';
-            document.getElementById('confirmedOrders').textContent = '23';
+            updateElementText('newOrders', '8');
+            updateElementText('confirmedOrders', '23');
             
             // Reset order statuses
             const tbody = document.getElementById('ordersTableBody');
             const rows = tbody.querySelectorAll('tr');
-            rows[1].querySelector('.order-status').className = 'order-status status-confirmed';
-            rows[1].querySelector('.order-status').textContent = 'Confirmed';
-            rows[3].querySelector('.order-status').className = 'order-status status-pending';
-            rows[3].querySelector('.order-status').textContent = 'Pending Allocation';
-        }
-
-        // Update user display from localStorage
-        function updateUserDisplay() {
-            const userSession = localStorage.getItem('evonik_user_session');
-            if (userSession) {
-                try {
-                    const session = JSON.parse(userSession);
-                    const userNameEl = document.getElementById('userName');
-                    const userTitleEl = document.getElementById('userTitle');
-                    
-                    if (userNameEl) {
-                        userNameEl.textContent = session.name;
-                    }
-                    
-                    if (userTitleEl) {
-                        // Map role to title
-                        const roleTitles = {
-                            'supply_chain': 'Local Supply Chain Manager',
-                            'plant_manager': 'Production Manager',
-                            'sales': 'Regional Sales Manager',
-                            'operations': 'Production Manager',
-                            'management': 'Management'
-                        };
-                        userTitleEl.textContent = roleTitles[session.role] || 'User';
-                    }
-                } catch (error) {
-                    console.error('Error parsing user session:', error);
-                }
+            if (rows[1]) {
+                rows[1].querySelector('.order-status').className = 'order-status status-confirmed';
+                rows[1].querySelector('.order-status').textContent = 'Confirmed';
+            }
+            if (rows[3]) {
+                rows[3].querySelector('.order-status').className = 'order-status status-pending';
+                rows[3].querySelector('.order-status').textContent = 'Pending Allocation';
             }
         }
 
-        // File Upload Functionality
+        // File Upload Functionality using shared utility
         function setupIBPFileUpload() {
-            const fileInput = document.getElementById('ibpDataFileInput');
-            const uploadSection = document.getElementById('ibpUploadSection');
-            const uploadStatus = document.getElementById('ibpUploadStatus');
-
-            if (!fileInput || !uploadSection) return;
-
-            // Drag and drop
-            uploadSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--sales-blue)';
-                uploadSection.style.background = 'rgba(37, 99, 235, 0.05)';
-            });
-
-            uploadSection.addEventListener('dragleave', () => {
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-            });
-
-            uploadSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleIBPFileUpload(files[0]);
+            setupFileUpload({
+                fileInputId: 'ibpDataFileInput',
+                uploadSectionId: 'ibpUploadSection',
+                uploadStatusId: 'ibpUploadStatus',
+                onFileSelected: function(file, uploadStatus) {
+                    // Simulate file processing
+                    setTimeout(() => {
+                        showUploadStatus(uploadStatus, 'success', `Successfully updated data from ${file.name}`);
+                        updateElementText('lastIbpSync', 'Just now');
+                    }, 1500);
                 }
             });
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleIBPFileUpload(e.target.files[0]);
-                }
-            });
-        }
-
-        function handleIBPFileUpload(file) {
-            const uploadStatus = document.getElementById('ibpUploadStatus');
-            const fileName = file.name.toLowerCase();
-
-            uploadStatus.style.display = 'block';
-            uploadStatus.className = 'upload-status';
-            uploadStatus.textContent = 'Processing file...';
-
-            // Simulate file processing
-            setTimeout(() => {
-                uploadStatus.className = 'upload-status success';
-                uploadStatus.style.background = 'rgba(22, 163, 74, 0.1)';
-                uploadStatus.style.color = 'var(--success-green)';
-                uploadStatus.style.border = '1px solid rgba(22, 163, 74, 0.2)';
-                uploadStatus.textContent = `Successfully updated data from ${file.name}`;
-                
-                // Update data freshness
-                document.getElementById('lastIbpSync').textContent = 'Just now';
-                
-                setTimeout(() => {
-                    uploadStatus.style.display = 'none';
-                }, 5000);
-            }, 1500);
         }
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
-            updateUserDisplay();
+            updateUserDisplay({ roleContext: null });
             initSalesCharts();
             setupIBPFileUpload();
             // Set initial sync time
-            document.getElementById('lastIbpSync').textContent = '5 min ago';
-            
+            updateElementText('lastIbpSync', '5 min ago');
             // Update notification count
-            document.getElementById('notificationsSent').textContent = '12';
+            updateElementText('notificationsSent', '12');
         });
     </script>
 </body>

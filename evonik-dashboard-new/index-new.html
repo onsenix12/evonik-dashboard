@@ -6,6 +6,8 @@
     <base href="https://onsenix12.github.io/evonik-dashboard/">
     <title>Evonik Production Coordination Hub</title>
     <link rel="stylesheet" href="shared-styles-new.css">
+    <script src="shared-utils.js"></script>
+    <script src="map-utils.js"></script>
     <style>
         /* Page-specific styles */
         .header {
@@ -1438,94 +1440,25 @@
             }
         }
 
-        // User session handling
-        function initializeUserSession() {
-            const userSession = localStorage.getItem('evonik_user_session');
-            if (!userSession) {
-                // No session found, redirect to login
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            try {
-                const session = JSON.parse(userSession);
-                
-                // Check if user just logged in (redirect to role-specific dashboard)
-                // Redirect if login was within last 5 seconds (fresh login) and not management
-                const loginTime = new Date(session.loginTime);
-                const now = new Date();
-                const secondsSinceLogin = (now - loginTime) / 1000;
-                const isFreshLogin = secondsSinceLogin < 5;
-                
-                // Redirect to role-specific primary dashboard (except management)
-                if (isFreshLogin && session.role !== 'management') {
-                    redirectToRoleDashboard(session.role);
-                    return;
-                }
-                
-                updateUserDisplay(session);
-                applyRoleBasedAccess(session);
-            } catch (error) {
-                console.error('Invalid session data:', error);
-                localStorage.removeItem('evonik_user_session');
-                window.location.href = 'login.html';
-            }
-        }
-        
-        function redirectToRoleDashboard(role) {
-            const roleDashboardMap = {
-                'supply_chain': 'local-supply-chain-new.html',
-                'plant_manager': 'production-new.html',
-                'sales': 'sales-new.html',
-                'operations': 'production-new.html',
-                'management': 'index-new.html' // Management stays on coordination hub
-            };
-            
-            const dashboard = roleDashboardMap[role];
-            if (dashboard && dashboard !== 'index-new.html') {
-                window.location.href = dashboard;
-            }
-        }
-        
-        function updateUserDisplay(session) {
-            const userDisplay = document.getElementById('userDisplay');
-            if (userDisplay) {
-                userDisplay.textContent = `${session.name} (${session.role.replace('_', ' ').toUpperCase()})`;
-            }
-        }
-        
-        function applyRoleBasedAccess(session) {
-            const permissions = session.permissions;
-            
-            // Hide/show navigation items based on role
-            const navItems = document.querySelectorAll('.stakeholder-btn');
-            navItems.forEach(item => {
-                const href = item.getAttribute('href');
-                if (href) {
-                    let dashboard = href.replace('-new.html', '').replace('.html', '');
+        // User session handling using shared utilities
+        function initializeHubUserSession() {
+            const session = initializeUserSession({
+                allowRedirect: true,
+                onSessionLoaded: function(session) {
+                    // Custom display for hub (shows role in uppercase)
+                    const userDisplay = getElementSafely('userDisplay');
+                    if (userDisplay) {
+                        userDisplay.textContent = `${session.name} (${session.role.replace('_', ' ').toUpperCase()})`;
+                    }
+                    applyRoleBasedAccess(session);
                     
-                    // Map specific dashboard names to permission names
-                    const dashboardMapping = {
-                        'global-supply-chain': 'global-sc',
-                        'local-supply-chain': 'local-sc',
-                        'optimizer': 'optimizer',
-                        'sales': 'sales',
-                        'production': 'production',
-                        'index-new': 'hub'
-                    };
-                    
-                    dashboard = dashboardMapping[dashboard] || dashboard;
-                    
-                    if (!permissions.dashboards.includes(dashboard)) {
-                        item.style.display = 'none';
+                    // Apply role-specific styling
+                    if (session.role === 'management') {
+                        document.body.classList.add('management-view');
                     }
                 }
             });
-            
-            // Apply role-specific styling or restrictions
-            if (session.role === 'management') {
-                document.body.classList.add('management-view');
-            }
+            return session;
         }
         
         // Plant Operations Chart
@@ -1635,255 +1568,13 @@
         
         // Initialize everything on page load
         document.addEventListener('DOMContentLoaded', function() {
-            initializeUserSession();
+            initializeHubUserSession();
             initializePlantOperationsChart();
             
-            // Production Flow Map - Simplified focus on shipment flows
-            // Wait a bit to ensure Leaflet is loaded
-            if (typeof L === 'undefined') {
-                console.error('Leaflet library not loaded');
-                return;
-            }
-
-            const mapEl = document.getElementById('plantWorldMap');
-            if (!mapEl) {
-                console.error('Map element #plantWorldMap not found');
-                return;
-            }
-
-            // Ensure container has dimensions
-            if (mapEl.offsetHeight === 0) {
-                console.warn('Map container has no height, waiting...');
-                setTimeout(() => {
-                    // Retry initialization after a delay
-                    initializeMap();
-                }, 500);
-                return;
-            }
-
-            // Initialize map function
-            function initializeMap() {
-                // Declare map variable
-                let map;
-                
-                try {
-                    // Create map instance
-                    map = L.map('plantWorldMap', { 
-                        zoomControl: true, 
-                        worldCopyJump: true,
-                        preferCanvas: true
-                    }).setView([20, 0], 2);
-                    
-                    // Add tile layer
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 8,
-                        attribution: '&copy; OpenStreetMap contributors'
-                    }).addTo(map);
-                    
-                    // Force map to invalidate size after a short delay to ensure it renders
-                    setTimeout(() => {
-                        if (map) map.invalidateSize();
-                    }, 100);
-                    
-                    // Plant locations
-                    const plants = {
-                        'Singapore': { 
-                            name: 'Jurong Island (ME5/ME6)',
-                            city: 'Singapore',
-                            lat: 1.3009, 
-                            lon: 103.7876
-                        },
-                        'Belgium': { 
-                            name: 'Antwerp Plant',
-                            city: 'Antwerp',
-                            lat: 51.2600, 
-                            lon: 4.4020
-                        },
-                        'United States': { 
-                            name: 'Mobile Plant',
-                            city: 'Mobile, Alabama',
-                            lat: 30.6954, 
-                            lon: -88.0399
-                        }
-                    };
-
-                    // Regional destination points
-                    const regions = {
-                        'APAC': { lat: 20, lon: 110 },
-                        'Europe': { lat: 50, lon: 10 },
-                        'Americas': { lat: 30, lon: -90 }
-                    };
-
-                    // Shipment flows - showing real-time allocation
-                    // Singapore serves multiple regions (to demonstrate coverage)
-                    const shipmentFlows = [
-                        // Singapore flows - covering multiple regions
-                        { 
-                            from: 'Singapore', 
-                            to: 'APAC', 
-                            volume: 'high', 
-                            mt: 28950, 
-                            color: '#8B2E8B',
-                            status: 'in-transit' // in-transit, scheduled, delivered
-                        },
-                        { 
-                            from: 'Singapore', 
-                            to: 'Europe', 
-                            volume: 'medium', 
-                            mt: 4200, 
-                            color: '#A855F7',
-                            status: 'in-transit'
-                        },
-                        { 
-                            from: 'Singapore', 
-                            to: 'Americas', 
-                            volume: 'low', 
-                            mt: 1800, 
-                            color: '#C084FC',
-                            status: 'scheduled'
-                        },
-                        // Antwerp flows
-                        { 
-                            from: 'Belgium', 
-                            to: 'Europe', 
-                            volume: 'high', 
-                            mt: 15600, 
-                            color: '#8B2E8B',
-                            status: 'in-transit'
-                        },
-                        // Mobile flows
-                        { 
-                            from: 'United States', 
-                            to: 'Americas', 
-                            volume: 'high', 
-                            mt: 13500, 
-                            color: '#8B2E8B',
-                            status: 'in-transit'
-                        }
-                    ];
-
-                    // Helper function to create animated curved flow line
-                    function createFlowLine(from, to, volume, color, mt) {
-                        const lat1 = from.lat, lon1 = from.lon;
-                        const lat2 = to.lat, lon2 = to.lon;
-                        
-                        // Create curved path for visual appeal
-                        const midLat = (lat1 + lat2) / 2;
-                        const midLon = (lon1 + lon2) / 2;
-                        const curve = 8; // curve intensity
-                        
-                        const controlLat = midLat + curve;
-                        const controlLon = midLon;
-                
-                        const points = [];
-                        for (let i = 0; i <= 50; i++) {
-                            const t = i / 50;
-                            const lat = (1-t)*(1-t)*lat1 + 2*(1-t)*t*controlLat + t*t*lat2;
-                            const lon = (1-t)*(1-t)*lon1 + 2*(1-t)*t*controlLon + t*t*lon2;
-                            points.push([lat, lon]);
-                        }
-                        
-                        const lineWidth = volume === 'high' ? 6 : volume === 'medium' ? 4 : 2;
-                        
-                        const polyline = L.polyline(points, {
-                            color: color,
-                            weight: lineWidth,
-                            opacity: 0.8,
-                            dashArray: '15, 10',
-                            className: `flow-line ${volume}-volume`
-                        }).addTo(map);
-                        
-                        // Add volume label at midpoint
-                        const midPoint = points[Math.floor(points.length / 2)];
-                        L.marker(midPoint, {
-                            icon: L.divIcon({
-                                className: 'flow-label',
-                                html: `<div class="flow-label-badge">${mt.toLocaleString()} MT</div>`,
-                                iconSize: [null, null],
-                                iconAnchor: [0, 0]
-                            })
-                        }).addTo(map);
-                        
-                        return polyline;
-                    }
-
-                    // Add plant markers
-                    const plantMarkers = [];
-                    Object.entries(plants).forEach(([country, plant]) => {
-                        const marker = L.circleMarker([plant.lat, plant.lon], {
-                            radius: 12,
-                            color: '#FFFFFF',
-                            weight: 3,
-                            fillColor: '#8B2E8B',
-                            fillOpacity: 0.95,
-                            className: 'plant-marker'
-                        }).addTo(map);
-                        
-                        marker.bindPopup(`
-                            <div style="min-width: 200px;">
-                                <strong>${plant.name}</strong><br/>
-                                📍 ${plant.city}, ${country}
-                            </div>
-                        `);
-                        
-                        marker.bindTooltip(plant.name, { permanent: false, direction: 'top' });
-                        plantMarkers.push(marker);
-                    });
-
-                    // Add shipment flow lines
-                    shipmentFlows.forEach(flow => {
-                        const plant = plants[flow.from];
-                        const region = regions[flow.to];
-                        
-                        if (plant && region) {
-                            createFlowLine(
-                                { lat: plant.lat, lon: plant.lon },
-                                { lat: region.lat, lon: region.lon },
-                                flow.volume,
-                                flow.color,
-                                flow.mt
-                            );
-                        }
-                    });
-
-                    // Add region labels
-                    Object.entries(regions).forEach(([regionName, coords]) => {
-                        L.marker([coords.lat, coords.lon], {
-                            icon: L.divIcon({
-                                className: 'region-label',
-                                html: `<div style="background: rgba(139, 46, 139, 0.9); color: white; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">${regionName}</div>`,
-                                iconSize: [null, null],
-                                iconAnchor: [0, 0]
-                            })
-                        }).addTo(map);
-                    });
-
-                    // Fit map to show all flows
-                    if (map && plantMarkers.length > 0) {
-                        const bounds = L.latLngBounds(plantMarkers.map(m => m.getLatLng()));
-                        Object.values(regions).forEach(region => bounds.extend([region.lat, region.lon]));
-                        map.fitBounds(bounds.pad(0.2));
-                    }
-                    
-                } catch (error) {
-                    console.error('Error initializing map:', error);
-                    const mapEl = document.getElementById('plantWorldMap');
-                    if (mapEl) {
-                        mapEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">⚠️ Map initialization error. Please check console for details.</div>';
-                    }
-                }
-            }
-            
-            // Call initialize map
-            initializeMap();
-        });
-
-        // Listen for events from other pages
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'evonik_coordination_event' && e.newValue) {
-                const event = JSON.parse(e.newValue);
-                console.log('Received coordination event:', event);
-            }
+            // Initialize production flow map using shared utility
+            initializeProductionFlowMap('plantWorldMap', function(error) {
+                console.error('Map initialization error:', error);
+            });
         });
     </script>
 </body>

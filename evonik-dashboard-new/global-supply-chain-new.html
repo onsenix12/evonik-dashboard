@@ -7,6 +7,8 @@
     <title>Global Supply Chain Dashboard - Evonik</title>
     <link rel="stylesheet" href="shared-styles-new.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="shared-file-upload.js"></script>
     <style>
         /* Page-specific styles for global-supply-chain.html */
         .header {
@@ -1015,15 +1017,8 @@
             }
         }
 
-        // Listen for coordination events
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'evonik_coordination_event') {
-                const eventData = JSON.parse(e.newValue);
-                handleCoordinationEvent(eventData);
-            }
-        });
-
-        function handleCoordinationEvent(event) {
+        // Listen for coordination events using shared utility
+        initCoordinationEventListener(function(event) {
             switch(event.type) {
                 case 'equipment_failure':
                     showAlert('Singapore site production disruption - Reallocating capacity');
@@ -1036,195 +1031,119 @@
                     resetDashboard();
                     break;
             }
-        }
-
-        function showAlert(message) {
-            const banner = document.getElementById('alertsBanner');
-            document.getElementById('alertMessage').textContent = message;
-            banner.classList.add('show');
-            setTimeout(() => banner.classList.remove('show'), 8000);
-        }
+        });
 
         function handleSingaporeDisruption() {
             // Update Singapore site
-            const singaporeCard = document.getElementById('singaporeCard');
-            singaporeCard.classList.add('degraded');
-            document.getElementById('singaporeSiteStatus').className = 'site-status status-critical';
-            document.getElementById('singaporeSiteStatus').textContent = 'Degraded';
-            document.getElementById('singaporeCapacity').textContent = '620 MT/day';
-            document.getElementById('singaporeUtilization').textContent = '64%';
-            document.getElementById('singaporeStatus').textContent = 'Degraded';
-            document.getElementById('singaporeStatus').style.color = 'var(--alert-red)';
+            const singaporeCard = getElementSafely('singaporeCard');
+            if (singaporeCard) singaporeCard.classList.add('degraded');
+            
+            setElementClassName('singaporeSiteStatus', 'site-status status-critical');
+            updateElementText('singaporeSiteStatus', 'Degraded');
+            updateElementText('singaporeCapacity', '620 MT/day');
+            updateElementText('singaporeUtilization', '64%');
+            updateElementText('singaporeStatus', 'Degraded');
+            const singaporeStatusEl = getElementSafely('singaporeStatus');
+            if (singaporeStatusEl) singaporeStatusEl.style.color = 'var(--alert-red)';
             
             // Update network totals
-            document.getElementById('totalOutput').textContent = '1,502 MT/day';
-            document.getElementById('networkStatus').className = 'card-status status-warning';
-            document.getElementById('networkStatus').textContent = 'Degraded';
-            document.getElementById('sitesStatus').textContent = '2.5/3';
-            document.getElementById('sitesStatus').className = 'card-status status-warning';
+            updateElementText('totalOutput', '1,502 MT/day');
+            setElementClassName('networkStatus', 'card-status status-warning');
+            updateElementText('networkStatus', 'Degraded');
+            updateElementText('sitesStatus', '2.5/3');
+            setElementClassName('sitesStatus', 'card-status status-warning');
             
             // Update APAC coverage
-            document.getElementById('apacSupply').textContent = '18,600 MT';
+            updateElementText('apacSupply', '18,600 MT');
             const apacSubtext = document.querySelector('#apacSupply + .metric-subtext');
-            apacSubtext.textContent = '64% local - Need 10,350 MT reallocation';
-            apacSubtext.style.color = 'var(--warning-orange)';
+            if (apacSubtext) {
+                apacSubtext.textContent = '64% local - Need 10,350 MT reallocation';
+                apacSubtext.style.color = 'var(--warning-orange)';
+            }
             
             // Add reallocation row to table
-            const tbody = document.getElementById('allocationTableBody');
-            const newRow = tbody.insertRow(1);
-            newRow.style.background = 'rgba(234, 88, 12, 0.05)';
-            newRow.innerHTML = `
-                <td><strong>Mobile → Singapore</strong></td>
-                <td><span class="region-badge badge-apac">APAC</span></td>
-                <td><strong>850 MT/month</strong></td>
-                <td>18-25 days</td>
-                <td><span class="card-status status-warning">Reallocating</span></td>
-            `;
+            const tbody = getElementSafely('allocationTableBody');
+            if (tbody) {
+                const newRow = tbody.insertRow(1);
+                newRow.style.background = 'rgba(234, 88, 12, 0.05)';
+                newRow.innerHTML = `
+                    <td><strong>Mobile → Singapore</strong></td>
+                    <td><span class="region-badge badge-apac">APAC</span></td>
+                    <td><strong>850 MT/month</strong></td>
+                    <td>18-25 days</td>
+                    <td><span class="card-status status-warning">Reallocating</span></td>
+                `;
+            }
             
             // Update Mobile capacity to show it's compensating
-            document.getElementById('mobileCapacity').textContent = '410 MT/day';
-            document.getElementById('americasSupply').textContent = '10,500 MT';
+            updateElementText('mobileCapacity', '410 MT/day');
+            updateElementText('americasSupply', '10,500 MT');
         }
 
         function resetDashboard() {
-            document.getElementById('alertsBanner').classList.remove('show');
+            closeAlert();
             
             // Reset Singapore
-            const singaporeCard = document.getElementById('singaporeCard');
-            singaporeCard.classList.remove('degraded');
-            document.getElementById('singaporeSiteStatus').className = 'site-status status-operational';
-            document.getElementById('singaporeSiteStatus').textContent = 'Operational';
-            document.getElementById('singaporeCapacity').textContent = '965 MT/day';
-            document.getElementById('singaporeUtilization').textContent = '100%';
-            document.getElementById('singaporeStatus').textContent = 'Online';
-            document.getElementById('singaporeStatus').style.color = 'var(--success-green)';
+            const singaporeCard = getElementSafely('singaporeCard');
+            if (singaporeCard) singaporeCard.classList.remove('degraded');
+            
+            setElementClassName('singaporeSiteStatus', 'site-status status-operational');
+            updateElementText('singaporeSiteStatus', 'Operational');
+            updateElementText('singaporeCapacity', '965 MT/day');
+            updateElementText('singaporeUtilization', '100%');
+            updateElementText('singaporeStatus', 'Online');
+            const singaporeStatusEl = getElementSafely('singaporeStatus');
+            if (singaporeStatusEl) singaporeStatusEl.style.color = 'var(--success-green)';
             
             // Reset network
-            document.getElementById('totalOutput').textContent = '1,747 MT/day';
-            document.getElementById('networkStatus').className = 'card-status status-operational';
-            document.getElementById('networkStatus').textContent = 'Operational';
-            document.getElementById('sitesStatus').className = 'card-status status-operational';
+            updateElementText('totalOutput', '1,747 MT/day');
+            setElementClassName('networkStatus', 'card-status status-operational');
+            updateElementText('networkStatus', 'Operational');
+            setElementClassName('sitesStatus', 'card-status status-operational');
             
             // Reset APAC coverage
-            document.getElementById('apacSupply').textContent = '28,950 MT';
+            updateElementText('apacSupply', '28,950 MT');
             const apacSubtext = document.querySelector('#apacSupply + .metric-subtext');
-            apacSubtext.textContent = '100% local production';
-            apacSubtext.style.color = 'var(--text-light)';
+            if (apacSubtext) {
+                apacSubtext.textContent = '100% local production';
+                apacSubtext.style.color = 'var(--text-light)';
+            }
             
             // Remove reallocation row from table
-            const tbody = document.getElementById('allocationTableBody');
-            if (tbody.rows.length > 3) {
+            const tbody = getElementSafely('allocationTableBody');
+            if (tbody && tbody.rows.length > 3) {
                 tbody.deleteRow(1);
             }
             
             // Reset Mobile
-            document.getElementById('mobileCapacity').textContent = '380 MT/day';
-            document.getElementById('americasSupply').textContent = '11,400 MT';
+            updateElementText('mobileCapacity', '380 MT/day');
+            updateElementText('americasSupply', '11,400 MT');
         }
 
-        // Update user display from localStorage
-        function updateUserDisplay() {
-            const userSession = localStorage.getItem('evonik_user_session');
-            if (userSession) {
-                try {
-                    const session = JSON.parse(userSession);
-                    const userNameEl = document.getElementById('userName');
-                    const userTitleEl = document.getElementById('userTitle');
-                    
-                    if (userNameEl) {
-                        userNameEl.textContent = session.name;
-                    }
-                    
-                    if (userTitleEl) {
-                        // Map role to title
-                        const roleTitles = {
-                            'supply_chain': 'Global Supply Chain Director',
-                            'plant_manager': 'Production Manager',
-                            'sales': 'Regional Sales Manager',
-                            'operations': 'Production Manager',
-                            'management': 'Management'
-                        };
-                        userTitleEl.textContent = roleTitles[session.role] || 'User';
-                    }
-                } catch (error) {
-                    console.error('Error parsing user session:', error);
-                }
-            }
-        }
-
-        // File Upload Functionality
+        // File Upload Functionality using shared utility
         function setupGlobalFileUpload() {
-            const fileInput = document.getElementById('globalDataFileInput');
-            const uploadSection = document.getElementById('globalUploadSection');
-            const uploadStatus = document.getElementById('globalUploadStatus');
-
-            if (!fileInput || !uploadSection) return;
-
-            // Drag and drop
-            uploadSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--evonik-purple)';
-                uploadSection.style.background = 'rgba(139, 46, 139, 0.05)';
-            });
-
-            uploadSection.addEventListener('dragleave', () => {
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-            });
-
-            uploadSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadSection.style.borderColor = 'var(--border-gray)';
-                uploadSection.style.background = 'var(--bg-gray)';
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleGlobalFileUpload(files[0]);
+            setupFileUpload({
+                fileInputId: 'globalDataFileInput',
+                uploadSectionId: 'globalUploadSection',
+                uploadStatusId: 'globalUploadStatus',
+                onFileSelected: function(file, uploadStatus) {
+                    // Simulate file processing
+                    setTimeout(() => {
+                        showUploadStatus(uploadStatus, 'success', `Successfully updated data from ${file.name}`);
+                        updateElementText('sgDataTime', 'Just now');
+                        updateElementText('antwerpDataTime', 'Just now');
+                        updateElementText('mobileDataTime', 'Just now');
+                        updateElementText('globalLastSync', 'Just now');
+                    }, 1500);
                 }
             });
-
-            // File input change
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleGlobalFileUpload(e.target.files[0]);
-                }
-            });
-        }
-
-        function handleGlobalFileUpload(file) {
-            const uploadStatus = document.getElementById('globalUploadStatus');
-            const fileName = file.name.toLowerCase();
-
-            uploadStatus.style.display = 'block';
-            uploadStatus.className = 'upload-status';
-            uploadStatus.textContent = 'Processing file...';
-
-            // Simulate file processing
-            setTimeout(() => {
-                uploadStatus.className = 'upload-status success';
-                uploadStatus.style.background = 'rgba(22, 163, 74, 0.1)';
-                uploadStatus.style.color = 'var(--success-green)';
-                uploadStatus.style.border = '1px solid rgba(22, 163, 74, 0.2)';
-                uploadStatus.textContent = `Successfully updated data from ${file.name}`;
-                
-                // Update data freshness
-                document.getElementById('sgDataTime').textContent = 'Just now';
-                document.getElementById('antwerpDataTime').textContent = 'Just now';
-                document.getElementById('mobileDataTime').textContent = 'Just now';
-                document.getElementById('globalLastSync').textContent = 'Just now';
-                
-                setTimeout(() => {
-                    uploadStatus.style.display = 'none';
-                }, 5000);
-            }, 1500);
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            updateUserDisplay();
+            updateUserDisplay({ roleContext: 'global' });
             initGlobalCharts();
             setupGlobalFileUpload();
-            console.log('Global Supply Chain Dashboard initialized');
-            console.log('Multi-site coordination active');
         });
     </script>
 </body>

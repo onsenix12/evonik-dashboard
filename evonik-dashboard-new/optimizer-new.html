@@ -1305,7 +1305,20 @@
         };
 
         // Visualization functions
+        function destroyAllCharts() {
+            // Destroy all existing chart instances
+            Object.values(chartInstances).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            chartInstances = {};
+        }
+
         function showProductionStatus() {
+            // Destroy existing charts first
+            destroyAllCharts();
+            
             addSystemMessage('Here is your current production status for November 2025:');
             updateVizTitle('Production Status - ME5 & ME6 Units');
             
@@ -1395,9 +1408,11 @@
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Weekly Production Chart
-            const weeklyCtx = document.getElementById('weeklyProductionChart').getContext('2d');
-            new Chart(weeklyCtx, {
+            // Wait for DOM to update before creating charts
+            setTimeout(() => {
+                // Weekly Production Chart
+                const weeklyCtx = document.getElementById('weeklyProductionChart').getContext('2d');
+                chartInstances.weeklyProductionChart = new Chart(weeklyCtx, {
                 type: 'bar',
                 data: {
                     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4 (Projected)'],
@@ -1433,10 +1448,10 @@
                     }
                 }
             });
-            
-            // Daily Production Trend
-            const dailyCtx = document.getElementById('dailyProductionChart').getContext('2d');
-            new Chart(dailyCtx, {
+                
+                // Daily Production Trend
+                const dailyCtx = document.getElementById('dailyProductionChart').getContext('2d');
+                chartInstances.dailyProductionChart = new Chart(dailyCtx, {
                 type: 'line',
                 data: {
                     labels: dailyLabels,
@@ -1478,10 +1493,10 @@
                     }
                 }
             });
-            
-            // Equipment Performance
-            const equipCtx = document.getElementById('equipmentChart').getContext('2d');
-            new Chart(equipCtx, {
+                
+                // Equipment Performance
+                const equipCtx = document.getElementById('equipmentChart').getContext('2d');
+                chartInstances.equipmentChart = new Chart(equipCtx, {
                 type: 'bar',
                 data: {
                     labels: ['ME5', 'ME6'],
@@ -1516,15 +1531,15 @@
                     }
                 }
             });
-            
-            // OEE Trend
-            const oeeCtx = document.getElementById('oeeChart').getContext('2d');
-            const oeeLabels = Array.from({length: 30}, (_, i) => {
+                
+                // OEE Trend
+                const oeeCtx = document.getElementById('oeeChart').getContext('2d');
+                const oeeLabels = Array.from({length: 30}, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (29 - i));
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            new Chart(oeeCtx, {
+                });
+                chartInstances.oeeChart = new Chart(oeeCtx, {
                 type: 'line',
                 data: {
                     labels: oeeLabels,
@@ -1555,9 +1570,13 @@
                     }
                 }
             });
+            }, 100);
         }
 
         function showTankLevels() {
+            // Destroy existing charts first
+            destroyAllCharts();
+            
             addSystemMessage('Current tank inventory status:');
             updateVizTitle('Tank Capacity & Inventory Levels');
             
@@ -1654,9 +1673,11 @@
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Tank Distribution Chart
-            const ctx = document.getElementById('tankChart').getContext('2d');
-            new Chart(ctx, {
+            // Wait for DOM to update before creating charts
+            setTimeout(() => {
+                // Tank Distribution Chart
+                const ctx = document.getElementById('tankChart').getContext('2d');
+                chartInstances.tankChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Free Stock', 'Mitsui Allocation', 'Heel Stock', 'Available Capacity'],
@@ -1686,10 +1707,10 @@
                     }
                 }
             });
-            
-            // Inventory Trend Chart
-            const trendCtx = document.getElementById('inventoryTrendChart').getContext('2d');
-            new Chart(trendCtx, {
+                
+                // Inventory Trend Chart
+                const trendCtx = document.getElementById('inventoryTrendChart').getContext('2d');
+                chartInstances.inventoryTrendChart = new Chart(trendCtx, {
                 type: 'line',
                 data: {
                     labels: trendLabels,
@@ -1740,15 +1761,15 @@
                     }
                 }
             });
-            
-            // Shipments vs Production Chart
-            const shipmentCtx = document.getElementById('shipmentChart').getContext('2d');
-            const shipmentLabels = Array.from({length: 14}, (_, i) => {
+                
+                // Shipments vs Production Chart
+                const shipmentCtx = document.getElementById('shipmentChart').getContext('2d');
+                const shipmentLabels = Array.from({length: 14}, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (13 - i));
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            new Chart(shipmentCtx, {
+                });
+                chartInstances.shipmentChart = new Chart(shipmentCtx, {
                 type: 'line',
                 data: {
                     labels: shipmentLabels,
@@ -1798,9 +1819,13 @@
                     }
                 }
             });
+            }, 100);
         }
 
         function showCostAnalysis() {
+            // Destroy existing charts first
+            destroyAllCharts();
+            
             addSystemMessage('Here is your production cost analysis for November 2025:');
             updateVizTitle('Production Cost Analysis');
             
@@ -1887,9 +1912,11 @@
             
             document.getElementById('vizContent').innerHTML = content;
             
-            // Weekly Cost Chart
-            const ctx = document.getElementById('costChart').getContext('2d');
-            new Chart(ctx, {
+            // Wait for DOM to update before creating charts
+            setTimeout(() => {
+                // Weekly Cost Chart
+                const ctx = document.getElementById('costChart').getContext('2d');
+                chartInstances.costChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
@@ -1939,10 +1966,10 @@
                     }
                 }
             });
-            
-            // Cost Breakdown Chart
-            const breakdownCtx = document.getElementById('costBreakdownChart').getContext('2d');
-            new Chart(breakdownCtx, {
+                
+                // Cost Breakdown Chart
+                const breakdownCtx = document.getElementById('costBreakdownChart').getContext('2d');
+                chartInstances.costBreakdownChart = new Chart(breakdownCtx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Raw Materials', 'Utilities', 'Labor', 'Maintenance', 'Other'],
@@ -1980,19 +2007,19 @@
                     }
                 }
             });
-            
-            // Cost per MT Trend
-            const costPerMTCtx = document.getElementById('costPerMTChart').getContext('2d');
-            const costPerMTLabels = Array.from({length: 30}, (_, i) => {
+                
+                // Cost per MT Trend
+                const costPerMTCtx = document.getElementById('costPerMTChart').getContext('2d');
+                const costPerMTLabels = Array.from({length: 30}, (_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - (29 - i));
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            });
-            const costPerMTData = Array.from({length: 30}, () => {
-                // Simulate cost per MT trend (target: $102, range: $98-$106)
-                return 102 + Math.random() * 4 - 2;
-            });
-            new Chart(costPerMTCtx, {
+                });
+                const costPerMTData = Array.from({length: 30}, () => {
+                    // Simulate cost per MT trend (target: $102, range: $98-$106)
+                    return 102 + Math.random() * 4 - 2;
+                });
+                chartInstances.costPerMTChart = new Chart(costPerMTCtx, {
                 type: 'line',
                 data: {
                     labels: costPerMTLabels,
@@ -2043,6 +2070,7 @@
                     }
                 }
             });
+            }, 100);
         }
 
         // Crisis trigger
@@ -2202,6 +2230,7 @@
 
         // Store chart instances to preserve them
         let impactChartInstance = null;
+        let chartInstances = {}; // Store all chart instances for proper cleanup
 
         function showScenarioAOverview() {
             const scenario = scenarioData[currentScenarioType].scenarios[0];

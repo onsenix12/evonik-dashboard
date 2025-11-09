@@ -2088,24 +2088,31 @@
                 }
             }
             
-            // Hide quick actions during crisis
+            // Ensure DOM elements exist before proceeding
             const quickActions = document.getElementById('quickActions');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            if (!chatMessages) {
+                // If chat messages container doesn't exist yet, wait a bit
+                setTimeout(() => triggerCrisis(scenarioType), 100);
+                return;
+            }
+            
+            // Hide quick actions during crisis
             if (quickActions) {
                 quickActions.style.display = 'none';
             }
             
             // Clear any existing messages
-            const chatMessages = document.getElementById('chatMessages');
-            if (chatMessages) {
-                chatMessages.innerHTML = '';
-            }
+            chatMessages.innerHTML = '';
             
             const scenario = scenarioData[currentScenarioType];
             addSystemMessage(`⚠️ ALERT: ${scenario.description}. Analyzing production impact...`, true);
             
+            // Show crisis impact immediately (very short delay to ensure UI is ready)
             setTimeout(() => {
                 showCrisisImpact();
-            }, 2000);
+            }, 800);
         }
 
         function showCrisisImpact() {
@@ -2997,10 +3004,11 @@
                         scenarioSelector.value = crisisType;
                     }
                     
-                    // Trigger crisis immediately with the specific type
+                    // Trigger crisis immediately - DOM should be ready or will be soon
+                    // Use a small delay to ensure all elements are rendered
                     setTimeout(() => {
                         triggerCrisis(crisisType);
-                    }, 1000);
+                    }, 100);
                     return true;
                 }
             } catch (error) {
@@ -3061,7 +3069,7 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for crisis parameter first (from URL link click)
+            // Check for crisis parameter first (from URL link click) - highest priority
             const urlTriggered = checkForCrisisParameter();
             
             // If URL didn't trigger, check for localStorage event (from other pages)
@@ -3075,6 +3083,11 @@
                 }
             }
         });
+        
+        // Also check immediately if DOM is already ready (for faster page loads)
+        if (document.readyState !== 'loading') {
+            checkForCrisisParameter();
+        }
     </script>
 </body>
 </html>

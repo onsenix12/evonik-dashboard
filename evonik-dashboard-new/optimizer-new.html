@@ -2977,44 +2977,73 @@
 
         // Check for crisis parameter in URL
         function checkForCrisisParameter() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const crisisType = urlParams.get('crisis');
-            if (crisisType && (crisisType === 'equipment_failure' || crisisType === 'supply_delay')) {
-                // Clear the URL parameter to prevent re-triggering on refresh
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
-                
-                // Set scenario type before triggering
-                currentScenarioType = crisisType;
-                document.getElementById('scenarioSelector').value = crisisType;
-                
-                // Trigger crisis immediately with the specific type
-                setTimeout(() => {
-                    triggerCrisis(crisisType);
-                }, 1000);
-                return true;
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const crisisType = urlParams.get('crisis');
+                if (crisisType && (crisisType === 'equipment_failure' || crisisType === 'supply_delay')) {
+                    // Mark as triggered immediately to prevent other triggers
+                    crisisAlreadyTriggered = true;
+                    
+                    // Clear the URL parameter to prevent re-triggering on refresh
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                    
+                    // Set scenario type before triggering
+                    currentScenarioType = crisisType;
+                    
+                    // Try to set scenario selector if it exists (optional)
+                    const scenarioSelector = document.getElementById('scenarioSelector');
+                    if (scenarioSelector) {
+                        scenarioSelector.value = crisisType;
+                    }
+                    
+                    // Trigger crisis immediately with the specific type
+                    setTimeout(() => {
+                        triggerCrisis(crisisType);
+                    }, 1000);
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error checking for crisis parameter:', error);
             }
             return false;
         }
 
         // Demo trigger detection
         function checkForDemoTrigger() {
-            const event = safeParseLocalStorage(CONSTANTS.COORDINATION_EVENT_KEY);
-            if (event) {
-                if (event.demo_trigger && (event.type === 'equipment_failure' || event.type === 'supply_delay')) {
-                    // Clear the event to prevent re-triggering
-                    localStorage.removeItem(CONSTANTS.COORDINATION_EVENT_KEY);
-                    
-                    // Set scenario type before triggering
-                    currentScenarioType = event.type;
-                    document.getElementById('scenarioSelector').value = event.type;
-                    
-                    // Trigger crisis with specific scenario type
-                    setTimeout(() => {
-                        triggerCrisis(event.type);
-                    }, 1000);
-                    return true;
+            try {
+                // Check if CONSTANTS and safeParseLocalStorage are available
+                if (typeof CONSTANTS === 'undefined' || typeof safeParseLocalStorage === 'undefined') {
+                    return false;
                 }
+                
+                const event = safeParseLocalStorage(CONSTANTS.COORDINATION_EVENT_KEY);
+                if (event) {
+                    if (event.demo_trigger && (event.type === 'equipment_failure' || event.type === 'supply_delay')) {
+                        // Mark as triggered immediately to prevent other triggers
+                        crisisAlreadyTriggered = true;
+                        
+                        // Clear the event to prevent re-triggering
+                        localStorage.removeItem(CONSTANTS.COORDINATION_EVENT_KEY);
+                        
+                        // Set scenario type before triggering
+                        currentScenarioType = event.type;
+                        
+                        // Try to set scenario selector if it exists (optional)
+                        const scenarioSelector = document.getElementById('scenarioSelector');
+                        if (scenarioSelector) {
+                            scenarioSelector.value = event.type;
+                        }
+                        
+                        // Trigger crisis with specific scenario type
+                        setTimeout(() => {
+                            triggerCrisis(event.type);
+                        }, 1000);
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for demo trigger:', error);
             }
             return false;
         }
